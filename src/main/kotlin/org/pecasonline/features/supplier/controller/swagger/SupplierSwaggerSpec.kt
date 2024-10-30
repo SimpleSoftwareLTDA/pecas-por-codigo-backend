@@ -37,7 +37,7 @@ interface SupplierSwaggerSpec {
         ApiResponse(responseCode = "200", description = "Fornecedor encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = SupplierExamples.GET_ALL_SUPPLIERS_EXAMPLE)
+                    ExampleObject(value = SupplierExamples.GET_SUPPLIER_BY_ID)
                 ])
         ]),
         ApiResponse(responseCode = "404", description = "Fornecedor não encontrado", content = [

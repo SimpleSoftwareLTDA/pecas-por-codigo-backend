@@ -13,7 +13,7 @@ import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
 
 class CreateSupplierDTO(
-    @get:Valid @field:NotNull(message = "O nome do fornecedor é obrigatório")
+    @field:NotNull(message = "O nome do fornecedor é obrigatório")
     @field:NotBlank(message = "O nome do fornecedor não pode ser vazio")
     @JsonAlias("empresa")
     val name: String? = null,
@@ -49,13 +49,13 @@ class CreateSupplierDTO(
     @JsonAlias("assinatura")
     val subscription : CreateSubscriptionDTO? = null,
 
-    @field:NotNull(message = "O endereço do fornecedor é obrigatório")
-    @JsonAlias("endereco")
-    val address: CreateAddressDTO? = null,
-
-    @field:NotNull(message = "O contato do fornecedor é obrigatório")
+    @get:Valid @field:NotNull(message = "O contato do fornecedor é obrigatório")
     @JsonAlias("contato")
     val contact: CreateContactDTO? = null,
+
+    @get:Valid @field:NotNull(message = "O endereço do fornecedor é obrigatório")
+    @JsonAlias("endereco")
+    val address: CreateAddressDTO? = null,
 ) {
     fun toSupplier(contact: Contact,
                    address: Address, description:

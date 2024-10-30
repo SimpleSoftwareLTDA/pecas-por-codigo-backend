@@ -6,11 +6,11 @@ import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.supplier.domain.Supplier
 
 data class CreateSubscriptionDTO(
-    @NotNull(message = "O dia de pagamento é obrigatório")
+    @field:NotNull(message = "O dia de pagamento é obrigatório")
     @JsonAlias("diaPagamento")
     val paymentDay: Int,
 
-    @NotNull(message = "O ID do plano é obrigatório")
+    @field:NotNull(message = "O ID do plano é obrigatório")
     @JsonAlias("idPlano")
     val planId: Int,
 

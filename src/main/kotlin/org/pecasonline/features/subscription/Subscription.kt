@@ -6,7 +6,7 @@ import jakarta.persistence.*
 import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.supplier.domain.Supplier
 
-@Entity
+@Entity(name = "signature")
 data class Subscription(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

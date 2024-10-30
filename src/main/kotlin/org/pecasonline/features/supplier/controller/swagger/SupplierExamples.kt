@@ -7,76 +7,76 @@ class SupplierExamples {
                         "content": [
                             {
                                 "id": 1,
-                                "name": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
-                                "supplierOriginalLink": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
-                                "socialName": "Foco Automoveis Ltda",
-                                  "description": {
+                                "nome": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
+                                "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
+                                "razaoSocial": "Foco Automoveis Ltda",
+                                "descricao": {
                                     "id": 1,
-                                    "text": "Supplier description here"
-                                  },
-                                  "brand": {
+                                    "descricao": "Concessionário"
+                                },
+                                "marca": {
                                     "id": 1,
-                                    "brandName": "Brand 1"
-                                  },
+                                    "marca": "Agip"
+                                },
                                 "cnpj": "10.376.703/0007-68",
-                                "stateSubscription": "10927340518",
-                                "address": {
+                                "inscricaoEstadual": "10927340518",
+                                "endereco": {
                                     "id": 1,
-                                    "street": "AV RAJA GABAGLIA, 2440",
-                                    "city": "BELO HORIZONTE",
-                                    "state": {
+                                    "endereco": "AV RAJA GABAGLIA, 2440",
+                                    "cidade": "BELO HORIZONTE",
+                                    "estado": {
                                         "id": 13,
-                                        "stateCode": "MG",
-                                        "stateName": "Minas Gerais"
+                                        "sigla": "MG",
+                                        "nome": "Minas Gerais"
                                     },
                                     "cep": "30494-170",
-                                    "country": "Brasil"
+                                    "pais": "Brasil"
                                 },
-                                "contact": {
+                                "contato": {
                                     "id": 1,
-                                    "sellerName": "Claudio, Wanderley",
-                                    "itemsEmail": "claudio@brasauto.com.br",
-                                    "itemsPhone": "31,2109-3000",
+                                    "vendedores": "Claudio, Wanderley",
+                                    "email": "claudio@brasauto.com.br",
+                                    "telefone": "31,2109-3000",
                                     "whatsapp": "31,98464-0818",
-                                    "itemsWhatsapp": null,
-                                    "stockEmail": null,
-                                    "billingEmail": null,
-                                    "nfEmail": null,
-                                    "site": "http://www.brasauto.com.br"
+                                    "whatsappPecas": null,
+                                    "emailEstoque": null,
+                                    "emailContasPagar": null,
+                                    "emailNotaFiscal": null,
+                                    "webSite": "http://www.brasauto.com.br"
                                 }
                             },
                             {
                                 "id": 2,
-                                "name": "AN Pecas (Belo Horizonte-MG) 31,2512-1366",
-                                "supplierOriginalLink": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=AN+Pecas",
-                                "socialName": "AN PECAS E SERVICOS LTDA",
-                                "description": null,
-                                "brand": null,
+                                "nome": "AN Pecas (Belo Horizonte-MG) 31,2512-1366",
+                                "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=AN+Pecas",
+                                "razaoSocial": "AN PECAS E SERVICOS LTDA",
+                                "descricao": null,
+                                "marca": null,
                                 "cnpj": "50.353.894/0001-71",
-                                "stateSubscription": "004596730.00-82",
-                                "address": {
+                                "inscricaoEstadual": "004596730.00-82",
+                                "endereco": {
                                     "id": 2,
-                                    "street": "RUA  ARACI 241",
-                                    "city": "Belo Horizonte",
-                                    "state": {
+                                    "endereco": "RUA  ARACI 241",
+                                    "cidade": "Belo Horizonte",
+                                    "estado": {
                                         "id": 13,
-                                        "stateCode": "MG",
-                                        "stateName": "Minas Gerais"
+                                        "sigla": "MG",
+                                        "nome": "Minas Gerais"
                                     },
                                     "cep": "30865-200",
-                                    "country": "Brasil"
+                                    "pais": "Brasil"
                                 },
-                                "contact": {
+                                "contato": {
                                     "id": 2,
-                                    "sellerName": "Pedro / Nilson",
-                                    "itemsEmail": "CONSERTAR4X4@HOTMAIL.COM",
-                                    "itemsPhone": "31,2512-1366",
+                                    "vendedores": "Pedro / Nilson",
+                                    "email": "CONSERTAR4X4@HOTMAIL.COM",
+                                    "telefone": "31,2512-1366",
                                     "whatsapp": "(31) 98903-4244",
-                                    "itemsWhatsapp": null,
-                                    "stockEmail": null,
-                                    "billingEmail": null,
-                                    "nfEmail": null,
-                                    "site": "Não encontrado"
+                                    "whatsappPecas": null,
+                                    "emailEstoque": null,
+                                    "emailContasPagar": null,
+                                    "emailNotaFiscal": null,
+                                    "webSite": "Não encontrado"
                                 }
                             }
                         ],
@@ -93,8 +93,8 @@ class SupplierExamples {
                             "unpaged": false
                         },
                         "last": false,
-                        "totalElements": 298,
                         "totalPages": 149,
+                        "totalElements": 298,
                         "first": true,
                         "size": 2,
                         "number": 0,
@@ -111,38 +111,44 @@ class SupplierExamples {
         const val GET_SUPPLIER_BY_ID =
             """
                 {
+                  "id": 1,
+                  "nome": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
+                  "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
+                  "razaoSocial": "Foco Automoveis Ltda",
+                  "descricao": {
                     "id": 1,
-                    "name": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
-                    "supplierOriginalLink": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
-                    "socialName": "Foco Automoveis Ltda",
-                    "description": null,
-                    "brand": null,
-                    "cnpj": "10.376.703/0007-68",
-                    "stateSubscription": "10927340518",
-                    "address": {
-                        "id": 1,
-                        "street": "AV RAJA GABAGLIA, 2440",
-                        "city": "BELO HORIZONTE",
-                        "state": {
-                            "id": 13,
-                            "stateCode": "MG",
-                            "stateName": "Minas Gerais"
-                        },
-                        "cep": "30494-170",
-                        "country": "Brasil"
+                    "descricao": "Concessionário"
+                  },
+                  "marca": {
+                    "id": 1,
+                    "marca": "Agip"
+                  },
+                  "cnpj": "10.376.703/0007-68",
+                  "inscricaoEstadual": "10927340518",
+                  "endereco": {
+                    "id": 1,
+                    "endereco": "AV RAJA GABAGLIA, 2440",
+                    "cidade": "BELO HORIZONTE",
+                    "estado": {
+                      "id": 13,
+                      "sigla": "MG",
+                      "nome": "Minas Gerais"
                     },
-                    "contact": {
-                        "id": 1,
-                        "sellerName": "Claudio, Wanderley",
-                        "itemsEmail": "claudio@brasauto.com.br",
-                        "itemsPhone": "31,2109-3000",
-                        "whatsapp": "31,98464-0818",
-                        "itemsWhatsapp": null,
-                        "stockEmail": null,
-                        "billingEmail": null,
-                        "nfEmail": null,
-                        "site": "http://www.brasauto.com.br"
-                    }
+                    "cep": "30494-170",
+                    "pais": "Brasil"
+                  },
+                  "contato": {
+                    "id": 1,
+                    "vendedores": "Claudio, Wanderley",
+                    "email": "claudio@brasauto.com.br",
+                    "telefone": "31,2109-3000",
+                    "whatsapp": "31,98464-0818",
+                    "whatsappPecas": null,
+                    "emailEstoque": null,
+                    "emailContasPagar": null,
+                    "emailNotaFiscal": null,
+                    "webSite": "http://www.brasauto.com.br"
+                  }
                 }
     """
 
@@ -164,38 +170,44 @@ class SupplierExamples {
 
         const val CREATE_SUPPLIER = """
             {
-              "empresa": "Fornecedor Exemplo",
-              "supplierOriginalLink": "https://example.com",
-              "razaoSocial": "Fornecedor Exemplo LTDA",
-              "cnpj": "12345678901234",
-              "inscricao": "12345678",
-              "idDescricao": 1,
-              "idMarca": 2,
-              "idPlano": 3,
-              "assinatura": {
-                "diaPagamento": 15,
-                "idPlano": 3,
-                "bigBannerUrl": "https://example.com/banners/big.jpg",
-                "smallBannerUrl": "https://example.com/banners/small.jpg"
-              },
-              "endereco": {
-                "street": "Rua Exemplo",
-                "city": "Cidade Exemplo",
-                "state": "Estado Exemplo",
-                "cep": "12345678",
-                "country": "Brasil"
-              },
-              "contato": {
-                "vendedores": "João Silva",
-                "emailPecas": "pecas@example.com",
-                "fonePecas": "1234567890",
-                "whatsappGeral": "1234567890",
-                "whatsappPecas": "0987654321",
-                "emailEstoque": "estoque@example.com",
-                "emailContasPagar": "contaspagar@example.com",
-                "emailNotaFiscal": "notafiscal@example.com",
-                "website": "https://fornecedorexemplo.com"
-              }
+                "id": 1,
+                "nome": "Fornecedor Exemplo",
+                "linkFornecedorOriginal": "https://example.com",
+                "razaoSocial": "Fornecedor Exemplo LTDA",
+                "descricao": {
+                    "id": 1,
+                    "descricao": "Concessionário"
+                },
+                "marca": {
+                    "id": 2,
+                    "marca": "Agrale"
+                },
+                "cnpj": "12345678901234",
+                "inscricaoEstadual": "12345678",
+                "endereco": {
+                    "id": 1,
+                    "endereco": "Rua Exemplo",
+                    "cidade": "Cidade Exemplo",
+                    "estado": {
+                        "id": 1,
+                        "sigla": "AC",
+                        "nome": "Acre"
+                    },
+                    "cep": "12345678",
+                    "pais": "Brasil"
+                },
+                "contato": {
+                    "id": 9,
+                    "vendedores": "João Silva",
+                    "email": "pecas@example.com",
+                    "telefone": "1234567890",
+                    "whatsapp": "1234567890",
+                    "whatsappPecas": "0987654321",
+                    "emailEstoque": "estoque@example.com",
+                    "emailContasPagar": "contaspagar@example.com",
+                    "emailNotaFiscal": "notafiscal@example.com",
+                    "webSite": "https://fornecedorexemplo.com"
+                }
             }
             """
 
