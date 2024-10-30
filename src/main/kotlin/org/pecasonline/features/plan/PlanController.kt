@@ -1,16 +1,20 @@
 package org.pecasonline.features.plan
 
+import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.pecasonline.features.plan.swagger.PlanSwaggerSpec
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
+@RestController
+@RequestMapping("$BASE_ENDPOINT/planos")
 class PlanController(
     private val planService: IPlanService
-) {
+): PlanSwaggerSpec {
 
-    @GetMapping("/plans")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun getPlans(): List<Plan> = planService.getAvailablePlans()
+    override fun getPlans(): List<Plan> = planService.getAvailablePlans()
 }

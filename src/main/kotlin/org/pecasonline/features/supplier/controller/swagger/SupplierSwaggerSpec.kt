@@ -6,27 +6,25 @@ import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
 import org.springframework.data.domain.Page
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
 
-interface SwaggerSpec {
+@Tag(name = "Fornecedores", description = "Recursos relacionados a fornecedores")
+interface SupplierSwaggerSpec {
     @Operation(summary = "Buscar todos os fornecedores com paginação")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Fornecedores encontrados", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.GET_ALL_SUPPLIERS_EXAMPLE)
+                    ExampleObject(value = SupplierExamples.GET_ALL_SUPPLIERS_EXAMPLE)
                 ])
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.INTERNAL_SERVER_ERROR)
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
                 ])
     ])])
     fun suppliers(
@@ -39,19 +37,19 @@ interface SwaggerSpec {
         ApiResponse(responseCode = "200", description = "Fornecedor encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.GET_ALL_SUPPLIERS_EXAMPLE)
+                    ExampleObject(value = SupplierExamples.GET_ALL_SUPPLIERS_EXAMPLE)
                 ])
         ]),
         ApiResponse(responseCode = "404", description = "Fornecedor não encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.SUPPLIER_NOT_FOUND)
+                    ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)
                 ])
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.INTERNAL_SERVER_ERROR)
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
                 ])
         ])
     ])
@@ -64,19 +62,19 @@ interface SwaggerSpec {
         ApiResponse(responseCode = "200", description = "Fornecedor encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.GET_ALL_SUPPLIERS_EXAMPLE)
+                    ExampleObject(value = SupplierExamples.GET_ALL_SUPPLIERS_EXAMPLE)
                 ])
         ]),
         ApiResponse(responseCode = "404", description = "Fornecedor não encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.SUPPLIER_NOT_FOUND)
+                    ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)
                 ])
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
             Content(mediaType = "application/json",
                 examples = [
-                    ExampleObject(value = Examples.INTERNAL_SERVER_ERROR)
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
                 ])
         ])
     ])
@@ -92,21 +90,21 @@ interface SwaggerSpec {
             Content(mediaType = "application/json",
                 schema = Schema(implementation = Supplier::class),
                 examples = [
-                    ExampleObject(value = Examples.CREATE_SUPPLIER)
+                    ExampleObject(value = SupplierExamples.CREATE_SUPPLIER)
                 ])
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
             Content(mediaType = "application/json",
                 schema = Schema(implementation = Supplier::class),
                 examples = [
-                    ExampleObject(value = Examples.INTERNAL_SERVER_ERROR)
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
                 ])
         ]),
         ApiResponse(responseCode = "400", description = "Requisição inválida", content = [
             Content(mediaType = "application/json",
                 schema = Schema(implementation = Supplier::class),
                 examples = [
-                    ExampleObject(value = Examples.BAD_REQUEST)
+                    ExampleObject(value = SupplierExamples.BAD_REQUEST)
                 ])
         ])
 

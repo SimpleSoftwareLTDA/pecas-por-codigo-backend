@@ -1,6 +1,6 @@
 package org.pecasonline.features.supplier.controller.swagger
 
-class Examples {
+class SupplierExamples {
     companion object {
         const val GET_ALL_SUPPLIERS_EXAMPLE = """
                     {
