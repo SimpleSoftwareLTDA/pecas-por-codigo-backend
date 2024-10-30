@@ -28,10 +28,12 @@ dependencies {
     // Database dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
+    implementation("com.h2database:h2:2.3.232")
     runtimeOnly("org.postgresql:postgresql")
 
     // Core dependencies
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // Doc dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")

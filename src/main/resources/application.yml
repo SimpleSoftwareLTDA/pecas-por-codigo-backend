@@ -1,1 +1,10 @@
-spring.application.name=pecasonline
+spring:
+  application:
+    name: novo-pecas-online
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    operationsSorter: method
+    tagsSorter: method
