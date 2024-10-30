@@ -30,10 +30,10 @@ class SupplierController(
     ): Supplier = supplierService.findSupplierById(id)
 
 
-    @GetMapping("/cnpj/{cnpj}")
+    @GetMapping("/cnpj")
     @ResponseStatus(HttpStatus.OK)
     override fun findSupplierByCnpj(
-        @PathVariable("cnpj") cnpj: String,
+        @RequestParam("cnpj") cnpj: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
     ): Page<Supplier> = supplierService.findSupplierByCnpj(cnpj)
