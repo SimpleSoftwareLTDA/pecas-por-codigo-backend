@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SupplierRepository : JpaRepository<Supplier, Int> {
     fun findSupplierByCnpj(cnpj: String, pageable: Pageable): Page<Supplier>
+    fun findSupplierByCnpj(cnpj: String): List<Supplier>
 }

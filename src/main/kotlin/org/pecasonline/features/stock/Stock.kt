@@ -1,6 +1,7 @@
-package org.pecasonline.features.items
+package org.pecasonline.features.stock
 
 import jakarta.persistence.*
+import org.pecasonline.features.items.Item
 import org.pecasonline.features.supplier.domain.Supplier
 
 @Entity
@@ -13,7 +14,7 @@ data class Stock(
 
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false)
-    val supplier: Supplier,
+    val supplier: Supplier? = null,
 
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
