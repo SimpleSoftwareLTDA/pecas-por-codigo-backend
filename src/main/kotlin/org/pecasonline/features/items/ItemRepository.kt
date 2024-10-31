@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ItemRepository : JpaRepository<Item, Int> {
     fun findByHash(hash: String): Item?
-    fun findItemByDescriptionContains(description: String, pageable: Pageable): Page<Item>
+    fun findItemByDescriptionContainsIgnoreCase(description: String, pageable: Pageable): Page<Item>
     fun findItemByCode(code: String, pageable: Pageable): Page<Item>
 }

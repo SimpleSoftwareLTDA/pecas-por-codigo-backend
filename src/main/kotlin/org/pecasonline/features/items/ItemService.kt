@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ItemService(
-    private val itemRepository: ItemRepository,
-    stockRepository: StockRepository,
-    repository: ItemRepository
+    private val itemRepository: ItemRepository
 ): IIitemService {
 
     override fun getAllItems(page: Int?, size: Int?): Page<Item> {
@@ -24,7 +22,7 @@ class ItemService(
 
     override fun findItemByDescription(descricao: String, page: Int?, size: Int?): Page<Item> {
         val pageRequest = PageRequest.of(page ?: 0, size?: 10)
-        return itemRepository.findItemByDescriptionContains(descricao, pageRequest)
+        return itemRepository.findItemByDescriptionContainsIgnoreCase(descricao, pageRequest)
     }
 
     override fun findItemByCode(code: String, page: Int?, size: Int?): Page<Item> {
