@@ -1,6 +1,14 @@
 spring:
   application:
     name: novo-pecas-online
+  datasource:
+    url: ${database.url}
+    username: ${database.user}
+    password: ${database.password}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 springdoc:
   api-docs:
     enabled: true
