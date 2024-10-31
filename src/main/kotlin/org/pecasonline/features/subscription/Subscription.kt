@@ -13,21 +13,26 @@ data class Subscription(
     val id: Long = 0,
 
     @JsonProperty("diaPagamento")
+    @JsonAlias(value = ["payment_day", "paymentDay"])
     val paymentDay: Int,
 
     @OneToOne
     @JoinColumn(name = "supplier_id", nullable = false)
     @JsonProperty("fornecedor")
+    @JsonAlias("supplier")
     val supplier: Supplier,
 
     @ManyToOne
     @JoinColumn(name = "plan_id", nullable = false)
     @JsonProperty("plano")
+    @JsonAlias("plan")
     val plan: Plan,
 
     @JsonProperty("bannerGrandeUrl")
+    @JsonAlias(value = ["big_banner_url", "bigBannerUrl"])
     val bigBannerUrl: String? = null,
 
     @JsonProperty("bannerPequenoUrl")
+    @JsonAlias(value = ["small_banner_url", "smallBannerUrl"])
     val smallBannerUrl: String? = null
 )

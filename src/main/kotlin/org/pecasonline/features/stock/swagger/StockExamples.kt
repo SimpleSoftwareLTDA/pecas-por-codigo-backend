@@ -7,8 +7,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 354,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 148,
                     "nome": "BSB (Brasilis-DF) 61,9646-3671",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=BSB",
@@ -42,7 +42,7 @@ class StockExamples {
                       "webSite": "http://"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 232,
                     "manufacturer": "Distribuidor",
                     "code": "52046262",
@@ -54,8 +54,8 @@ class StockExamples {
                 },
                 {
                   "id": 355,
-                  "quantity": 3,
-                  "supplier": {
+                  "quantidade": 3,
+                  "fornecedor": {
                     "id": 76,
                     "nome": "Utilpecas (Belo Horizonte-MG) 31,3491-5210 / 0992",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Utilpecas",
@@ -89,7 +89,7 @@ class StockExamples {
                       "webSite": "Não encontrado"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 233,
                     "manufacturer": "Distribuidor",
                     "code": "12581701",
@@ -131,8 +131,8 @@ class StockExamples {
         const val GET_STOCK_BY_ID = """
             {
               "id": 355,
-              "quantity": 3,
-              "supplier": {
+              "quantidade": 3,
+              "fornecedor": {
                 "id": 76,
                 "nome": "Utilpecas (Belo Horizonte-MG) 31,3491-5210 / 0992",
                 "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Utilpecas",
@@ -166,7 +166,7 @@ class StockExamples {
                   "webSite": "Não encontrado"
                 }
               },
-              "item": {
+              "peca": {
                 "id": 233,
                 "manufacturer": "Distribuidor",
                 "code": "12581701",
@@ -195,8 +195,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 0,
-                  "quantity": 0,
-                  "supplier": {
+                  "quantidade": 0,
+                  "fornecedor": {
                     "id": 0,
                     "nome": "string",
                     "linkFornecedorOriginal": "string",
@@ -236,7 +236,7 @@ class StockExamples {
                       "webSite": "string"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 0,
                     "manufacturer": "string",
                     "code": "string",
@@ -283,8 +283,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 359,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 260,
                     "nome": "Auto Pecas Parana (UBIRATA-PR) 44,35431054",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Auto+Pecas+Parana",
@@ -318,7 +318,7 @@ class StockExamples {
                       "webSite": "http://www.autopecasparanaubirata.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 235,
                     "manufacturer": "Distribuidor",
                     "code": "52046262",
@@ -330,8 +330,8 @@ class StockExamples {
                 },
                 {
                   "id": 364,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 73,
                     "nome": "Casarao Auto Pecas (Franca-SP) 16,3705-1400",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Casarao+Auto+Pecas",
@@ -365,7 +365,7 @@ class StockExamples {
                       "webSite": "http://www.casaraoautopecas.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 240,
                     "manufacturer": "Distribuidor",
                     "code": "93263176",
@@ -409,8 +409,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 21017,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 1,
                     "nome": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
@@ -450,7 +450,7 @@ class StockExamples {
                       "webSite": "http://www.brasauto.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 7643,
                     "manufacturer": "Ford",
                     "code": "6S6Z15520A",
@@ -462,8 +462,8 @@ class StockExamples {
                 },
                 {
                   "id": 30414,
-                  "quantity": 14,
-                  "supplier": {
+                  "quantidade": 14,
+                  "fornecedor": {
                     "id": 1,
                     "nome": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Brasauto+BH",
@@ -503,7 +503,7 @@ class StockExamples {
                       "webSite": "http://www.brasauto.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 9917,
                     "manufacturer": "Ford",
                     "code": "CM5Z6K254A",
@@ -547,8 +547,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 20342,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 260,
                     "nome": "Auto Pecas Parana (UBIRATA-PR) 44,35431054",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Auto+Pecas+Parana",
@@ -582,7 +582,7 @@ class StockExamples {
                       "webSite": "http://www.autopecasparanaubirata.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 7491,
                     "manufacturer": "Distribuidor",
                     "code": "15656162",
@@ -594,8 +594,8 @@ class StockExamples {
                 },
                 {
                   "id": 45185,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 260,
                     "nome": "Auto Pecas Parana (UBIRATA-PR) 44,35431054",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Auto+Pecas+Parana",
@@ -629,7 +629,7 @@ class StockExamples {
                       "webSite": "http://www.autopecasparanaubirata.com.br"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 7491,
                     "manufacturer": "Distribuidor",
                     "code": "15656162",
@@ -673,8 +673,8 @@ class StockExamples {
               "content": [
                 {
                   "id": 354,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 148,
                     "nome": "BSB (Brasilis-DF) 61,9646-3671",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=BSB",
@@ -708,7 +708,7 @@ class StockExamples {
                       "webSite": "http://"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 232,
                     "manufacturer": "Distribuidor",
                     "code": "52046262",
@@ -720,8 +720,8 @@ class StockExamples {
                 },
                 {
                   "id": 356,
-                  "quantity": 1,
-                  "supplier": {
+                  "quantidade": 1,
+                  "fornecedor": {
                     "id": 95,
                     "nome": "DM (Contagem-MG) 31,99568-7324",
                     "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=DM",
@@ -755,7 +755,7 @@ class StockExamples {
                       "webSite": "http://"
                     }
                   },
-                  "item": {
+                  "peca": {
                     "id": 232,
                     "manufacturer": "Distribuidor",
                     "code": "52046262",

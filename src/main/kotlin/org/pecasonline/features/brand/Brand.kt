@@ -1,5 +1,6 @@
 package org.pecasonline.features.brand
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -13,5 +14,6 @@ class Brand(
     val id: Int? = null,
 
     @JsonProperty("marca")
+    @JsonAlias(value = ["brand_name", "brandName"])
     val brandName: String
 )
