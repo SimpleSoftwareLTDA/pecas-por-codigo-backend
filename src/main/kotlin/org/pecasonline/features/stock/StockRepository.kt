@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface StockRepository : JpaRepository<Stock, Int> {
-    fun findStockByItemDescriptionContains(description: String, pageable: Pageable): Page<Stock>
+    fun findStockByItemDescriptionContainsIgnoreCase(description: String, pageable: Pageable): Page<Stock>
     fun findStockByItemId(id: Int, pageable: Pageable): Page<Stock>
     fun findStockByItemCode(code: String, pageable: Pageable): Page<Stock>
     fun findStockBySupplierId(id: Int, pageable: Pageable): Page<Stock>

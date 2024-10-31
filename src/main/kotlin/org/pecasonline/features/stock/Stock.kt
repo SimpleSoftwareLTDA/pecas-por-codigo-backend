@@ -8,7 +8,7 @@ import org.pecasonline.features.supplier.domain.Supplier
 data class Stock(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Long? = null,
 
     val quantity: Int,
 
@@ -17,6 +17,6 @@ data class Stock(
     val supplier: Supplier? = null,
 
     @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "piece_id", nullable = false)
     val item: Item
 )
