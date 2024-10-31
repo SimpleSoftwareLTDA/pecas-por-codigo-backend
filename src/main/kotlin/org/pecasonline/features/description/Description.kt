@@ -1,5 +1,6 @@
 package org.pecasonline.features.description
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -13,5 +14,6 @@ data class Description(
     val id: Int? = null,
 
     @JsonProperty("descricao")
+    @JsonAlias(value = ["description"])
     val description: String
 )

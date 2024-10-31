@@ -10,7 +10,7 @@ import org.pecasonline.features.supplier.domain.Supplier
 data class Subscription(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Long? = null,
 
     @JsonProperty("diaPagamento")
     @JsonAlias(value = ["payment_day", "paymentDay"])

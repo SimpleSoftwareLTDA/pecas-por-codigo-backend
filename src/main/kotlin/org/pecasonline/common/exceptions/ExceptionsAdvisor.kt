@@ -41,7 +41,7 @@ class ExceptionsAdvisor {
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, String?>> {
         val errors = ex.bindingResult.allErrors.associate { error ->
             val fieldName = (error as FieldError).field
-            val jsonAlias = fieldAliases[fieldName] ?: fieldName // Use alias if available
+            val jsonAlias = fieldAliases[fieldName] ?: fieldName
             val errorMessage = error.defaultMessage
             println("Mapping field '$fieldName' to alias '$jsonAlias' with message '$errorMessage'")
             jsonAlias to errorMessage

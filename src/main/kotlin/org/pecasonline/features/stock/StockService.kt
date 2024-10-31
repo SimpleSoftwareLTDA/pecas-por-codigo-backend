@@ -56,11 +56,11 @@ class StockService(
 
     override fun findStockBySupplierName(name: String, page: Int?, size: Int?): Page<Stock> {
         val pageRequest = PageRequest.of(page ?: 0, size ?: 10)
-        return stockRepository.findStockBySupplierNameContains(name, pageRequest)
+        return stockRepository.findStockBySupplierNameContainsIgnoreCase(name, pageRequest)
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun createStock(cnpj: String, file: MultipartFile): List<Long> {
+    override fun createStock(cnpj: String, file: MultipartFile) {
         val tmpDir: Path = Paths.get("tmp")
         logger.info("Creating temporary directory: {}", tmpDir)
 
@@ -117,17 +117,15 @@ class StockService(
 
             cleanupTempFiles(tmpDir)
             logger.info("Temporary files cleaned up. updatedIds: {}", updatedIds)
-
-            return updatedIds
         } catch (e: Exception) {
-            cleanupTempFiles(tmpDir) // Ensure cleanup on error as well
+            cleanupTempFiles(tmpDir)
             logger.error("Error processing file", e)
             MDC.clear()
             throw e
         }
     }
 
-    private fun cleanupTempFiles(directory: Path) {
+    fun cleanupTempFiles(directory: Path) {
         try {
             Files.list(directory).forEach { file ->
                 try {

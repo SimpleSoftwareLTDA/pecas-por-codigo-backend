@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 class AddressRepositoryTest @Autowired constructor(
     private val addressRepository: AddressRepository,
-    private val stateRepository: BrazilianStatesRepository // Assuming you have a repository for BrazilianState
+    private val stateRepository: BrazilianStatesRepository
 ) {
 
     @Test

@@ -46,6 +46,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito", module = "mockito-core")
     }
+    testImplementation("com.ninja-squad:springmockk:3.0.1")
     testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

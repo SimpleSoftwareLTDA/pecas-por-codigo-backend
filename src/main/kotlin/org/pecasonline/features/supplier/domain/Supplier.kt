@@ -8,7 +8,7 @@ import org.pecasonline.features.description.Description
 import java.security.MessageDigest
 
 @Entity
-class Supplier(
+data class Supplier(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,

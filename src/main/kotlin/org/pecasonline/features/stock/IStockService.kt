@@ -12,5 +12,5 @@ interface IStockService {
     fun finStockByItemCode(code: String, page: Int?=0, size: Int?=10): Page<Stock>
     fun findStockBySupplierId(id: Int, page: Int?=0, size: Int?=10): Page<Stock>
     fun findStockBySupplierName(name: String, page: Int?=0, size: Int?=10): Page<Stock>
-    fun createStock(cnpj: String, file: MultipartFile): List<Long>
+    fun createStock(cnpj: String, file: MultipartFile)
 }
