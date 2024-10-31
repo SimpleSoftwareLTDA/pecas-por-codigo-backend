@@ -94,7 +94,6 @@ class StockService(
 
                 supplier.parallelStream().forEach {
                     val stockBySupplierAndItem = stockRepository.findStockBySupplierIdAndItemId(it.id!!, item.id!!)
-                    logger.debug("Stock found: {}. Updating stock...", stockBySupplierAndItem)
 
                     if (stockBySupplierAndItem.isEmpty()) {
                         val newStock = stock.copy(item = item, supplier = it)
