@@ -2,13 +2,13 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: ${database.url}
-    username: ${database.user}
-    password: ${database.password}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+      max-file-size: 10MB
+      max-request-size: 10MB
 springdoc:
   api-docs:
     enabled: true
@@ -16,3 +16,10 @@ springdoc:
     enabled: true
     operationsSorter: method
     tagsSorter: method
+logging:
+  level:
+    org:
+      pecasonline:
+        features:
+          stock:
+            StockService: DEBUG
