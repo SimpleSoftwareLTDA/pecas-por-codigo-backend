@@ -1,4 +1,4 @@
-package org.pecasonline.features.email
+package org.pecasonline.features.stock.email
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

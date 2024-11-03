@@ -3,7 +3,7 @@ package org.pecasonline.features.stock
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
-import org.pecasonline.features.email.EmailService
+import org.pecasonline.features.stock.email.EmailService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
