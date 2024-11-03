@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: novo-pecas-online
+  datasource:
+    url: jdbc:h2:file:./testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    # If you want enable email sending, set this property to true
+    # And fill the properties below, on the contrary, all the stock creation will break every time
+    enabled: false
+    host: smtp.gmail.com
+    port: 587
+    username: youremail@gmail.com
+    # You need to generate an app password on your gmail account
+    # your gmail default password will not work
+    password: your-gmail-app-generated-pwd
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    operationsSorter: method
+    tagsSorter: method
+logging:
+  level:
+    org:
+      pecasonline:
+        features:
+          stock:
+            StockService: DEBUG
+server:
+  forward-headers-strategy: native
+
+app:
+  url: http://localhost:8080
