@@ -85,4 +85,46 @@ class CategoryServiceTest @Autowired constructor(
         assertEquals("Mirror O S", result.content[0].name)
         verify(categoryRepository, times(1)).findByNameContainsIgnoreCase("mirror", pageable)
     }
+
+    @Test
+    fun `addCategory should save a new category with formatted name`() {
+        val category = Category(name = "new category")
+        val formattedCategory = category.copy(name = "New Category")
+        `when`(categoryRepository.findByNameContainsIgnoreCase("New Category", PageRequest.of(0, 1)))
+            .thenReturn(PageImpl(emptyList()))
+        `when`(categoryRepository.save(any(Category::class.java))).thenReturn(formattedCategory)
+
+        val result = categoryService.addCategory(category)
+
+        assertEquals("New Category", result.name)
+        verify(categoryRepository).save(formattedCategory)
+    }
+
+    @Test
+    fun `addCategory should not save duplicate category with different case or format`() {
+        val duplicateCategory = Category(name = "mirror o s")
+        val existingCategory = sampleCategories[1] // "Mirror O S"
+        `when`(categoryRepository.findByNameContainsIgnoreCase("Mirror O S", PageRequest.of(0, 1)))
+            .thenReturn(PageImpl(listOf(existingCategory)))
+
+        val result = categoryService.addCategory(duplicateCategory)
+
+        assertEquals(existingCategory.id, result.id)
+        assertEquals(existingCategory.name, result.name)
+        verify(categoryRepository, never()).save(any(Category::class.java))
+    }
+
+    @Test
+    fun `addCategory should format name before saving`() {
+        val categoryWithUnformattedName = Category(name = "\"tela\"")
+        val formattedCategory = categoryWithUnformattedName.copy(name = "Tela")
+        `when`(categoryRepository.findByNameContainsIgnoreCase("Tela", PageRequest.of(0, 1)))
+            .thenReturn(PageImpl(emptyList()))
+        `when`(categoryRepository.save(any(Category::class.java))).thenReturn(formattedCategory)
+
+        val result = categoryService.addCategory(categoryWithUnformattedName)
+
+        assertEquals("Tela", result.name)
+        verify(categoryRepository).save(formattedCategory)
+    }
 }

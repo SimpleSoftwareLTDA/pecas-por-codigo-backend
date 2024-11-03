@@ -21,5 +21,20 @@ class CategoryService(
         return categoryRepository.findByNameContainsIgnoreCase(name, PageRequest.of(page!!, size!!))
     }
 
+    override fun addCategory(category: Category): Category {
+        val formattedName = category.name.trim()
+            .replace(Regex("^[^A-Za-z0-9]*|[^A-Za-z0-9]*$"), "")
+            .replace(Regex("\\s+"), " ")
+            .split(" ")
+            .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } } // Capitalize each word
+
+        val existingCategory = categoryRepository.findByNameContainsIgnoreCase(formattedName, PageRequest.of(0, 1))
+        if (!existingCategory.isEmpty) {
+            return existingCategory.content[0]
+        }
+
+        val newCategory = category.copy(name = formattedName)
+        return categoryRepository.save(newCategory)
+    }
 
 }
