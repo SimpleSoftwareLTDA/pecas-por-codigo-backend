@@ -3,6 +3,7 @@ package org.pecasonline.features.stock
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
+import org.pecasonline.features.email.EmailService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
@@ -25,7 +26,8 @@ class StockService(
     private val stockRepository: StockRepository,
     private val itemRepository: ItemRepository,
     private val supplierRepository: SupplierRepository,
-    private val categoryService: ICategoryService
+    private val categoryService: ICategoryService,
+    private val emailService: EmailService
 ) : IStockService {
 
     companion object {
@@ -58,7 +60,20 @@ class StockService(
         val tmpDir = Paths.get("tmp")
         logger.info("Starting stock creation from file upload for supplier CNPJ: {}", cnpj)
 
-        if (file.isEmpty) throw IllegalArgumentException("Arquivo vazio, por favor selecione um arquivo para upload")
+        val allSuppliers = getSuppliers(cnpj)
+        allSuppliers.forEach {
+            val filename = file.originalFilename ?: "Arquivo de estoque"
+            val supplierStockEmail = Optional.ofNullable(it.contact.itemsEmail).orElseThrow { NotFoundException("Email de estoque não encontrado para CNPJ: $cnpj") }
+            emailService.sendStockProcessingStartNotification(supplierStockEmail, "${it.name} - ${it.cnpj}", filename)
+        }
+
+        if (file.isEmpty) {
+            allSuppliers.forEach {
+                val supplierStockEmail = Optional.ofNullable(it.contact.itemsEmail).orElseThrow { NotFoundException("Email de estoque não encontrado para CNPJ: $cnpj") }
+                emailService.sendStockProcessingErrorNotification(supplierStockEmail, "${it.name} - ${it.cnpj}", file.originalFilename ?: "Arquivo de estoque", "Arquivo vazio, por favor selecione um arquivo com dados para upload")
+            }
+            throw IllegalArgumentException("Arquivo vazio, por favor selecione um arquivo para upload")
+        }
 
         Files.createDirectories(tmpDir)
         logger.debug("Created temporary directory: {}", tmpDir)
@@ -79,7 +94,13 @@ class StockService(
             logger.debug("Processed item with ID: {}, Hash: {}", item.id, item.hash)
 
             val suppliers = getSuppliers(cnpj)
-            if(suppliers.isEmpty()) throw NotFoundException("Fornecedor não encontrado para CNPJ: $cnpj")
+            if(suppliers.isEmpty()) {
+                allSuppliers.forEach {
+                    val supplierStockEmail = Optional.ofNullable(it.contact.itemsEmail).orElseThrow { NotFoundException("Email de estoque não encontrado para CNPJ: $cnpj") }
+                    emailService.sendStockProcessingErrorNotification(supplierStockEmail, "${it.name} - ${it.cnpj}", file.originalFilename ?: "Arquivo de estoque", "Fornecedor não encontrado para CNPJ: $cnpj")
+                }
+                throw NotFoundException("Fornecedor não encontrado para CNPJ: $cnpj")
+            }
             logger.debug("Found {} suppliers for CNPJ {}", suppliers.size, cnpj)
 
             suppliers.forEach { supplier ->
@@ -107,6 +128,10 @@ class StockService(
         }
 
         cleanupTempFiles(tmpDir)
+        allSuppliers.forEach {
+            val supplierStockEmail = Optional.ofNullable(it.contact.itemsEmail).orElseThrow { NotFoundException("Email de estoque não encontrado para CNPJ: $cnpj") }
+            emailService.sendStockProcessingCompletionNotification(supplierStockEmail, "${it.name} - ${it.cnpj}", file.originalFilename ?: "Arquivo de estoque", updatedIds.size)
+        }
         logger.info("Stock creation completed. Updated stock IDs: {}", updatedIds.size)
     }
 
@@ -157,7 +182,7 @@ class StockService(
 
     private fun getOrCreateCategory(description: String?): Category {
         val categoryName = description?.split(" ")?.firstOrNull()?.replace("\"", "") ?: "Uncategorized"
-        val formattedName = categoryName.replaceFirstChar { it.uppercaseChar() } + categoryName.substring(1).lowercase()
+        val formattedName = categoryName.replaceFirstChar { it.uppercaseChar() }.lowercase()
         val category = categoryService.findByNameIgnoreCase(formattedName) ?: categoryService.addCategory(Category(name = formattedName))
         logger.debug("Retrieved or created category with name: {}", category.name)
         return category
