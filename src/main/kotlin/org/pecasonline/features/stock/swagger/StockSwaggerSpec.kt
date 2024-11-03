@@ -120,7 +120,7 @@ interface StockSwaggerSpec {
             )
         ]
     )
-    fun findStockByItemDescription(description: String, page: Int? = 0, size: Int? = 10): Page<Stock>
+    fun findStockByItemDescription(descricao: String, page: Int? = 0, size: Int? = 10): Page<Stock>
 
 
     @Operation(summary = "Retorna um estoque pelo código do item")

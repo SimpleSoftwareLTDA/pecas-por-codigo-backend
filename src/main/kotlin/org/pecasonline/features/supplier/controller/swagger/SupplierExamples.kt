@@ -168,11 +168,48 @@ class SupplierExamples {
         }
     """
 
-        const val CREATE_SUPPLIER = """
+        const val CREATE_SUPPLIER_REQUEST = """
             {
-                "id": 1,
+              "empresa": "Fornecedor Exemplo",
+              "linkFornecedorOriginal": "https://example.com",
+              "razaoSocial": "Fornecedor Exemplo LTDA",
+              "cnpj": "12345678901234",
+              "inscricao": "12345678",
+              "idDescricao": 1,
+              "idMarca": 2,
+              "idPlano": 3,
+              "assinatura": {
+                "diaPagamento": 15,
+                "idPlano": 3,
+                "bigBannerUrl": "https://example.com/banner-big.jpg",
+                "smallBannerUrl": "https://example.com/banner-small.jpg"
+              },
+              "contato": {
+                "vendedores": "João Silva",
+                "emailPecas": "pecas@example.com",
+                "fonePecas": "1234567890",
+                "whatsappGeral": "1234567890",
+                "whatsappPecas": "0987654321",
+                "emailEstoque": "estoque@example.com",
+                "emailContasPagar": "contaspagar@example.com",
+                "emailNotaFiscal": "notafiscal@example.com",
+                "website": "https://fornecedorexemplo.com"
+              },
+              "endereco": {
+                "endereco": "Rua Exemplo",
+                "cidade": "Cidade Exemplo",
+                "cep": "12345678",
+                "pais": "Brasil",
+                "idEstado": 1
+              }
+            }
+        """
+
+        const val CREATE_SUPPLIER_ANSWER = """
+            {
+                "id": 301,
                 "nome": "Fornecedor Exemplo",
-                "linkFornecedorOriginal": "https://example.com",
+                "linkFornecedorOriginal": null,
                 "razaoSocial": "Fornecedor Exemplo LTDA",
                 "descricao": {
                     "id": 1,
@@ -185,7 +222,7 @@ class SupplierExamples {
                 "cnpj": "12345678901234",
                 "inscricaoEstadual": "12345678",
                 "endereco": {
-                    "id": 1,
+                    "id": 301,
                     "endereco": "Rua Exemplo",
                     "cidade": "Cidade Exemplo",
                     "estado": {
@@ -197,7 +234,7 @@ class SupplierExamples {
                     "pais": "Brasil"
                 },
                 "contato": {
-                    "id": 9,
+                    "id": 301,
                     "vendedores": "João Silva",
                     "email": "pecas@example.com",
                     "telefone": "1234567890",

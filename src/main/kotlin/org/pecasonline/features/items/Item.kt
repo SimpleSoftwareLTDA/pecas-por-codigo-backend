@@ -36,7 +36,7 @@ data class Item(
 
     @JsonProperty("categoria")
     @JsonAlias(value = ["category"])
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = true)
     val category: Category? = null
 

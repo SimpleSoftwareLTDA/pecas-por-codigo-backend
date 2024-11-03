@@ -25,3 +25,6 @@ logging:
             StockService: DEBUG
 server:
   forward-headers-strategy: native
+
+app:
+  url: ${CURRENT_URL}

@@ -27,7 +27,7 @@ class StockController(
         @PathVariable("id") id: Int
     ) = stockService.findStockById(id)
 
-    @GetMapping("/descricao")
+    @GetMapping("/item")
     override fun findStockByItemDescription(
         @RequestParam("descricao") descricao: String,
         @RequestParam("page") page: Int?,
@@ -43,10 +43,10 @@ class StockController(
 
     @GetMapping("/codigo/{codigo}")
     override fun findStockByItemCode(
-        @PathVariable("codigo") codigo: String,
+        @PathVariable("codigo") code: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.finStockByItemCode(codigo, page, size)
+    ) = stockService.findStockByItemCode(code, page, size)
 
     @GetMapping("/fornecedor/{id}")
     override fun findStockBySupplierId(
@@ -57,10 +57,10 @@ class StockController(
 
     @GetMapping("/fornecedor")
     override fun findStockBySupplierName(
-        @RequestParam("nome") nome: String,
+        @RequestParam("name") name: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.findStockBySupplierName(nome, page, size)
+    ) = stockService.findStockBySupplierName(name, page, size)
 
     @PostMapping(consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.CREATED)

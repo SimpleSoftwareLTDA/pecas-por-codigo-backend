@@ -133,7 +133,7 @@ class StockExamples {
         """
 
         const val GET_STOCK_BY_ID = """
-            {
+           {
               "id": 355,
               "quantidade": 3,
               "fornecedor": {
@@ -141,8 +141,14 @@ class StockExamples {
                 "nome": "Utilpecas (Belo Horizonte-MG) 31,3491-5210 / 0992",
                 "linkFornecedorOriginal": "http://www.pecas-on-line.com.br/empresas.php4?Empresa=Utilpecas",
                 "razaoSocial": "Utilpecas Ltda",
-                "descricao": null,
-                "marca": null,
+                "descricao": {
+                  "id": 1,
+                  "descricao": "Distribuidor"
+                },
+                "marca": {
+                  "id": 1,
+                  "marca": "Agrale"
+                },
                 "cnpj": "01.095.324/0001-13",
                 "inscricaoEstadual": "062.964425.0086",
                 "endereco": {
@@ -167,7 +173,7 @@ class StockExamples {
                   "emailEstoque": null,
                   "emailContasPagar": null,
                   "emailNotaFiscal": null,
-                  "webSite": "Não encontrado",
+                  "webSite": "Não encontrado"
                 }
               },
               "peca": {

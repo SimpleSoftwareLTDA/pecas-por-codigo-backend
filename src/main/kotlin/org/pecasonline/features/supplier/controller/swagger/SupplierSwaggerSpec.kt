@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -88,9 +89,8 @@ interface SupplierSwaggerSpec {
     @ApiResponses(value = [
         ApiResponse(responseCode = "201", description = "Fornecedor criado", content = [
             Content(mediaType = "application/json",
-                schema = Schema(implementation = Supplier::class),
                 examples = [
-                    ExampleObject(value = SupplierExamples.CREATE_SUPPLIER)
+                    ExampleObject(value = SupplierExamples.CREATE_SUPPLIER_ANSWER)
                 ])
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
@@ -107,8 +107,14 @@ interface SupplierSwaggerSpec {
                     ExampleObject(value = SupplierExamples.BAD_REQUEST)
                 ])
         ])
-
     ])
+    @RequestBody(
+        content = [Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = CreateSupplierDTO::class),
+            examples = [ExampleObject(value = SupplierExamples.CREATE_SUPPLIER_REQUEST)]
+        )]
+    )
     fun createSupplier(
         supplier: CreateSupplierDTO
     ): Supplier

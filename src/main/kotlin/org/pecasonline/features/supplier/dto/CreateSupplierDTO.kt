@@ -41,10 +41,6 @@ class CreateSupplierDTO(
     @JsonAlias("idMarca")
     val brandId: Int? = null,
 
-    @field:NotNull(message = "O ID do plano do fornecedor é obrigatório")
-    @JsonAlias("idPlano")
-    val planId: Int? = null,
-
     @field:NotNull(message = "A assinatura do fornecedor é obrigatória")
     @JsonAlias("assinatura")
     val subscription : CreateSubscriptionDTO? = null,
