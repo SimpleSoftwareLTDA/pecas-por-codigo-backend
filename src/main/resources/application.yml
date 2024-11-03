@@ -41,7 +41,7 @@ logging:
       pecasonline:
         features:
           stock:
-            StockService: DEBUG
+            StockService: INFO
 server:
   forward-headers-strategy: native
 
