@@ -1,6 +1,8 @@
 package org.pecasonline.features.stock
 
 import org.pecasonline.common.exceptions.NotFoundException
+import org.pecasonline.features.category.Category
+import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
@@ -23,149 +25,108 @@ import kotlin.io.path.deleteIfExists
 class StockService(
     private val stockRepository: StockRepository,
     private val itemRepository: ItemRepository,
-    private val supplierRepository: SupplierRepository
+    private val supplierRepository: SupplierRepository,
+    private val categoryService: ICategoryService
 ) : IStockService {
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
-    override fun getAllStocks(page: Int?, size: Int?) = stockRepository
-        .findAll(PageRequest.of(page ?: 0, size ?: 10))
+    override fun getAllStocks(page: Int?, size: Int?) =
+        stockRepository.findAll(PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun findStockById(id: Int): Stock {
-        return stockRepository.findById(id).orElseThrow { NotFoundException("Estoque não encontrado") }
-    }
+    override fun findStockById(id: Int): Stock =
+        stockRepository.findById(id).orElseThrow { NotFoundException("Estoque não encontrado") }
 
-    override fun findStockByItemDescription(description: String, page: Int?, size: Int?): Page<Stock> {
-        val pageRequest = PageRequest.of(page ?: 0, size ?: 10)
-        return stockRepository.findStockByItemDescriptionContainsIgnoreCase(description, pageRequest)
-    }
+    override fun findStockByItemDescription(description: String, page: Int?, size: Int?) =
+        stockRepository.findStockByItemDescriptionContainsIgnoreCase(description, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun findStockByItemId(id: Int, page: Int?, size: Int?): Page<Stock> {
-        return stockRepository.findStockByItemId(id, PageRequest.of(page ?: 0, size ?: 10))
-    }
+    override fun findStockByItemId(id: Int, page: Int?, size: Int?) =
+        stockRepository.findStockByItemId(id, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun finStockByItemCode(code: String, page: Int?, size: Int?): Page<Stock> {
-        val pageRequest = PageRequest.of(page ?: 0, size ?: 10)
-        return stockRepository.findStockByItemCode(code, pageRequest)
-    }
+    override fun finStockByItemCode(code: String, page: Int?, size: Int?) =
+        stockRepository.findStockByItemCode(code, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> {
-        return stockRepository.findStockBySupplierId(id, PageRequest.of(page ?: 0, size ?: 10))
-    }
+    override fun findStockBySupplierId(id: Int, page: Int?, size: Int?) =
+        stockRepository.findStockBySupplierId(id, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun findStockBySupplierName(name: String, page: Int?, size: Int?): Page<Stock> {
-        val pageRequest = PageRequest.of(page ?: 0, size ?: 10)
-        return stockRepository.findStockBySupplierNameContainsIgnoreCase(name, pageRequest)
-    }
+    override fun findStockBySupplierName(name: String, page: Int?, size: Int?) =
+        stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
     @Transactional(rollbackFor = [Exception::class])
     override fun createStock(cnpj: String, file: MultipartFile) {
-        val tmpDir: Path = Paths.get("tmp")
-        logger.info("Creating temporary directory: {}", tmpDir)
+        val tmpDir = Paths.get("tmp")
+        logger.info("Starting stock creation from file upload.")
 
-        try {
-            Files.createDirectories(tmpDir)
-            logger.info("Temporary directory created: {}", tmpDir)
+        if (file.isEmpty) throw IllegalArgumentException("Arquivo vazio, por favor selecione um arquivo para upload")
 
-            if (file.isEmpty)
-                throw IllegalArgumentException("Arquivo vazio, por favor selecione um arquivo para upload")
+        Files.createDirectories(tmpDir)
+        val tempFile = saveFileLocallyTemporarily(file, tmpDir)
+        val stockList = getFileValues(tempFile)
+        val updatedIds = mutableListOf<Long>()
 
-            val tempFile = saveFileLocallyTemporarily(file, tmpDir)
-            logger.info("File saved locally: {}", tempFile)
+        stockList.forEach { stock ->
+            val item = processItem(stock.item)
+            val suppliers = getSuppliers(cnpj)
 
-            val stockList = getFileValues(tempFile)
-            logger.info("File parsed: {}", stockList)
-
-            val updatedIds = mutableListOf<Long>()
-            val total = stockList.size
-            var count = 0
-
-            stockList.forEach { stock ->
-                logger.debug("Processing stock: {}", stock)
-
-                val item = itemRepository.findByHash(stock.item.hash) ?: itemRepository.save(stock.item)
-                logger.debug("Item saved: {}", item)
-
-                val supplier = supplierRepository.findSupplierByCnpj(cnpj)
-                if (supplier.isEmpty())
-                    throw NotFoundException("Fornecedor não encontrado")
-                logger.debug("Supplier found: {}", supplier)
-
-                supplier.parallelStream().forEach {
-                    val stockBySupplierAndItem = stockRepository.findStockBySupplierIdAndItemId(it.id!!, item.id!!)
-
-                    if (stockBySupplierAndItem.isEmpty()) {
-                        val newStock = stock.copy(item = item, supplier = it)
-                        logger.debug("Stock not found. Creating new stock: {}", newStock)
-                        val saved = stockRepository.save(newStock)
-                        logger.debug("Stock saved: {}", saved)
-                        updatedIds.add(saved.id!!)
-                    } else {
-                        stockBySupplierAndItem.forEach { stockItem ->
-                            val updatedStock = stockItem.copy(quantity = stockItem.quantity)
-                            logger.debug("Stock found. Updating stock quantity: {}", updatedStock)
-                            val saved = stockRepository.save(updatedStock)
-                            logger.debug("Stock updated: {}", saved)
-                            updatedIds.add(saved.id!!)
-                        }
-                    }
-
-                    logger.info("processed ${++count} of $total suppliers")
-                }
+            suppliers.forEach { supplier ->
+                val existingStock = stockRepository.findStockBySupplierIdAndItemId(supplier.id!!, item.id!!)
+                val stockToSave = if (existingStock.isEmpty()) stock.copy(item = item, supplier = supplier) else updateExistingStock(existingStock)
+                updatedIds.add(stockRepository.save(stockToSave).id!!)
             }
-
-            cleanupTempFiles(tmpDir)
-            logger.info("Temporary files cleaned up. updatedIds: {}", updatedIds)
-        } catch (e: Exception) {
-            cleanupTempFiles(tmpDir)
-            logger.error("Error processing file", e)
-            MDC.clear()
-            throw e
         }
+
+        cleanupTempFiles(tmpDir)
+        logger.info("Stock creation completed. Updated IDs: {}", updatedIds)
+    }
+
+    fun processItem(item: Item): Item {
+        val category = getOrCreateCategory(item.description)
+        val itemWithCategory = item.copy(category = category)
+        return itemRepository.findByHash(itemWithCategory.hash) ?: itemRepository.save(itemWithCategory)
+    }
+
+    private fun getSuppliers(cnpj: String) =
+        supplierRepository.findSupplierByCnpj(cnpj).takeIf { it.isNotEmpty() } ?: throw NotFoundException("Fornecedor não encontrado")
+
+    private fun updateExistingStock(existingStocks: List<Stock>): Stock {
+        val existingStock = existingStocks.first()
+        return existingStock.copy(quantity = existingStock.quantity)
     }
 
     fun cleanupTempFiles(directory: Path) {
-        try {
-            Files.list(directory).forEach { file ->
-                try {
-                    file.deleteIfExists()
-                } catch (ex: IOException) {
-                    throw IOException("Failed to delete file: $file", ex)
-                }
-            }
-        } catch (e: IOException) {
-            throw IOException("Failed to list files in directory: $directory", e)
+        Files.list(directory).forEach { file ->
+            try { file.deleteIfExists() }
+            catch (ex: IOException) { logger.error("Failed to delete file: {}", file, ex) }
         }
     }
 
     private fun saveFileLocallyTemporarily(file: MultipartFile, tmpDir: Path): Path {
-        val uniqueFileName = "${UUID.randomUUID()}_${file.originalFilename}"
-        val tempFile = tmpDir.resolve(uniqueFileName)
+        val tempFile = tmpDir.resolve("${UUID.randomUUID()}_${file.originalFilename}")
         Files.copy(file.inputStream, tempFile)
         return tempFile
     }
 
     private fun getFileValues(tempFile: Path): List<Stock> {
-        val stockList = mutableListOf<Stock>()
-        Files.newBufferedReader(tempFile).use { reader ->
-            reader.forEachLine { line ->
-                val columns = line.split("\\s+".toRegex()).filter { it.isNotEmpty() }
-                if (columns.size >= 4) {
-                    val code = columns[0]
-                    val quantity = columns[1].toIntOrNull() ?: 0
-                    val doublePrice = columns[2].toDoubleOrNull() ?: 0.0
-                    val priceInLongCents = (doublePrice * 100).toLong()
-                    val description = columns[3]
-
-                    val item = Item.buildFromMinimalProperties(code, priceInLongCents, description)
-                    val stock = Stock(quantity = quantity, item = item)
-                    stockList.add(stock)
-                }
-            }
+        return Files.newBufferedReader(tempFile).use { reader ->
+            reader.lineSequence().mapNotNull { parseStockLine(it) }.toList()
         }
-
-        return stockList
     }
 
+    private fun parseStockLine(line: String): Stock? {
+        val columns = line.split("\\s+".toRegex()).filter { it.isNotEmpty() }
+        if (columns.size < 4) return null
+
+        val (code, quantityStr, priceStr, description) = columns
+        val quantity = quantityStr.toIntOrNull() ?: 0
+        val priceInCents = ((priceStr.toDoubleOrNull() ?: (0.0 * 100))).toLong()
+        val item = Item.buildFromMinimalProperties(code, priceInCents, description)
+        return Stock(quantity = quantity, item = item)
+    }
+
+    fun getOrCreateCategory(description: String?): Category {
+        val categoryName = description?.split(" ")?.firstOrNull()?.replace("\"", "") ?: "Uncategorized"
+        val formattedName = categoryName.replaceFirstChar { it.uppercaseChar() } + categoryName.substring(1).lowercase()
+        return categoryService.findByNameIgnoreCase(formattedName) ?: categoryService.addCategory(Category(name = formattedName))
+    }
 }

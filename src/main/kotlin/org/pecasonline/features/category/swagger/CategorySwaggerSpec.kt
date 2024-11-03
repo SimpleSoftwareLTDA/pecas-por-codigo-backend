@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.features.category.Category
 import org.springframework.data.domain.Page
 
-@Tag(name = "Category", description = "Recursos relacionados a categorias")
+@Tag(name = "Categoria", description = "Recursos relacionados a categorias")
 interface CategorySwaggerSpec {
 
     @Operation(summary = "Buscar todas categorias")

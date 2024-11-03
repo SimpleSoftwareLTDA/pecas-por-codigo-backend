@@ -11,6 +11,10 @@ class ItemExample {
                   "codigo": "52046262",
                   "precoEmCentavos": null,
                   "descricao": "FILTRO",
+                  "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "d3b3d22af71cb9992b7001f0448301e6"
                 },
@@ -20,6 +24,10 @@ class ItemExample {
                   "codigo": "12581701",
                   "precoEmCentavos": null,
                   "descricao": "POLIA TENSORA S10 2012/",
+                  "categoria": {
+                      "id": 2,
+                      "nome": "Polia"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "14ea96e6b5528a5d1fffe55c7bc6f225"
                 }
@@ -59,6 +67,10 @@ class ItemExample {
               "codigo": "52126000",
               "precoEmCentavos": 75754,
               "descricao": "CAIXA-FUSIVEIS",
+              "categoria": {
+                  "id": 3,
+                  "nome": "Caixa"
+              },
               "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
               "hash": "74174ba88ebb073e57f16e72d7d61f7a"
             }
@@ -73,6 +85,10 @@ class ItemExample {
                   "codigo": "94754484",
                   "precoEmCentavos": 11555,
                   "descricao": "BUCHA",
+                  "categoria": {
+                      "id": 4,
+                      "nome": "Bucha"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "5217bedfef7af4ec33b52a03085b74ca"
                 },
@@ -82,6 +98,10 @@ class ItemExample {
                   "codigo": "93294976",
                   "precoEmCentavos": 4783,
                   "descricao": "BUCHA",
+                  "categoria": {
+                      "id": 4,
+                      "nome": "Bucha"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "7ff89af2540494a4a1cf339e6a162da1"
                 }
@@ -123,6 +143,10 @@ class ItemExample {
                   "codigo": "94754484",
                   "precoEmCentavos": 11555,
                   "descricao": "ISOLADOR DE BORRACHA",
+                  "categoria": {
+                      "id": 5,
+                      "nome": "Isolador"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "6c0dfcabe9f257766b98ab12ebe4ddc8"
                 },
@@ -132,6 +156,10 @@ class ItemExample {
                   "codigo": "94754484",
                   "precoEmCentavos": 10826,
                   "descricao": "\"Borracha Estabilizador Onix 2013 / 2 Peça Gm 9475",
+                  "categoria": {
+                      "id": 6,
+                      "nome": "Borracha"
+                  },
                   "dataDeAtualizacao": "2024-10-27T03:00:00.000+00:00",
                   "hash": "ca2068bf97f98362cca9b0b1b9060c10"
                 }

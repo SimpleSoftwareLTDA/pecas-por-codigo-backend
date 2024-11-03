@@ -21,6 +21,10 @@ class CategoryService(
         return categoryRepository.findByNameContainsIgnoreCase(name, PageRequest.of(page!!, size!!))
     }
 
+    override fun findByNameIgnoreCase(name: String): Category? {
+        return categoryRepository.findByNameIgnoreCase(name)
+    }
+
     override fun addCategory(category: Category): Category {
         val formattedName = category.name.trim()
             .replace(Regex("^[^A-Za-z0-9]*|[^A-Za-z0-9]*$"), "")

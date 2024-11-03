@@ -2,10 +2,8 @@ package org.pecasonline.features.items
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
+import org.pecasonline.features.category.Category
 import java.security.MessageDigest
 import java.util.Date
 
@@ -34,7 +32,14 @@ data class Item(
     @JsonProperty("dataDeAtualizacao")
     @JsonAlias(value = ["updateDate", "update_date"])
     val updateDate: Date? = Date(),
-    val hash: String
+    val hash: String,
+
+    @JsonProperty("categoria")
+    @JsonAlias(value = ["category"])
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = true)
+    val category: Category? = null
+
 ) {
 
     private fun hash(): String {
@@ -42,7 +47,6 @@ data class Item(
         val md = MessageDigest.getInstance("MD5")
         val hashBytes = md.digest(dataToHash.toByteArray())
 
-        // Convert the byte array to a hex string
         val hash = hashBytes.joinToString("") { "%02x".format(it) }
         return hash
     }

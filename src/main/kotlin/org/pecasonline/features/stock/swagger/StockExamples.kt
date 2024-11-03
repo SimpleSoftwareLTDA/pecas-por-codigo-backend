@@ -96,6 +96,10 @@ class StockExamples {
                     "priceInCents": null,
                     "description": "POLIA TENSORA S10 2012/",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "14ea96e6b5528a5d1fffe55c7bc6f225"
                   }
                 }
@@ -163,7 +167,7 @@ class StockExamples {
                   "emailEstoque": null,
                   "emailContasPagar": null,
                   "emailNotaFiscal": null,
-                  "webSite": "Não encontrado"
+                  "webSite": "Não encontrado",
                 }
               },
               "peca": {
@@ -173,6 +177,10 @@ class StockExamples {
                 "priceInCents": null,
                 "description": "POLIA TENSORA S10 2012/",
                 "updateDate": "2024-10-27T03:00:00.000+00:00",
+                "categoria": {
+                  "id": 1,
+                  "nome": "Filtro"
+                },
                 "hash": "14ea96e6b5528a5d1fffe55c7bc6f225"
               }
             }
@@ -243,6 +251,10 @@ class StockExamples {
                     "priceInCents": 0,
                     "description": "string",
                     "updateDate": "2024-10-30T23:10:19.792Z",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "string"
                   }
                 }
@@ -325,6 +337,10 @@ class StockExamples {
                     "priceInCents": 15631,
                     "description": "\"Elemento Do Filtro De Ar S10 Trailblazer Gm 52046",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "d60946b17edcd470e1639ee7f3fd33bf"
                   }
                 },
@@ -372,6 +388,10 @@ class StockExamples {
                     "priceInCents": null,
                     "description": "PARALAMA DIANT DIR",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "98770a1e145ad3fc25a486c4317e5fc4"
                   }
                 }
@@ -457,6 +477,10 @@ class StockExamples {
                     "priceInCents": 8255,
                     "description": "INTERRUPTOR",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "9718fbb2a74d360b921f25b1c7e2b059"
                   }
                 },
@@ -510,6 +534,10 @@ class StockExamples {
                     "priceInCents": 30184,
                     "description": "POLIA TENSORA",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "665d1a96fd826e4dc02e797962b91c75"
                   }
                 }
@@ -589,6 +617,10 @@ class StockExamples {
                     "priceInCents": 66737,
                     "description": "\"Suporte C/buchas Do Diferencial Diant S10 4×4 Pc",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "89aead95bbd2bf2283ceccad60f32594"
                   }
                 },
@@ -636,6 +668,10 @@ class StockExamples {
                     "priceInCents": 66737,
                     "description": "\"Suporte C/buchas Do Diferencial Diant S10 4×4 Pc",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "89aead95bbd2bf2283ceccad60f32594"
                   }
                 }
@@ -715,6 +751,10 @@ class StockExamples {
                     "priceInCents": null,
                     "description": "FILTRO",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "d3b3d22af71cb9992b7001f0448301e6"
                   }
                 },
@@ -762,6 +802,10 @@ class StockExamples {
                     "priceInCents": null,
                     "description": "FILTRO",
                     "updateDate": "2024-10-27T03:00:00.000+00:00",
+                    "categoria": {
+                      "id": 1,
+                      "nome": "Filtro"
+                    },
                     "hash": "d3b3d22af71cb9992b7001f0448301e6"
                   }
                 }

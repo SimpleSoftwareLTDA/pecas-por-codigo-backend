@@ -11,7 +11,7 @@ data class Category(
     @Column(name = "category_id")
     val id: Int? = null,
 
-    @JsonProperty("categoria")
-    @JsonAlias(value = ["category"])
+    @JsonProperty("nome")
+    @JsonAlias(value = ["name"])
     val name: String
 )

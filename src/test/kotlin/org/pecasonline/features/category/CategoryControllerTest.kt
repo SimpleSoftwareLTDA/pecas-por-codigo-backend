@@ -1,7 +1,6 @@
 package org.pecasonline.features.category
 
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.pecasonline.common.exceptions.NotFoundException
@@ -40,8 +39,8 @@ class CategoryControllerTest @Autowired constructor(
             .param("size", "10")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content[0].categoria").value("Tela"))
-            .andExpect(jsonPath("$.content[1].categoria").value("Mirror O S"))
+            .andExpect(jsonPath("$.content[0].nome").value("Tela"))
+            .andExpect(jsonPath("$.content[1].nome").value("Mirror O S"))
 
         verify(categoryService).getAllCategories(any(), any())
     }
@@ -54,7 +53,7 @@ class CategoryControllerTest @Autowired constructor(
         mockMvc.perform(get("/api/v1/categorias/$categoryId")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.categoria").value("Tela"))
+            .andExpect(jsonPath("$.nome").value("Tela"))
 
         verify(categoryService).getCategoryById(categoryId)
     }
@@ -84,7 +83,7 @@ class CategoryControllerTest @Autowired constructor(
             .param("size", "10")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content[0].categoria").value("Mirror O S"))
+            .andExpect(jsonPath("$.content[0].nome").value("Mirror O S"))
 
         verify(categoryService).searchCategory(anyOrNull(), anyOrNull(), anyOrNull())
     }

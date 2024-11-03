@@ -7,43 +7,43 @@ class CategoryExample {
                 "content": [
                     {
                         "id": 1,
-                        "categoria": "Junta-cabecote"
+                        "nome": "Junta-cabecote"
                     },
                     {
                         "id": 2,
-                        "categoria": "Limpador"
+                        "nome": "Limpador"
                     },
                     {
                         "id": 3,
-                        "categoria": "Pedaleiras"
+                        "nome": "Pedaleiras"
                     },
                     {
                         "id": 4,
-                        "categoria": "1.4"
+                        "nome": "1.4"
                     },
                     {
                         "id": 5,
-                        "categoria": "Casq"
+                        "nome": "Casq"
                     },
                     {
                         "id": 6,
-                        "categoria": "Retentor(skf"
+                        "nome": "Retentor(skf"
                     },
                     {
                         "id": 7,
-                        "categoria": "15a"
+                        "nome": "15a"
                     },
                     {
                         "id": 185,
-                        "categoria": "Secador"
+                        "nome": "Secador"
                     },
                     {
                         "id": 186,
-                        "categoria": "Painelm"
+                        "nome": "Painelm"
                     },
                     {
                         "id": 187,
-                        "categoria": "Parafuso"
+                        "nome": "Parafuso"
                     }
                 ],
                 "pageable": {
@@ -77,7 +77,7 @@ class CategoryExample {
         const val GET_CATEGORY_BY_ID = """
              {
                 "id": 1,
-                "categoria": "Junta-cabecote"
+                "nome": "Junta-cabecote"
             }
         """
 
@@ -86,43 +86,43 @@ class CategoryExample {
                 "content": [
                     {
                         "id": 1,
-                        "categoria": "Junta-cabecote"
+                        "nome": "Junta-cabecote"
                     },
                     {
                         "id": 2,
-                        "categoria": "Limpador"
+                        "nome": "Limpador"
                     },
                     {
                         "id": 3,
-                        "categoria": "Pedaleiras"
+                        "nome": "Pedaleiras"
                     },
                     {
                         "id": 4,
-                        "categoria": "1.4"
+                        "nome": "1.4"
                     },
                     {
                         "id": 5,
-                        "categoria": "Casq"
+                        "nome": "Casq"
                     },
                     {
                         "id": 6,
-                        "categoria": "Retentor(skf"
+                        "nome": "Retentor(skf"
                     },
                     {
                         "id": 7,
-                        "categoria": "15a"
+                        "nome": "15a"
                     },
                     {
                         "id": 185,
-                        "categoria": "Secador"
+                        "nome": "Secador"
                     },
                     {
                         "id": 186,
-                        "categoria": "Painelm"
+                        "nome": "Painelm"
                     },
                     {
                         "id": 187,
-                        "categoria": "Parafuso"
+                        "nome": "Parafuso"
                     }
                 ],
                 "pageable": {
