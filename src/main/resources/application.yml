@@ -15,10 +15,10 @@ spring:
     enabled: false
     host: smtp.gmail.com
     port: 587
-    username: youremail@gmail.com
+    username: ${MAIL_USER}
     # You need to generate an app password on your gmail account
     # your gmail default password will not work
-    password: your-gmail-app-generated-pwd
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
