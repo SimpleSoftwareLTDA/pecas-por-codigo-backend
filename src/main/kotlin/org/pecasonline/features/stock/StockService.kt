@@ -79,6 +79,7 @@ class StockService(
             logger.debug("Processed item with ID: {}, Hash: {}", item.id, item.hash)
 
             val suppliers = getSuppliers(cnpj)
+            if(suppliers.isEmpty()) throw NotFoundException("Fornecedor não encontrado para CNPJ: $cnpj")
             logger.debug("Found {} suppliers for CNPJ {}", suppliers.size, cnpj)
 
             suppliers.forEach { supplier ->
@@ -109,7 +110,7 @@ class StockService(
         logger.info("Stock creation completed. Updated stock IDs: {}", updatedIds.size)
     }
 
-    private fun processItem(item: Item): Item {
+    fun processItem(item: Item): Item {
         val category = getOrCreateCategory(item.description)
         val itemWithCategory = item.copy(category = category)
         logger.debug("Assigning category {} to item with hash {}", category.name, item.hash)
@@ -120,7 +121,7 @@ class StockService(
         supplierRepository.findSupplierByCnpj(cnpj).takeIf { it.isNotEmpty() }
             ?: throw NotFoundException("Fornecedor não encontrado para CNPJ: $cnpj")
 
-    private fun cleanupTempFiles(directory: Path) {
+    fun cleanupTempFiles(directory: Path) {
         Files.list(directory).forEach { file ->
             try {
                 file.deleteIfExists()

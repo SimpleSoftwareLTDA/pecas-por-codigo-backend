@@ -77,7 +77,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
         val description = "sample"
         every { stockService.findStockByItemDescription(description, 0, 10) } returns PageImpl(emptyList())
 
-        mockMvc.perform(get("/api/v1/estoque/descricao")
+        mockMvc.perform(get("/api/v1/estoque/item")
                 .param("descricao", description)
                 .param("page", "0")
                 .param("size", "10"))
@@ -111,7 +111,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should search stock by item code`() {
         val code = "ITEM123"
-        every { stockService.finStockByItemCode(code, 0, 10) } returns PageImpl(emptyList())
+        every { stockService.findStockByItemCode(code, 0, 10) } returns PageImpl(emptyList())
 
         mockMvc.perform(get("/api/v1/estoque/codigo/$code")
                 .param("page", "0")
@@ -119,7 +119,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { stockService.finStockByItemCode(code, 0, 10) }
+        verify { stockService.findStockByItemCode(code, 0, 10) }
     }
 
     @Test

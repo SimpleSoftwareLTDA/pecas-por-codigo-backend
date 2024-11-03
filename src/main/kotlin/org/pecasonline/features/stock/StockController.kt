@@ -57,7 +57,7 @@ class StockController(
 
     @GetMapping("/fornecedor")
     override fun findStockBySupplierName(
-        @RequestParam("name") name: String,
+        @RequestParam("nome") name: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
     ) = stockService.findStockBySupplierName(name, page, size)
