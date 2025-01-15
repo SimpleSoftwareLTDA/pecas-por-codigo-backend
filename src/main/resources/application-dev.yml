@@ -1,17 +1,46 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/blah?currentSchema=public
+    driver-class-name: org.postgresql.Driver
+    username: pecas
+    password: online
   h2:
     console:
-      enabled: true
-      path: /h2-console
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  flyway:
+    baseline-on-migrate: true
+  mail:
+    enabled: true
+    host: smtp.gmail.com
+    port: 587
+    username: pecas.online.agora@gmail.com
+    # Use a app password gerada no Gmail
+    password: qkts eacj hcek zxwh
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+        imap:
+          host: imap.gmail.com
+          port: 993
+          ssl.enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    imap:
+      enabled: true
+      inbox-folder: INBOX
+      processed-folder: Processed
+
 springdoc:
   api-docs:
     enabled: true
@@ -19,5 +48,3 @@ springdoc:
     enabled: true
     operationsSorter: method
     tagsSorter: method
-
-

@@ -1,26 +1,29 @@
-package org.pecasonline.features.stock.email
+package org.pecasonline.features.stock.email.sender
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.stereotype.Service
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.scheduling.annotation.Async
+import org.springframework.stereotype.Service
+
+private val logger = KotlinLogging.logger {}
 
 @Service
-class EmailService(
+class EmailSenderService(
     private val emailSender: JavaMailSender,
-    @Value("\${spring.mail.enabled}") private val emailEnabled: Boolean
-) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-    private val EMAIL_NOT_ENABLED_MESSAGE = "Email service is disabled. Notification email will not be sent."
 
+    @Value("\${spring.mail.enabled}")
+    private val isEmailEnabled: Boolean
+) {
+    private val EMAIL_NOT_ENABLED_MESSAGE = "Email service is disabled. Notification email will not be sent."
+    private val supplierEmail = "pecas.online.agora@gmail.com" // Para evitar mandar e-mail pra fornecedor que existe mesmo.
+
+    @Async
     fun sendStockProcessingStartNotification(supplierEmail: String, supplierName: String, fileName: String) {
-        if(!emailEnabled) {
-            logger.warn(EMAIL_NOT_ENABLED_MESSAGE)
-            return
-        }
+        validateIfEmailIsEnabled()
+
         val subject = "Início do Processamento de Estoque"
         val htmlContent = """
             <html>
@@ -32,34 +35,44 @@ class EmailService(
             </body>
             </html>
         """.trimIndent()
+
         sendEmail(supplierEmail, subject, htmlContent)
     }
 
-    fun sendStockProcessingCompletionNotification(supplierEmail: String, supplierName: String, fileName: String, updatedItemCount: Int) {
-        if (!emailEnabled) {
-            logger.warn(EMAIL_NOT_ENABLED_MESSAGE)
-            return
-        }
+    @Async
+    fun sendStockProcessingCompletionNotification(
+        supplierEmail: String,
+        supplierName: String,
+        fileName: String,
+        updatedItemCount: Int
+    ) {
+        validateIfEmailIsEnabled()
+
         val subject = "Processamento de Estoque Concluído"
         val htmlContent = """
             <html>
             <body>
                 <p>Olá $supplierName,</p>
                 <p>Informamos que o processamento do estoque para o arquivo <strong>$fileName</strong> foi concluído com sucesso.</p>
-                <p>Um total de <strong>$updatedItemCount</strong> itens foi atualizado.</p>
+                <p>Total de itens atualizados: <strong>$updatedItemCount</strong>.</p>
                 <p>Se houver alguma dúvida ou problema, não hesite em nos contatar.</p>
                 <p>Atenciosamente,<br>Equipe de Estoque</p>
             </body>
             </html>
         """.trimIndent()
-        sendEmail(supplierEmail, subject, htmlContent)
+
+        sendEmail(this.supplierEmail, subject, htmlContent)
     }
 
-    fun sendStockProcessingErrorNotification(supplierEmail: String, supplierName: String, fileName: String, errorMessage: String) {
-        if (!emailEnabled) {
-            logger.warn(EMAIL_NOT_ENABLED_MESSAGE)
-            return
-        }
+    @Async
+    fun sendStockProcessingErrorNotification(
+        supplierEmail: String,
+        supplierName: String = "",
+        fileName: String,
+        errorMessage: String
+    ) {
+        validateIfEmailIsEnabled()
+
         val subject = "Erro no Processamento de Estoque"
         val htmlContent = """
             <html>
@@ -72,20 +85,31 @@ class EmailService(
             </body>
             </html>
         """.trimIndent()
-        sendEmail(supplierEmail, subject, htmlContent)
+
+        sendEmail(this.supplierEmail, subject, htmlContent)
     }
 
     private fun sendEmail(supplierEmail: String, subject: String, htmlContent: String) {
-        try {
+        runCatching {
             val message: MimeMessage = emailSender.createMimeMessage()
             val helper = MimeMessageHelper(message, true)
+
             helper.setTo(supplierEmail)
             helper.setSubject(subject)
             helper.setText(htmlContent, true)
             emailSender.send(message)
-            logger.info("Sent email with subject '{}' to: {}", subject, supplierEmail)
-        } catch (ex: Exception) {
-            logger.error("Failed to send email to: {}", supplierEmail, ex)
+
+            logger.info { "Sent email with subject '$subject' to: $supplierEmail" }
+        }.onFailure { ex ->
+            logger.error { "${"Failed to send email to: {}"} $supplierEmail $ex" }
         }
     }
+
+    private fun validateIfEmailIsEnabled() {
+        if (!isEmailEnabled) {
+            logger.warn { EMAIL_NOT_ENABLED_MESSAGE }
+            return
+        }
+    }
+
 }

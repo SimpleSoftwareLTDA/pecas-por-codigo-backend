@@ -1,0 +1,17 @@
+version: "3.9"  # Especifica a versão do Docker Compose
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: pecas
+      POSTGRES_PASSWORD: online
+      POSTGRES_DB: novo-pecas-online
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

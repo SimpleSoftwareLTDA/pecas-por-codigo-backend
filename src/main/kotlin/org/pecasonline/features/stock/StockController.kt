@@ -1,14 +1,18 @@
 package org.pecasonline.features.stock
 
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.hibernate.validator.constraints.br.CNPJ
+import org.pecasonline.common.Constants.BASE_ENDPOINT
+import org.pecasonline.common.Constants.INVALID_CNPJ
 import org.pecasonline.features.stock.swagger.StockSwaggerSpec
 import org.slf4j.MDC
 import org.springframework.http.HttpStatus
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
+@Validated
 @RestController
 @RequestMapping("$BASE_ENDPOINT/estoque")
 @Tag(name = "Estoque", description = "Operações relacionadas ao estoque")
@@ -65,15 +69,13 @@ class StockController(
     @PostMapping(consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.CREATED)
     override fun createItem(
-        @RequestParam("cnpj") cnpj: String,
+        @RequestParam("cnpj") @CNPJ(message = INVALID_CNPJ) cnpj: String,
         @RequestPart file: MultipartFile
     ) {
-        MDC.put("cnpj", cnpj)
-        MDC.put("tid", UUID.randomUUID().toString())
-        try {
-            stockService.createStock(cnpj, file)
-        } finally {
-            MDC.clear()
+        MDC.putCloseable("cnpj", cnpj).use {
+            MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
+                stockService.createStock(cnpj, file)
+            }
         }
     }
 }

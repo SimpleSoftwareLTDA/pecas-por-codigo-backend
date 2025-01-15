@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -23,22 +25,37 @@ dependencies {
 
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // Database dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.h2database:h2:2.3.232")
     runtimeOnly("org.postgresql:postgresql")
+//    implementation("org.flywaydb:flyway-core:11.1.1")
+//    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.1.1")
 
     // Core dependencies
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // Email dependencies
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("jakarta.mail:jakarta.mail-api:2.1.3")
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
+
+    // https://mvnrepository.com/artifact/org.apache.james/apache-mime4j-core
+    implementation("org.apache.james:apache-mime4j-core:0.8.12")
+    implementation("commons-fileupload:commons-fileupload:1.4")
 
     // Logback (Spring Boot's default logger with SLF4J)
     implementation("org.slf4j:slf4j-api:2.0.16")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
 
     // Documentation dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
@@ -52,6 +69,13 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.4")
+    }
+}
+
 
 kotlin {
     compilerOptions {
