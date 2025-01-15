@@ -1,5 +1,5 @@
 # Use Eclipse Temurin JDK 21 base image with a Gradle wrapper
-FROM eclipse-temurin:21-jdk as build
+FROM amazoncorretto:21-alpine as build
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -18,7 +18,7 @@ COPY . .
 RUN ./gradlew --no-daemon clean bootJar
 
 # Production stage: use a minimal JRE image for running the app
-FROM eclipse-temurin:21-jre as runtime
+FROM amazoncorretto:21-alpine as runtime
 
 # Set working directory and copy over the built JAR file
 WORKDIR /app
