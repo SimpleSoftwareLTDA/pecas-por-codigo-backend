@@ -48,3 +48,6 @@ springdoc:
     enabled: true
     operationsSorter: method
     tagsSorter: method
+
+app:
+  url: ${CURRENT_URL:}

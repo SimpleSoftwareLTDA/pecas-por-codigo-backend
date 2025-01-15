@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: novo-pecas-online
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  mail:
+    enabled: false
+app:
+  url: ${CURRENT_URL:}
