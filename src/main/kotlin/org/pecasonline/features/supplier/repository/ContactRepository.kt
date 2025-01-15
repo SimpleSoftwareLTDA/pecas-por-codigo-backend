@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ContactRepository : JpaRepository<Contact, Int>
+interface ContactRepository : JpaRepository<Contact, Int> {
+    fun existsByItemsEmail(itemsEmail: String): Boolean
+}

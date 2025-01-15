@@ -12,6 +12,7 @@ import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -59,6 +60,8 @@ class StockService(
         when {
             file.isEmpty -> {
                 val errorMessage = "Arquivo vazio, por favor selecione um arquivo de estoque com dados para upload."
+
+                supplierRepository.findSupplierEmailByCnpj(cnpj)
 
                 emailSenderService.sendStockProcessingErrorNotification(
                     supplierEmail = emailAddress,
@@ -281,3 +284,17 @@ class FileProcessor {
     }
 }
 
+
+@Service
+class AsyncService(private val stockService: StockService) {
+
+    @Async
+    fun processStockAsync(cnpj: String, file: MultipartFile, emailAddress: String) {
+        try {
+            stockService.createStock(cnpj, file, emailAddress)
+        } catch (e: Exception) {
+            // Lidar com erros, logar ou enviar notificações
+            println("Erro no processamento assíncrono: ${e.message}")
+        }
+    }
+}
