@@ -41,6 +41,7 @@ dependencies {
 
     // Core dependencies
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -49,9 +50,9 @@ dependencies {
     implementation("jakarta.mail:jakarta.mail-api:2.1.3")
     implementation("com.sun.mail:jakarta.mail:2.0.1")
 
-    // https://mvnrepository.com/artifact/org.apache.james/apache-mime4j-core
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
     implementation("commons-fileupload:commons-fileupload:1.4")
+
 
     // Logback (Spring Boot's default logger with SLF4J)
     implementation("org.slf4j:slf4j-api:2.0.16")
