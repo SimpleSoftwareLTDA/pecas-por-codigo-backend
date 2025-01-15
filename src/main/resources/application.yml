@@ -2,9 +2,9 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:h2:file:./testdb}
+    username: ${DATABASE_USER:sa}
+    password: ${DATABASE_PASSWORD:}
   servlet:
     multipart:
       max-file-size: 10MB
@@ -46,4 +46,11 @@ server:
   forward-headers-strategy: native
 
 app:
-  url: ${CURRENT_URL}
+  url: ${CURRENT_URL:}
+
+asaas:
+  api:
+    sandbox-base-url: https://sandbox.asaas.com/api/v3
+    production-base-url: https://api.asaas.com/v3
+    environment: ${ASAAS_ENV_SELECTOR:sandbox}
+    api-key: ${ASAAS_API_KEY:$aact_MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjVmNjY1YzM3LTlkMjMtNGI1OS1hY2ZjLTk0ZTg1OTA0OTRhODo6JGFhY2hfYThlZDE3ZjQtYzc2Ni00OGQ2LWIwZmUtZjE3ODkwNzIzZmYz}

@@ -7,7 +7,7 @@ import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
 import java.security.MessageDigest
 
-@Entity
+@Entity(name = "supplier")
 data class Supplier(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
