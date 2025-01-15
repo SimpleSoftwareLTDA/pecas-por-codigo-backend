@@ -67,9 +67,9 @@ class StockController(
     ) = stockService.findStockBySupplierName(name, page, size)
 
     @PostMapping(consumes = ["multipart/form-data"])
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     override fun createItem(
-        @RequestParam("cnpj") @CNPJ(message = INVALID_CNPJ) cnpj: String,
+        @RequestParam("cnpj") cnpj: String,
         @RequestPart file: MultipartFile
     ) {
         MDC.putCloseable("cnpj", cnpj).use {

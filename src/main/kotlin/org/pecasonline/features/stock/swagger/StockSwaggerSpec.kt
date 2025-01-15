@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.hibernate.validator.constraints.br.CNPJ
+import org.pecasonline.common.Constants.INVALID_CNPJ
 import org.pecasonline.features.stock.Stock
 import org.springframework.data.domain.Page
 import org.springframework.web.multipart.MultipartFile
@@ -144,6 +146,6 @@ interface StockSwaggerSpec {
         description = "Estoque criado com sucesso",
         content = [Content(mediaType = "application/json")]
     )
-    fun createItem(cnpj: String, file: MultipartFile)
+    fun createItem(@CNPJ(message = INVALID_CNPJ)cnpj: String, file: MultipartFile)
 
 }

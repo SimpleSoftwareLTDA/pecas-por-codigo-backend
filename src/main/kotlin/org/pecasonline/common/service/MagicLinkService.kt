@@ -3,6 +3,9 @@ package org.pecasonline.common.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.supplier.repository.ContactRepository
+import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -17,7 +20,10 @@ private val logger = KotlinLogging.logger {}
 @Service
 class MagicLinkService(
     private val users: UserDetailsService,
-    private val tokenRepository: TokenRepository
+    private val tokenRepository: TokenRepository,
+    private val emailSenderService: EmailSenderService,
+    private val contactRepository: ContactRepository,
+    private val supplierRepository: SupplierRepository
 ) {
 
     private val random = SecureRandomSingleton.instance
@@ -40,26 +46,26 @@ class MagicLinkService(
             strategy.context = context
 
             sessionRepository.saveContext(context, request, response)
-
-            tokenRepository.deleteById(entity.id!!)
         }
     }
 
 
-    fun issueToken(username: String) {
-        val user = users.loadUserByUsername(username)
+    fun issueToken(email: String) {
+        if (checkSupplierEmail(email)) {
+            val tokens = tokenRepository.save(Tokens().apply {
+                this.username = email
+                this.token = token()
+                this.created = Instant.now()
+            })
 
-        val tokens = tokenRepository.save(Tokens().apply {
-            this.username = user.username
-            this.token = token()
-            this.created = Instant.now()
-        })
-
-        mail(tokens)
+            sendMagicLinkEmail(token = tokens, email = email)
+        }
     }
 
-    private fun mail(tokens: Tokens) {
-        logger.info { "Enviou o email com o token: ${tokens.token} e o username: ${tokens.username} -> http://localhost:8080/auth/${tokens.token}" }
+    private fun sendMagicLinkEmail(token: Tokens, email: String) {
+        logger.info { "Enviou o email com o token: ${token.token} para o email: ${token.username} -> http://localhost:8080/login/${token.token}" }
+
+        emailSenderService.sendMagicLink(supplierEmail = email, token = token.token, supplierName = getSupplierNameByEmail(email))
     }
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
@@ -69,6 +75,10 @@ class MagicLinkService(
 
         return tokenEntity != null
     }
+
+    private fun checkSupplierEmail(email: String): Boolean = contactRepository.existsByItemsEmail(email)
+
+    private fun getSupplierNameByEmail(email: String): String = supplierRepository.findSupplierNameByEmail(email)
 
 }
 

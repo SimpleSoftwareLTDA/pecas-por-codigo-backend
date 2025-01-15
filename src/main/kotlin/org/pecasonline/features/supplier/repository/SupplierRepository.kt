@@ -15,4 +15,12 @@ interface SupplierRepository : JpaRepository<Supplier, Int> {
 
     @Query("SELECT s.cnpj FROM supplier s JOIN s.contact c WHERE c.itemsEmail = :email")
     fun findSupplierCnpjByEmail(email: String): String?
+
+    @Query("SELECT c.itemsEmail FROM supplier s JOIN s.contact c WHERE s.cnpj = :cnpj")
+    fun findSupplierEmailByCnpj(cnpj: String): String?
+
+    @Query("SELECT s.name FROM supplier s JOIN s.contact c WHERE c.itemsEmail = :email")
+    fun findSupplierNameByEmail(email: String): String
+
+
 }

@@ -25,7 +25,7 @@ class SecurityConfig {
         http
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers("/login").authenticated()
+                    .requestMatchers("/upload").authenticated()
                     .anyRequest().permitAll()
             }
             .csrf { csrf -> csrf.disable() }

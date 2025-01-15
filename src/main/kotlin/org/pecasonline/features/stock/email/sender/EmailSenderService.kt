@@ -15,7 +15,10 @@ class EmailSenderService(
     private val emailSender: JavaMailSender,
 
     @Value("\${spring.mail.enabled}")
-    private val isEmailEnabled: Boolean
+    private val isEmailEnabled: Boolean,
+
+    @Value("\${app.site_url}")
+    private val siteUrl: String
 ) {
     private val EMAIL_NOT_ENABLED_MESSAGE = "Email service is disabled. Notification email will not be sent."
     private val supplierEmail = "pecas.online.agora@gmail.com" // Para evitar mandar e-mail pra fornecedor que existe mesmo.
@@ -88,6 +91,28 @@ class EmailSenderService(
 
         sendEmail(this.supplierEmail, subject, htmlContent)
     }
+
+    @Async
+    fun sendMagicLink(supplierEmail: String, supplierName: String, token: String) {
+        validateIfEmailIsEnabled()
+
+        val subject = "O seu link para acesso ao Peças Online X"
+        val magicLink = "${siteUrl}/login?token=$token"
+        val htmlContent = """
+            <html>
+            <body>
+                <p>Olá $supplierName,</p>
+                <p>Você requisitou acesso ao sistema Peças Online X. Use o link abaixo para realizar o login de forma segura:</p>
+                <p><a href='$magicLink' target='_blank'>Clique aqui para acessar</a></p>
+                <p>Este link é válido por tempo limitado. Caso você não tenha solicitado este acesso, por favor, ignore este e-mail.</p>
+                <p>Atenciosamente,<br>Equipe de Suporte</p>
+            </body>
+            </html>
+        """.trimIndent()
+
+        sendEmail(this.supplierEmail, subject, htmlContent)
+    }
+
 
     private fun sendEmail(supplierEmail: String, subject: String, htmlContent: String) {
         runCatching {
