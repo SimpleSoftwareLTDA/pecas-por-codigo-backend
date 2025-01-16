@@ -121,7 +121,6 @@ class StockService(
                 val tempFile = saveFileLocallyTemporarily(file, tmpDir)
                 logger.debug { "${"Saved file locally: {}"} $tempFile" }
 
-//                val stockList = getFileValues(tempFile)
                 val stockList = getFileValuesOptimized(tempFile)
                 logger.debug { "${"Parsed stock entries: {}"} ${stockList.size}" }
 
@@ -136,7 +135,6 @@ class StockService(
 
                     if (suppliers.isEmpty()) {
                         val errorMessage = "Fornecedor não encontrado para CNPJ: $cnpj"
-//                        notifySuppliersOfError(allSuppliers, file, errorMessage)
                         throw NotFoundException(errorMessage)
                     }
 

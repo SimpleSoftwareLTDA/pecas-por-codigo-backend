@@ -51,7 +51,9 @@ class MagicLinkService(
     }
 
     @Transactional
-    fun sendLoginLinkWithToken(email: String) {
+    fun sendLoginLinkWithToken(email: String): String {
+        var returnTokenTemp = ""
+
         when {
             checkSupplierEmail(email) -> {
                 val supplier = supplierRepository.findSupplierByEmail(email)
@@ -67,6 +69,8 @@ class MagicLinkService(
                             }
                     )
 
+                    returnTokenTemp = tokens.token
+
                     emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = supplier.name)
                 } else {
                     logger.warn { "Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado." }
@@ -74,6 +78,7 @@ class MagicLinkService(
             }
             else -> logger.warn { "E-mail não cadastrado. Magic Link não será gerado para ele." }
         }
+        return returnTokenTemp
     }
 
 
