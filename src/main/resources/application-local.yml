@@ -51,3 +51,8 @@ springdoc:
 
 app:
   url: ${CURRENT_URL:}
+
+asaas:
+  api:
+    api-key: ${ASAAS_API_KEY:REDACTED_ASAAS_KEY}
+    base-url: https://sandbox.asaas.com/api/v3

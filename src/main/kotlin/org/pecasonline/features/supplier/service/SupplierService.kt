@@ -1,6 +1,8 @@
 package org.pecasonline.features.supplier.service
 
 import org.pecasonline.common.exceptions.NotFoundException
+import org.pecasonline.common.httpclients.AsaasService
+import org.pecasonline.common.httpclients.CreateClientRequest
 import org.pecasonline.features.address.service.IAddressService
 import org.pecasonline.features.brand.IBrandService
 import org.pecasonline.features.description.IDescriptionService
@@ -22,6 +24,7 @@ class SupplierService(
     private val brandService: IBrandService,
     private val subscriptionService: ISubscriptionService,
     private val contactRepository: ContactRepository,
+    private val asaasService: AsaasService
 ): ISupplierService {
     override fun findSuppliers(page: Int?, size: Int?): Page<Supplier> {
         val pageable = PageRequest.of(page!!, size!!)
@@ -48,6 +51,16 @@ class SupplierService(
 
     @Transactional(rollbackFor = [Exception::class])
     override fun createSupplier(supplier: CreateSupplierDTO): Supplier {
+        val existingSupplier = supplier.cnpj?.let { supplierRepository.findSupplierByCnpj(it) }
+
+        when {
+            existingSupplier?.isNotEmpty() == true -> {
+                val supplierWithAsaasId = existingSupplier.find { it.asaasId != null }
+
+                require(supplierWithAsaasId == null) { "Fornecedor com CNPJ ${supplier.cnpj} já cadastrado e vinculado ao Asaas." }
+            }
+        }
+
         val savedContact = contactRepository.save(supplier.contact!!.toContact())
         val savedAddress = addressService.save(supplier.address!!)
 
@@ -63,8 +76,23 @@ class SupplierService(
             throw IllegalArgumentException("A marca escolhida não existe. brandId: ${supplier.brandId}")
         }
 
-        val newSupplier = supplier.toSupplier(savedContact, savedAddress, chosenDescription, chosenBrand)
-        val savedSupplier = supplierRepository.save(newSupplier)
+        val newSupplier = supplier.toSupplier(
+            savedContact,
+            savedAddress,
+            chosenDescription,
+            chosenBrand
+        )
+
+        val newlyCreatedCustomer = asaasService.createCustomer(
+            CreateClientRequest(
+                name = newSupplier.name,
+                email = newSupplier.contact.stockEmail,
+                phone = newSupplier.contact.whatsapp,
+                cpfCnpj = newSupplier.cnpj
+            )
+        )
+
+        val savedSupplier = supplierRepository.save(newSupplier.copy(asaasId = newlyCreatedCustomer.id))
 
         subscriptionService.createSubscription(supplier.subscription!!, savedSupplier)
 

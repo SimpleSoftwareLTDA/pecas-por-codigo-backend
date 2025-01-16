@@ -173,7 +173,7 @@ class SupplierExamples {
               "empresa": "Fornecedor Exemplo",
               "linkFornecedorOriginal": "https://example.com",
               "razaoSocial": "Fornecedor Exemplo LTDA",
-              "cnpj": "12345678901234",
+              "cnpj": "15826705000130",
               "inscricao": "12345678",
               "idDescricao": 1,
               "idMarca": 2,
@@ -219,7 +219,7 @@ class SupplierExamples {
                     "id": 2,
                     "marca": "Agrale"
                 },
-                "cnpj": "12345678901234",
+                "cnpj": "15826705000130",
                 "inscricaoEstadual": "12345678",
                 "endereco": {
                     "id": 301,

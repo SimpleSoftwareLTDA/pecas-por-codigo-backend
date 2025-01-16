@@ -10,6 +10,5 @@ class PlanService(
 
     override fun getAvailablePlans(): List<Plan> = planRepository.findAll()
 
-    override fun getPlanById(id: Int): Plan = planRepository.findById(id)
-        .orElseThrow { NotFoundException("Plano de assinatura não encontrado.") }
+    override fun getPlanById(id: Int): Plan = planRepository.findById(id).orElseThrow { NotFoundException("Plano de assinatura não encontrado.") }
 }
