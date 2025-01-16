@@ -107,7 +107,12 @@ class EmailReceiverService(
                                     logger.info { "Estrutura do arquivo válida. Processando..." }
 
                                     runCatching {
-                                        stockService.createStock(cnpj = supplierCnpj, file = streamToMultipartFile(inputStream, fileName), emailAddress = senderEmail)
+                                        stockService.createStock(
+                                            cnpj = supplierCnpj,
+                                            file = streamToMultipartFile(inputStream, fileName),
+                                            emailAddress = senderEmail,
+                                            token = null
+                                        )
                                     }.onFailure { ex ->
                                         logger.error(ex) { "Erro ao processar arquivo" }
                                     }

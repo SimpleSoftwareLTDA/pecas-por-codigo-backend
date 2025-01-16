@@ -155,7 +155,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `should create stock from file`() {
         val mockFile = MockMultipartFile("file", "stocks.txt", "text/plain", "ITEM123 10 19.99 Sample".toByteArray())
         val cnpj = "15826705000130"
-        justRun { stockService.createStock(cnpj, mockFile) }
+        justRun { stockService.createStock(cnpj, mockFile, token = null) }
 
         mockMvc.perform(multipart("/api/v1/estoque")
                 .file(mockFile)
@@ -163,14 +163,14 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated)
 
-        verify { stockService.createStock(cnpj, mockFile) }
+        verify { stockService.createStock(cnpj, mockFile, token = null) }
     }
 
     @Test
     fun `should handle NotFoundException when supplier is not found during stock creation`() {
         val mockFile = MockMultipartFile("file", "stocks.txt", "text/plain", "ITEM123 10 19.99 Sample".toByteArray())
         val cnpj = "15826705000130"
-        every { stockService.createStock(cnpj, mockFile) } throws NotFoundException("Fornecedor não encontrado")
+        every { stockService.createStock(cnpj, mockFile, token = null) } throws NotFoundException("Fornecedor não encontrado")
 
         mockMvc.perform(multipart("/api/v1/estoque")
                 .file(mockFile)
@@ -179,6 +179,6 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.message").value("Fornecedor não encontrado"))
 
-        verify { stockService.createStock(cnpj, mockFile) }
+        verify { stockService.createStock(cnpj, mockFile, token = null) }
     }
 }

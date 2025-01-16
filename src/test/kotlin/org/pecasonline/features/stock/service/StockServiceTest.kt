@@ -4,7 +4,6 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
@@ -29,8 +28,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.*
 
 @ExtendWith(SpringExtension::class)
@@ -127,7 +124,7 @@ class StockServiceTest {
         `when`(itemRepository.save(any(Item::class.java))).thenReturn(sampleItem) // Ensure itemRepository.save returns a non-null value
         `when`(categoryService.findByNameIgnoreCase(anyOrNull())).thenReturn(sampleCategory)
         assertThrows<NotFoundException> {
-            stockService.createStock(cnpj, mockFile)
+            stockService.createStock(cnpj, mockFile, token = null)
         }
     }
 

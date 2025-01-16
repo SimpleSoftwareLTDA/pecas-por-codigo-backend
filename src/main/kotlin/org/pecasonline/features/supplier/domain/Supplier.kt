@@ -2,9 +2,11 @@ package org.pecasonline.features.supplier.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
+import org.pecasonline.common.service.Tokens
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
+import org.pecasonline.features.subscription.Subscription
 import java.security.MessageDigest
 
 @Entity(name = "supplier")
@@ -49,7 +51,16 @@ data class Supplier(
 
     @Column(name = "asaas_id", unique = true)
     @JsonProperty("asaasId")
-    val asaasId: String? = null
+    val asaasId: String? = null,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "token_id", nullable = true)
+    @JsonProperty("token")
+    val token: Tokens? = null,
+
+    @OneToOne(mappedBy = "supplier")
+    val subscription: Subscription? = null
+
 ) {
     override fun toString(): String = "Supplier(id=$id, name=$name, supplierOriginalLink=$supplierOriginalLink, socialName=$socialName, description=$description, brand=$brand, cnpj=$cnpj, stateSubscription=$stateSubscription, address=$address, contact=$contact)"
 }

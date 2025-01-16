@@ -146,6 +146,6 @@ interface StockSwaggerSpec {
         description = "Estoque criado com sucesso",
         content = [Content(mediaType = "application/json")]
     )
-    fun createItem(@CNPJ(message = INVALID_CNPJ)cnpj: String, file: MultipartFile)
+    fun createItem(@CNPJ(message = INVALID_CNPJ) cnpj: String, file: MultipartFile, token: String)
 
 }

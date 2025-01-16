@@ -50,23 +50,32 @@ class MagicLinkService(
         }
     }
 
+    @Transactional
     fun sendLoginLinkWithToken(email: String) {
         when {
             checkSupplierEmail(email) -> {
-                val tokens = tokenRepository.save(
-                    Tokens()
-                        .apply {
-                            this.username = email
-                            this.token = token()
-                            this.created = Instant.now()
-                        }
-                )
+                val supplier = supplierRepository.findSupplierByEmail(email)
 
-                emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = getSupplierNameByEmail(email))
+                if (supplier != null) {
+                    val tokens = tokenRepository.save(
+                        Tokens()
+                            .apply {
+                                this.username = email
+                                this.token = token()
+                                this.created = Instant.now()
+                                this.supplier = supplier
+                            }
+                    )
+
+                    emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = supplier.name)
+                } else {
+                    logger.warn { "Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado." }
+                }
             }
             else -> logger.warn { "E-mail não cadastrado. Magic Link não será gerado para ele." }
         }
     }
+
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
 
