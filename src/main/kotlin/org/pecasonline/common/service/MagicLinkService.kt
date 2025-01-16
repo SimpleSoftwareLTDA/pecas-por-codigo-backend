@@ -31,25 +31,6 @@ class MagicLinkService(
 
     private val alphabet = ('a' .. 'z') + ('A' .. 'Z') + ('0' .. '9')
 
-    private val strategy = SecurityContextHolder.getContextHolderStrategy()
-    private val sessionRepository = HttpSessionSecurityContextRepository()
-
-    @Transactional
-    fun authenticate(token: String, request: HttpServletRequest, response: HttpServletResponse) {
-        val entity = tokenRepository.findByToken(token)
-
-        entity?.let {
-            val user = users.loadUserByUsername(entity.username)
-            val authentication = UsernamePasswordAuthenticationToken(user, user.password, user.authorities)
-            val context = strategy.context
-
-            context.authentication = authentication
-            strategy.context = context
-
-            sessionRepository.saveContext(context, request, response)
-        }
-    }
-
     @Transactional
     fun sendLoginLinkWithToken(email: String): String {
         var returnTokenTemp = ""
@@ -91,8 +72,6 @@ class MagicLinkService(
     }
 
     private fun checkSupplierEmail(email: String): Boolean = contactRepository.existsByItemsEmail(email)
-
-    private fun getSupplierNameByEmail(email: String): String = supplierRepository.findSupplierNameByEmail(email)
 
 }
 
