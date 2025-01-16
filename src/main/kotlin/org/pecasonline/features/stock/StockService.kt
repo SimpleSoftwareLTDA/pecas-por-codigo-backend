@@ -9,7 +9,9 @@ import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns
 import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.subscription.SubscriptionService
 import org.pecasonline.features.subscription.SubscriptionStatus
+import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -32,7 +34,8 @@ class StockService(
     private val itemRepository: ItemRepository,
     private val supplierRepository: SupplierRepository,
     private val categoryService: ICategoryService,
-    private val emailSenderService: EmailSenderService
+    private val emailSenderService: EmailSenderService,
+    private val subscriptionService: SubscriptionService
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -58,7 +61,7 @@ class StockService(
 
     @Transactional(rollbackFor = [Exception::class])
     override fun createStock(cnpj: String, file: MultipartFile, emailAddress: String, token: String?) {
-        // Se o processamento do arquivo for iniciado via site web, o token deve ser válido
+        // Se o processamento do arquivo for iniciado via site web, o token deve ser válido.
         token?.let {
             val supplierWithToken = supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)
 
@@ -70,22 +73,9 @@ class StockService(
             }
         }
 
-        // Obter o fornecedor com base no CNPJ
         val supplier = getSupplierByCNPJ(cnpj)
 
-        // Verificar se a assinatura do fornecedor está ativa
-        if (supplier.first().subscription?.status != SubscriptionStatus.ACTIVE) {
-            val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
-            logger.error { errorMessage }
-
-            emailSenderService.sendStockProcessingErrorNotification(
-                supplierEmail = emailAddress,
-                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
-                errorMessage = errorMessage
-            )
-
-            throw IllegalArgumentException(errorMessage)
-        }
+        subscriptionService.checkIfSubscriptionIsActive(supplier, cnpj)
 
         when {
             file.isEmpty -> {

@@ -12,6 +12,7 @@ import org.pecasonline.features.stock.email.receiver.RegexPatterns.costRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.emailRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.productCodeRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.quantityRegex
+import org.pecasonline.features.subscription.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
@@ -32,6 +33,7 @@ private val logger = KotlinLogging.logger {}
 class EmailReceiverService(
     private val stockService: StockService,
     private val supplierRepository: SupplierRepository,
+    private val subscriptionService: SubscriptionService,
     @Value("\${spring.mail.properties.mail.imap.host}") private val host: String,
     @Value("\${spring.mail.username}") private val username: String,
     @Value("\${spring.mail.password}") private val password: String,
@@ -57,29 +59,34 @@ class EmailReceiverService(
                 for (message in messages) {
                     logger.info { "Processando mensagem: ${message.subject}" }
 
-                    processAttachments(message)
+                    val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
 
-                    // Marca a mensagem como lida depois
-                    message.setFlag(Flag.SEEN, false)
+                    supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
 
-                    // Move para a pasta de processados, se configurada
-                    if (processedFolder.isNotEmpty()) {
-                        val processed = emailStore.getFolder(processedFolder)
-
-                        if (!processed.exists()) {
-                            processed.create(Folder.HOLDS_MESSAGES)
+                        supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
+                            subscriptionService.checkIfSubscriptionIsActive(listOf(supplier), cnpj)
                         }
 
-                        emailInbox.copyMessages(arrayOf(message), processed)
-                    }
+                        processAttachments(message, senderEmail = senderEmail, supplierCnpj = cnpj)
+
+                        message.setFlag(Flag.SEEN, true)
+
+                        if (processedFolder.isNotEmpty()) {
+                            val processed = emailStore.getFolder(processedFolder)
+
+                            if (!processed.exists()) {
+                                processed.create(Folder.HOLDS_MESSAGES)
+                            }
+
+                            emailInbox.copyMessages(arrayOf(message), processed)
+                        }
+                    } ?: error("CNPJ não cadastrado")
                 }
             }
         }
     }
 
-    private fun processAttachments(message: Message) {
-        val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
-        val supplierCnpj = supplierRepository.findSupplierCnpjByEmail(senderEmail)
+    private fun processAttachments(message: Message, senderEmail: String, supplierCnpj: String?) {
 
         supplierCnpj?.let {
             if (message.isMimeType("multipart/*")) {
@@ -103,7 +110,7 @@ class EmailReceiverService(
                                 val inputStream = bodyPart.inputStream
                                 val bufferedReader = BufferedReader(InputStreamReader(inputStream, StandardCharsets.UTF_8))
 
-                                if (isValidFileStructure2(BufferedReader(bufferedReader))) {
+                                if (isValidFileStructure(BufferedReader(bufferedReader))) {
                                     logger.info { "Estrutura do arquivo válida. Processando..." }
 
                                     runCatching {
@@ -125,30 +132,6 @@ class EmailReceiverService(
     }
 
     private fun isValidFileStructure(reader: BufferedReader): Boolean {
-        var count = 0
-
-        reader.use {
-            val lines = reader.lineSequence().take(3).toList()
-
-            return lines.all { line ->
-                val fields = line.trim().split("\\s+".toRegex())
-
-                when (fields.size) {
-                    4 -> when {
-                        !productCodeRegex.matcher(fields[0]).matches() -> false
-                        !quantityRegex.matcher(fields[1]).matches() -> false
-                        !costRegex.matcher(fields[2]).matches() -> false
-
-                        else -> true
-                    }
-
-                    else -> false
-                }
-            }
-        }
-    }
-
-    private fun isValidFileStructure2(reader: BufferedReader): Boolean {
         var lineCount = 0
 
         reader.useLines { lines ->

@@ -1,5 +1,6 @@
 package org.pecasonline.features.subscription
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.common.httpclients.AsaasService
 import org.pecasonline.common.httpclients.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
@@ -7,6 +8,8 @@ import org.pecasonline.features.supplier.domain.Supplier
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class SubscriptionService(
@@ -17,9 +20,9 @@ class SubscriptionService(
     override fun createSubscription(subscriptionDto: CreateSubscriptionDTO, supplier: Supplier): Subscription {
         val chosenPlan = runCatching {
             planService.getPlanById(subscriptionDto.planId)
-        }.getOrElse { throw IllegalArgumentException("O plano escolhido não existe. planId: ${subscriptionDto.planId}") }
-
-        // TODO: Criar a assinatura no asaas com base nos dados que existem na entidade supplier e contact
+        }.getOrElse {
+            throw IllegalArgumentException("O plano escolhido não existe. planId: ${subscriptionDto.planId}")
+        }
 
         val subscriptionRequest = CreateSubscriptionRequest(
             customer = supplier.asaasId!!,
@@ -49,5 +52,20 @@ class SubscriptionService(
                 }
             }
         return nextDueDate.format(DateTimeFormatter.ISO_LOCAL_DATE) // Formato yyyy-MM-dd
+    }
+
+    fun checkIfSubscriptionIsActive(
+        supplier: List<Supplier>,
+        cnpj: String
+    ) {
+        when {
+            supplier.first().subscription?.status != SubscriptionStatus.ACTIVE -> {
+                val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
+
+                logger.error { errorMessage }
+
+                error(errorMessage)
+            }
+        }
     }
 }
