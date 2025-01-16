@@ -17,15 +17,13 @@ class LoginController(
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun login(@RequestBody request: LoginRequest) {
-        runCatching {
-            magicLinkService.sendLoginLinkWithToken(request.email)
-        }.onFailure { ex ->
-            logger.error(ex) { "Usuário não cadastrado" }
-        }
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
+        val token = magicLinkService.sendLoginLinkWithToken(request.email)
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse(token))
     }
 
-    @GetMapping("/login")
+    @GetMapping("/login/verify")
     fun verifyToken(@RequestParam token: String): ResponseEntity<String> =
         when {
             magicLinkService.validateToken(token) -> ResponseEntity.ok("Usuário autenticado com sucesso")
@@ -38,4 +36,8 @@ data class LoginRequest(
     @field:NotBlank(message = "O e-mail não pode estar vazio.")
     @field:Email(message = "O e-mail informado não é válido.")
     val email: String
+)
+
+data class TokenResponse(
+    val token: String
 )

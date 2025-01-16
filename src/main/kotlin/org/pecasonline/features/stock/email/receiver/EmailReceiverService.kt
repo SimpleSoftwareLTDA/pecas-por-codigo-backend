@@ -110,8 +110,7 @@ class EmailReceiverService(
                                         stockService.createStock(
                                             cnpj = supplierCnpj,
                                             file = streamToMultipartFile(inputStream, fileName),
-                                            emailAddress = senderEmail,
-                                            token = null
+                                            emailAddress = senderEmail
                                         )
                                     }.onFailure { ex ->
                                         logger.error(ex) { "Erro ao processar arquivo" }

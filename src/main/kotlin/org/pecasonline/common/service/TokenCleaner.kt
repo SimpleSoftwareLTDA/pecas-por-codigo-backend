@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class TokenCleaner(private val tokenRepository: TokenRepository) {
 
-    @Scheduled(cron = "0 */1 * * * *") // TODO: Migrar para o Redis, e usar o TTL.
+    @Scheduled(cron = "0 */30 * * * *") // TODO: Migrar para o Redis, e usar o TTL.
     fun clean() {
         val threshold = Instant.now().minus(5, ChronoUnit.MINUTES)
 
