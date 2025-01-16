@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.hibernate.validator.constraints.br.CNPJ
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.brand.Brand
@@ -26,6 +27,7 @@ class CreateSupplierDTO(
 
     @field:NotNull(message = "O CNPJ do fornecedor é obrigatório")
     @field:NotBlank(message = "O CNPJ do fornecedor não pode ser vazio")
+    @field:CNPJ(message = "O CNPJ precisa ser válido.")
     val cnpj: String? = null,
 
     @field:NotNull(message = "A inscrição estadual do fornecedor é obrigatório")

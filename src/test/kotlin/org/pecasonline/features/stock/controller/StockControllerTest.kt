@@ -154,7 +154,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should create stock from file`() {
         val mockFile = MockMultipartFile("file", "stocks.txt", "text/plain", "ITEM123 10 19.99 Sample".toByteArray())
-        val cnpj = "12345678901234"
+        val cnpj = "15826705000130"
         justRun { stockService.createStock(cnpj, mockFile) }
 
         mockMvc.perform(multipart("/api/v1/estoque")
@@ -169,7 +169,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should handle NotFoundException when supplier is not found during stock creation`() {
         val mockFile = MockMultipartFile("file", "stocks.txt", "text/plain", "ITEM123 10 19.99 Sample".toByteArray())
-        val cnpj = "12345678901234"
+        val cnpj = "15826705000130"
         every { stockService.createStock(cnpj, mockFile) } throws NotFoundException("Fornecedor não encontrado")
 
         mockMvc.perform(multipart("/api/v1/estoque")

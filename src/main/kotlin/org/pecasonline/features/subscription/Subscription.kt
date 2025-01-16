@@ -34,5 +34,15 @@ data class Subscription(
 
     @JsonProperty("bannerPequenoUrl")
     @JsonAlias(value = ["small_banner_url", "smallBannerUrl"])
-    val smallBannerUrl: String? = null
+    val smallBannerUrl: String? = null,
+
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("status")
+    var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
 )
+
+enum class SubscriptionStatus(val description: String) {
+    ACTIVE("Assinatura ativa"),
+    INACTIVE("Assinatura inativa"),
+    LATE("Assinatura atrasada");
+}

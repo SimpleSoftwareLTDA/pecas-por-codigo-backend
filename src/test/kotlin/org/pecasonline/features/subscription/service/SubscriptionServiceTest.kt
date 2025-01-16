@@ -42,7 +42,7 @@ class SubscriptionServiceTest {
             name = "Test Supplier",
             supplierOriginalLink = "http://supplierlink.com",
             socialName = "Test Social Name",
-            cnpj = "12345678901234",
+            cnpj = "15826705000130",
             stateSubscription = "123456789",
             address = mock(),
             contact = mock()
@@ -92,7 +92,7 @@ class SubscriptionServiceTest {
             name = "Test Supplier",
             supplierOriginalLink = "http://supplierlink.com",
             socialName = "Test Social Name",
-            cnpj = "12345678901234",
+            cnpj = "15826705000130",
             stateSubscription = "123456789",
             address = mock(),
             contact = mock()

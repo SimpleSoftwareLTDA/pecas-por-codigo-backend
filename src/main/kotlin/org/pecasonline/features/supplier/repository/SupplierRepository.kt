@@ -22,5 +22,7 @@ interface SupplierRepository : JpaRepository<Supplier, Int> {
     @Query("SELECT s.name FROM supplier s JOIN s.contact c WHERE c.itemsEmail = :email")
     fun findSupplierNameByEmail(email: String): String
 
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END FROM supplier s WHERE s.asaasId = :asaasId")
+    fun existsByAsaasId(asaasId: String): Boolean
 
 }

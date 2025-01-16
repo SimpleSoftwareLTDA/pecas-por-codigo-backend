@@ -79,7 +79,7 @@ class StockRepositoryTest @Autowired constructor(
             socialName = "Supplier X Ltd",
             description = Description(description = "Description for Supplier X"),
             brand = Brand(brandName = "Brand X"),
-            cnpj = "12345678901234",
+            cnpj = "15826705000130",
             stateSubscription = "123456",
             address = address1,
             contact = contact1

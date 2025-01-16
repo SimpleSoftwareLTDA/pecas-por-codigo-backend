@@ -59,7 +59,4 @@ app:
 
 asaas:
   api:
-    sandbox-base-url: https://sandbox.asaas.com/api/v3
-    production-base-url: https://api.asaas.com/v3
-    environment: ${ASAAS_ENV_SELECTOR:sandbox}
-    api-key: ${ASAAS_API_KEY:$aact_MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjVmNjY1YzM3LTlkMjMtNGI1OS1hY2ZjLTk0ZTg1OTA0OTRhODo6JGFhY2hfYThlZDE3ZjQtYzc2Ni00OGQ2LWIwZmUtZjE3ODkwNzIzZmYz}
+    api-key: ${ASAAS_API_KEY:TBD}

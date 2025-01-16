@@ -45,9 +45,11 @@ data class Supplier(
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "contact_id", nullable = true)
     @JsonProperty("contato")
-    val contact: Contact
+    val contact: Contact,
+
+    @Column(name = "asaas_id", unique = true)
+    @JsonProperty("asaasId")
+    val asaasId: String? = null
 ) {
-    override fun toString(): String {
-        return "Supplier(id=$id, name=$name, supplierOriginalLink=$supplierOriginalLink, socialName=$socialName, description=$description, brand=$brand, cnpj=$cnpj, stateSubscription=$stateSubscription, address=$address, contact=$contact)"
-    }
+    override fun toString(): String = "Supplier(id=$id, name=$name, supplierOriginalLink=$supplierOriginalLink, socialName=$socialName, description=$description, brand=$brand, cnpj=$cnpj, stateSubscription=$stateSubscription, address=$address, contact=$contact)"
 }
