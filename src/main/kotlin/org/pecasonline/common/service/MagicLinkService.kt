@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
+import org.springframework.scheduling.annotation.Async
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -49,23 +50,22 @@ class MagicLinkService(
         }
     }
 
+    fun sendLoginLinkWithToken(email: String) {
+        when {
+            checkSupplierEmail(email) -> {
+                val tokens = tokenRepository.save(
+                    Tokens()
+                        .apply {
+                            this.username = email
+                            this.token = token()
+                            this.created = Instant.now()
+                        }
+                )
 
-    fun issueToken(email: String) {
-        if (checkSupplierEmail(email)) {
-            val tokens = tokenRepository.save(Tokens().apply {
-                this.username = email
-                this.token = token()
-                this.created = Instant.now()
-            })
-
-            sendMagicLinkEmail(token = tokens, email = email)
+                emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = getSupplierNameByEmail(email))
+            }
+            else -> logger.warn { "E-mail não cadastrado. Magic Link não será gerado para ele." }
         }
-    }
-
-    private fun sendMagicLinkEmail(token: Tokens, email: String) {
-        logger.info { "Enviou o email com o token: ${token.token} para o email: ${token.username} -> http://localhost:8080/login/${token.token}" }
-
-        emailSenderService.sendMagicLink(supplierEmail = email, token = token.token, supplierName = getSupplierNameByEmail(email))
     }
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
