@@ -1,9 +1,7 @@
 package org.pecasonline.features.stock
 
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.hibernate.validator.constraints.br.CNPJ
 import org.pecasonline.common.Constants.BASE_ENDPOINT
-import org.pecasonline.common.Constants.INVALID_CNPJ
 import org.pecasonline.features.stock.swagger.StockSwaggerSpec
 import org.slf4j.MDC
 import org.springframework.http.HttpStatus
@@ -69,12 +67,13 @@ class StockController(
     @PostMapping(consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.ACCEPTED)
     override fun createItem(
-        @RequestParam("cnpj") cnpj: String,
-        @RequestPart file: MultipartFile
+        @RequestParam cnpj: String,
+        @RequestPart file: MultipartFile,
+        @RequestParam token: String
     ) {
         MDC.putCloseable("cnpj", cnpj).use {
             MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
-                stockService.createStock(cnpj, file)
+                stockService.createStock(cnpj = cnpj, file = file, token = token)
             }
         }
     }

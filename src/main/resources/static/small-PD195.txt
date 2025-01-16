@@ -1,0 +1,12 @@
+3040250                    1           0.00 INTERRUPTOR              
+4C4513A350AA               1           0.00 INTERRUPTOR              
+00005034                   6           0.00 RETENTOR                 
+5034                       6           0.00 RETENTOR                 
+6C347A581AA                6           0.00 RETENTOR                 
+6C3Z7A581A                 6           0.00 RETENTOR                 
+93221087                   6           0.00 RETENTOR                 
+E7SC7A581AA                6           0.00 RETENTOR                 
+E7SZ7A581A                 6           0.00 RETENTOR                 
+707600B                    1           0.00 BUCHA GUIA               
+TE3903221                  1           0.00 BUCHA GUIA               
+TE3903221X                 1           0.00 BUCHA GUIA    

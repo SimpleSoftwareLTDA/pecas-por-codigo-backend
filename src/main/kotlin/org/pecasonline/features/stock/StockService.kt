@@ -9,6 +9,7 @@ import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns
 import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.subscription.SubscriptionStatus
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -56,7 +57,36 @@ class StockService(
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun createStock(cnpj: String, file: MultipartFile, emailAddress: String) {
+    override fun createStock(cnpj: String, file: MultipartFile, emailAddress: String, token: String?) {
+        // Se o processamento do arquivo for iniciado via site web, o token deve ser válido
+        token?.let {
+            val supplierWithToken = supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)
+
+            if (supplierWithToken == null) {
+                val errorMessage = "Token inválido ou não associado ao fornecedor com CNPJ: $cnpj."
+                logger.error { errorMessage }
+
+                throw IllegalArgumentException(errorMessage)
+            }
+        }
+
+        // Obter o fornecedor com base no CNPJ
+        val supplier = getSupplierByCNPJ(cnpj)
+
+        // Verificar se a assinatura do fornecedor está ativa
+        if (supplier.first().subscription?.status != SubscriptionStatus.ACTIVE) {
+            val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
+            logger.error { errorMessage }
+
+            emailSenderService.sendStockProcessingErrorNotification(
+                supplierEmail = emailAddress,
+                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
+                errorMessage = errorMessage
+            )
+
+            throw IllegalArgumentException(errorMessage)
+        }
+
         when {
             file.isEmpty -> {
                 val errorMessage = "Arquivo vazio, por favor selecione um arquivo de estoque com dados para upload."
@@ -76,7 +106,7 @@ class StockService(
                 val tmpDir: Path = Files.createTempDirectory("pecas-")
                 logger.info { "Iniciando criação de estoque a partir do arquivo do fornecedor CNPJ: $cnpj" }
 
-                val allSuppliers = getSupplier(cnpj)
+                val allSuppliers = getSupplierByCNPJ(cnpj)
 
                 allSuppliers.forEach { supplier ->
                     emailSenderService.sendStockProcessingStartNotification(
@@ -102,7 +132,7 @@ class StockService(
 
                     logger.debug { "Item processado com ID: ${item.id}, Hash: ${item.hash}" }
 
-                    val suppliers = getSupplier(cnpj)
+                    val suppliers = getSupplierByCNPJ(cnpj)
 
                     if (suppliers.isEmpty()) {
                         val errorMessage = "Fornecedor não encontrado para CNPJ: $cnpj"
@@ -162,7 +192,7 @@ class StockService(
         return itemRepository.findByHash(itemWithCategory.hash) ?: itemRepository.save(itemWithCategory)
     }
 
-    private fun getSupplier(cnpj: String) =
+    private fun getSupplierByCNPJ(cnpj: String) =
         supplierRepository.findSupplierByCnpj(cnpj)
             .takeIf { it.isNotEmpty() }
             ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $cnpj. Faça sua assinatura para usar esse serviço.")
@@ -291,7 +321,7 @@ class AsyncService(private val stockService: StockService) {
     @Async
     fun processStockAsync(cnpj: String, file: MultipartFile, emailAddress: String) {
         try {
-            stockService.createStock(cnpj, file, emailAddress)
+            stockService.createStock(cnpj, file, emailAddress, null)
         } catch (e: Exception) {
             // Lidar com erros, logar ou enviar notificações
             println("Erro no processamento assíncrono: ${e.message}")

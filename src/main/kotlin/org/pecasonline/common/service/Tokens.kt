@@ -3,6 +3,7 @@ package org.pecasonline.common.service
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import org.hibernate.Hibernate
+import org.pecasonline.features.supplier.domain.Supplier
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -22,6 +23,10 @@ class Tokens {
     lateinit var created: Instant
     lateinit var username: String
     lateinit var token: String
+
+    @OneToOne
+    @JoinColumn(name = "supplier_id")
+    var supplier: Supplier? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
