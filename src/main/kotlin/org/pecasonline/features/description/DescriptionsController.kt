@@ -1,6 +1,6 @@
 package org.pecasonline.features.description
 
-import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.brand.swagger.DescriptionSwaggerSpec
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller

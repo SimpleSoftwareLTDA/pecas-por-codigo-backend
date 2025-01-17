@@ -1,6 +1,6 @@
 package org.pecasonline.features.brand
 
-import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.brand.swagger.BrandSwaggerSpec
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
