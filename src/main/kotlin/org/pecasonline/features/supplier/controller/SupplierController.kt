@@ -1,7 +1,7 @@
 package org.pecasonline.features.supplier.controller
 
 import jakarta.validation.Valid
-import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.supplier.controller.swagger.SupplierSwaggerSpec
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO

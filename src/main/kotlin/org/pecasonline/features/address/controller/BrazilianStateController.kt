@@ -1,6 +1,6 @@
 package org.pecasonline.features.address.controller
 
-import org.pecasonline.features.Constants.Companion.BASE_ENDPOINT
+import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.address.controller.swagger.AddressSwaggerSpec
 import org.pecasonline.features.address.service.IStateService
 import org.pecasonline.features.address.domain.BrazilianState
