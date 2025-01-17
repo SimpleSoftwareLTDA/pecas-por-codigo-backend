@@ -25,18 +25,27 @@ class LoginController(
     }
 
     @GetMapping("/login/verify")
-    fun verifyToken(@RequestParam token: String): ResponseEntity<String> =
-        when {
-            magicLinkService.validateToken(token) -> ResponseEntity.ok("Usuário autenticado com sucesso")
+    fun verifyToken(@RequestParam token: String): ResponseEntity<Any> {
+        val cnpj = magicLinkService.getTokenOwner(token)
 
+        return when {
+            magicLinkService.validateToken(token) -> {
+                val response = LoginResponse(cnpj = cnpj ?: "CNPJ não encontrado")
+                ResponseEntity.ok(response)
+            }
             else -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.")
         }
+    }
 }
 
 data class LoginRequest(
     @field:NotBlank(message = "O e-mail não pode estar vazio.")
     @field:Email(message = "O e-mail informado não é válido.")
     val email: String
+)
+
+data class LoginResponse(
+    val cnpj: String
 )
 
 data class TokenResponse(
