@@ -30,8 +30,6 @@ class CreateSupplierDTO(
     @field:CNPJ(message = "O CNPJ precisa ser válido.")
     val cnpj: String? = null,
 
-    @field:NotNull(message = "A inscrição estadual do fornecedor é obrigatório")
-    @field:NotBlank(message = "A inscrição estadual do fornecedor não pode ser vazio")
     @JsonAlias("inscricao")
     val stateSubscription: String? = null,
 

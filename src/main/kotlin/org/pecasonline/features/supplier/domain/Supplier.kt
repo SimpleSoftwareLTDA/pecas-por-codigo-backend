@@ -37,7 +37,8 @@ data class Supplier(
     val cnpj: String,
 
     @JsonProperty("inscricaoEstadual")
-    val stateSubscription: String,
+    @Column(nullable = true)
+    val stateSubscription: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "address_id", nullable = true)
