@@ -18,7 +18,7 @@ class OpenApiConfig {
         return OpenAPI()
             .info(
                 Info().title("Novo Pecas Online API")
-                    .description("API para gerenciamento de peças automotivas.")
+                    .description("API de Catalogo de peças automotivas e seus fornecedores.")
                     .version("1.0")
             )
             .addServersItem(Server().url(currentURL))
