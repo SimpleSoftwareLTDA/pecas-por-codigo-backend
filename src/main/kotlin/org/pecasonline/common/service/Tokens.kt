@@ -50,4 +50,12 @@ interface TokenRepository : CrudRepository<Tokens, Long> {
     @Query("DELETE FROM Tokens t WHERE t.created < :threshold")
     fun deleteExpired(threshold: Instant)
 
+    @Query("""
+        SELECT s.cnpj
+        FROM Tokens t
+        JOIN t.supplier s
+        WHERE t.token = :token
+    """)
+    fun findSupplierCnpjByToken(token: String): String?
+
 }
