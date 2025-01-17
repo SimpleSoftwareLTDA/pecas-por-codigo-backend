@@ -65,7 +65,7 @@ class StockService(
         token?.let {
             val supplierWithToken = supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)
 
-            if (supplierWithToken == null) {
+            if (!supplierWithToken) {
                 val errorMessage = "Token inválido ou não associado ao fornecedor com CNPJ: $cnpj."
                 logger.error { errorMessage }
 
