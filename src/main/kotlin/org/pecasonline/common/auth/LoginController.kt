@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*
 private val logger = KotlinLogging.logger {}
 
 @RestController
+@RequestMapping("/api/v1")
 class LoginController(
     private val magicLinkService: MagicLinkService
 ) {
@@ -20,7 +21,7 @@ class LoginController(
     fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         val token = magicLinkService.sendLoginLinkWithToken(request.email)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse("https://www.pecasonlinex.com.br/login?token=${token}"))
+        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse("https://www.pecasonlinex.com.br/auth/${token}"))
     }
 
     @GetMapping("/login/verify")
