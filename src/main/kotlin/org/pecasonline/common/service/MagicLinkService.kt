@@ -71,9 +71,7 @@ class MagicLinkService(
         return tokenEntity != null
     }
 
-    fun getTokenOwner(token: String): String? {
-        return tokenRepository.findSupplierCnpjByToken(token)
-    }
+    fun getTokenOwner(token: String): String? = tokenRepository.findSupplierCnpjByToken(token)
 
     private fun checkSupplierEmail(email: String): Boolean = contactRepository.existsByItemsEmail(email)
 
