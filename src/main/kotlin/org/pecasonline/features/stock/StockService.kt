@@ -10,8 +10,6 @@ import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.SubscriptionService
-import org.pecasonline.features.subscription.SubscriptionStatus
-import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -60,7 +58,18 @@ class StockService(
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun createStock(cnpj: String, file: MultipartFile, emailAddress: String, token: String?) {
+    override fun createStock(file: MultipartFile, emailAddress: String, token: String?) {
+        val cnpj = token?.let {
+            getSupplierByToken(token)
+        } ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
+
+        if (cnpj == null) {
+            val errorMessage = "CNPJ não encontrado para o token ou email fornecido. Token: $token, Email: $emailAddress."
+            logger.error { errorMessage }
+
+            return
+        }
+
         // Se o processamento do arquivo for iniciado via site web, o token deve ser válido.
         token?.let {
             val supplierWithToken = supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)
@@ -184,6 +193,10 @@ class StockService(
         supplierRepository.findSupplierByCnpj(cnpj)
             .takeIf { it.isNotEmpty() }
             ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $cnpj. Faça sua assinatura para usar esse serviço.")
+
+    private fun getSupplierByToken(token: String): String =
+        supplierRepository.findCnpjByToken(token)
+            ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $token. Faça sua assinatura para usar esse serviço.")
 
     fun cleanupTempFiles(directory: Path) {
         Files.list(directory).forEach { file ->
@@ -309,7 +322,7 @@ class AsyncService(private val stockService: StockService) {
     @Async
     fun processStockAsync(cnpj: String, file: MultipartFile, emailAddress: String) {
         try {
-            stockService.createStock(cnpj, file, emailAddress, null)
+            stockService.createStock(file, emailAddress, null)
         } catch (e: Exception) {
             // Lidar com erros, logar ou enviar notificações
             println("Erro no processamento assíncrono: ${e.message}")

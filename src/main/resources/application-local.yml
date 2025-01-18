@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/blah?currentSchema=public
+    url: jdbc:postgresql://localhost:5432/novo-pecas-online?currentSchema=public
     driver-class-name: org.postgresql.Driver
     username: pecas
     password: online

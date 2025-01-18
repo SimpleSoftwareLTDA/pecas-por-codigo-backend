@@ -88,7 +88,7 @@ class EmailReceiverService(
 
     private fun processAttachments(message: Message, senderEmail: String, supplierCnpj: String?) {
 
-        supplierCnpj?.let {
+        supplierCnpj?.let { cnpj ->
             if (message.isMimeType("multipart/*")) {
                 val multipart = message.content as MimeMultipart
 
@@ -115,7 +115,6 @@ class EmailReceiverService(
 
                                     runCatching {
                                         stockService.createStock(
-                                            cnpj = supplierCnpj,
                                             file = streamToMultipartFile(inputStream, fileName),
                                             emailAddress = senderEmail
                                         )
