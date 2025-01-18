@@ -1,7 +1,7 @@
 package org.pecasonline.features.supplier.service
 
 import org.pecasonline.common.exceptions.NotFoundException
-import org.pecasonline.common.httpclients.AsaasService
+import org.pecasonline.common.httpclients.BankingService
 import org.pecasonline.common.httpclients.CreateClientRequest
 import org.pecasonline.features.address.service.IAddressService
 import org.pecasonline.features.brand.IBrandService
@@ -24,7 +24,7 @@ class SupplierService(
     private val brandService: IBrandService,
     private val subscriptionService: ISubscriptionService,
     private val contactRepository: ContactRepository,
-    private val asaasService: AsaasService
+    private val bankingService: BankingService
 ): ISupplierService {
     override fun findSuppliers(page: Int?, size: Int?): Page<Supplier> {
         val pageable = PageRequest.of(page!!, size!!)
@@ -83,7 +83,7 @@ class SupplierService(
             chosenBrand
         )
 
-        val newlyCreatedCustomer = asaasService.createCustomer(
+        val newlyCreatedCustomer = bankingService.createCustomer(
             CreateClientRequest(
                 name = newSupplier.name,
                 email = newSupplier.contact.stockEmail,
