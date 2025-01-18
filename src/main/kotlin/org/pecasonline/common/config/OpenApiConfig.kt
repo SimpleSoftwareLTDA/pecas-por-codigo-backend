@@ -21,5 +21,6 @@ class OpenApiConfig {
                     .description("API de Catalogo de peças automotivas e seus fornecedores.")
                     .version("1.0")
             )
+            .addServersItem(Server().url(currentURL))
     }
 }
