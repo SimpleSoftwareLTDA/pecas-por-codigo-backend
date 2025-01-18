@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
 @Service
-class AsaasService(
+class BankingService(
     private val asaasClient: AsaasClient
 ) {
     private val logger = KotlinLogging.logger {}

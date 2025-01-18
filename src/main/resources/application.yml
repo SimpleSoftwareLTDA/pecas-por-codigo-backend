@@ -5,6 +5,9 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
   mail:
     enabled: false
+  jpa:
+    open-in-view: false
+
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://www.pecasonlinex.com.br}

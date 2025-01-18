@@ -1,11 +1,13 @@
 package org.pecasonline.features.subscription
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.pecasonline.common.httpclients.AsaasService
+import org.pecasonline.common.httpclients.BankingService
 import org.pecasonline.common.httpclients.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.supplier.domain.Supplier
+import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -14,8 +16,9 @@ private val logger = KotlinLogging.logger {}
 @Service
 class SubscriptionService(
     private val planService: IPlanService,
-    private val asaasService: AsaasService,
-    private val subscriptionRepository: SubscriptionRepository
+    private val bankingService: BankingService,
+    private val subscriptionRepository: SubscriptionRepository,
+    private val supplierRepository: SupplierRepository
 ) : ISubscriptionService {
     override fun createSubscription(subscriptionDto: CreateSubscriptionDTO, supplier: Supplier): Subscription {
         val chosenPlan = runCatching {
@@ -33,11 +36,28 @@ class SubscriptionService(
             description = "Assinatura do fornecedor ${supplier.name} no plano ${SubscriptionPlan.nameFromId(subscriptionDto.planId)}"
         )
 
-        asaasService.createSubscription(subscriptionRequest)
+        bankingService.createSubscription(subscriptionRequest)
 
         val subscription = subscriptionDto.toSubscription(supplier, chosenPlan)
 
         return subscriptionRepository.save(subscription)
+    }
+
+    @Transactional
+    fun updateSubscriptionStatusByWebhook(asaasCustomerId: String, asaasStatus: String) {
+        val supplier = supplierRepository.findByAsaasId(asaasCustomerId)
+            ?: throw IllegalArgumentException("Fornecedor com Asaas ID $asaasCustomerId não encontrado")
+
+        val subscription = supplier.subscription
+            ?: throw IllegalStateException("Fornecedor com Asaas ID $asaasCustomerId não possui uma assinatura associada")
+
+        val newStatus = asaasStatus.toSubscriptionStatus()
+
+        subscription.status = newStatus
+
+        subscriptionRepository.save(subscription)
+
+        logger.info { "Status da assinatura de ${supplier.name} foi alterado para: $newStatus" }
     }
 
     fun calculateNextDueDate(paymentDay: Int): String {
@@ -68,4 +88,12 @@ class SubscriptionService(
             }
         }
     }
+}
+
+fun String.toSubscriptionStatus(): SubscriptionStatus = when (this) {
+    "RECEIVED_IN_CASH", "PAYMENT_RECEIVED" -> SubscriptionStatus.ACTIVE
+    "PENDING", "AWAITING_PAYMENT" -> SubscriptionStatus.INACTIVE
+    "OVERDUE", "PAYMENT_OVERDUE" -> SubscriptionStatus.LATE
+
+    else -> throw IllegalArgumentException("Status do webhook desconhecido: $this")
 }
