@@ -1,4 +1,4 @@
-package org.pecasonline.features.subscription
+package org.pecasonline.features.subscription.repository
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -9,6 +9,8 @@ import org.pecasonline.features.address.repository.AddressRepository
 import org.pecasonline.features.address.repository.BrazilianStatesRepository
 import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.plan.PlanRepository
+import org.pecasonline.features.subscription.Subscription
+import org.pecasonline.features.subscription.SubscriptionRepository
 import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
