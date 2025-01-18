@@ -27,9 +27,8 @@ data class CreateSubscriptionDTO(
 }
 
 enum class SubscriptionPlan(val id: Int, val price: Double, val description: String) {
-    BASIC(1, 100.0, "Plano Básico - Ideal para iniciantes"),
-    INTERMEDIATE(2, 200.0, "Plano Intermediário - Para quem busca mais recursos"),
-    ADVANCED(3, 300.0, "Plano Avançado - Completo e avançado");
+    BASIC(1, 299.99, "Plano Básico - Apenas permite subir o estoque para o catálogo"),
+    VIP(2, 399.99, "Plano Intermediário - Além do básico, permite expor um banner de propaganda no site.");
 
     companion object {
         fun nameFromId(id: Int): String =
