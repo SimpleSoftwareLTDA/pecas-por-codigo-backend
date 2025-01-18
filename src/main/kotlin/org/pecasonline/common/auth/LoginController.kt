@@ -29,7 +29,7 @@ class LoginController(
         when {
             magicLinkService.checkIsValidToken(token) -> ResponseEntity.ok().build()
 
-            else -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.")
+            else -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 }
 
