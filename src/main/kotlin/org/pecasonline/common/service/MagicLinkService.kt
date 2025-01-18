@@ -2,6 +2,7 @@ package org.pecasonline.common.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -14,7 +15,6 @@ private val logger = KotlinLogging.logger {}
 
 @Service
 class MagicLinkService(
-    private val users: UserDetailsService,
     private val tokenRepository: TokenRepository,
     private val emailSenderService: EmailSenderService,
     private val contactRepository: ContactRepository,
@@ -23,7 +23,7 @@ class MagicLinkService(
 
     private val random = SecureRandomSingleton.instance
 
-    private val alphabet = ('a' .. 'z') + ('A' .. 'Z') + ('0' .. '9')
+    private val alphabet = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
     @Transactional
     fun sendLoginLinkWithToken(email: String): String {
@@ -33,26 +33,35 @@ class MagicLinkService(
             checkSupplierEmail(email) -> {
                 val supplier = supplierRepository.findSupplierByEmail(email)
 
-                if (supplier != null) {
-                    val tokens = tokenRepository.save(
-                        Tokens()
-                            .apply {
-                                this.username = email
-                                this.token = token()
-                                this.created = Instant.now()
-                                this.supplier = supplier
-                            }
-                    )
+                supplier?.let {
+                    when {
+                        supplierExists(supplier) -> {
+                            val tokens = tokenRepository.save(
+                                Tokens()
+                                    .apply {
+                                        this.username = email
+                                        this.token = token()
+                                        this.created = Instant.now()
+                                        this.supplier = supplier
+                                    }
+                            )
 
-                    returnTokenTemp = tokens.token
+                            returnTokenTemp = tokens.token
 
-                    emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = supplier.name)
-                } else error("Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado.")
+                            emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = supplier.name)
+                        }
+
+                        else -> error("Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado.")
+                    }
+                }
             }
+
             else -> error("E-mail não cadastrado. Magic Link não será gerado para ele.")
         }
         return returnTokenTemp
     }
+
+    private fun supplierExists(supplier: Supplier?) = supplier != null
 
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
@@ -70,5 +79,5 @@ class MagicLinkService(
 }
 
 object SecureRandomSingleton {
-    val instance: SecureRandom by lazy {  SecureRandom() }
+    val instance: SecureRandom by lazy { SecureRandom() }
 }
