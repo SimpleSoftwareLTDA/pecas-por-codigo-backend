@@ -1,16 +1,10 @@
 package org.pecasonline.common.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
-import org.springframework.scheduling.annotation.Async
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.security.SecureRandom
@@ -53,11 +47,9 @@ class MagicLinkService(
                     returnTokenTemp = tokens.token
 
                     emailSenderService.sendMagicLink(supplierEmail = email, token = tokens.token, supplierName = supplier.name)
-                } else {
-                    logger.warn { "Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado." }
-                }
+                } else error("Fornecedor não encontrado para o e-mail $email. Magic Link não será gerado.")
             }
-            else -> logger.warn { "E-mail não cadastrado. Magic Link não será gerado para ele." }
+            else -> error("E-mail não cadastrado. Magic Link não será gerado para ele.")
         }
         return returnTokenTemp
     }
@@ -65,7 +57,7 @@ class MagicLinkService(
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
 
-    fun validateToken(token: String): Boolean {
+    fun checkIsValidToken(token: String): Boolean {
         val tokenEntity = tokenRepository.findByToken(token)
 
         return tokenEntity != null
