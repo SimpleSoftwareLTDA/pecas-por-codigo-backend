@@ -36,4 +36,14 @@ interface SupplierRepository : JpaRepository<Supplier, Int> {
                 "WHERE t.token = :token AND s.cnpj = :cnpj"), nativeQuery = true
     )
     fun isTokenAssociatedWithCnpj(@Param("cnpj") cnpj: String?, @Param("token") token: String?): Boolean
+
+    @Query(
+        value = """
+        SELECT s.cnpj 
+        FROM supplier s
+        JOIN tokens t ON t.supplier_id = s.id
+        WHERE t.token = :token
+    """, nativeQuery = true)
+    fun findCnpjByToken(@Param("token") token: String): String?
+
 }

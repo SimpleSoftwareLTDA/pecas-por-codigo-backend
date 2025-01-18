@@ -124,7 +124,7 @@ class StockServiceTest {
         `when`(itemRepository.save(any(Item::class.java))).thenReturn(sampleItem) // Ensure itemRepository.save returns a non-null value
         `when`(categoryService.findByNameIgnoreCase(anyOrNull())).thenReturn(sampleCategory)
         assertThrows<NotFoundException> {
-            stockService.createStock(cnpj, mockFile, token = null)
+            stockService.createStock(mockFile, token = null)
         }
     }
 

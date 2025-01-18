@@ -67,13 +67,12 @@ class StockController(
     @PostMapping(consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.ACCEPTED)
     override fun createItem(
-        @RequestParam cnpj: String,
         @RequestPart file: MultipartFile,
         @RequestParam token: String
     ) {
-        MDC.putCloseable("cnpj", cnpj).use {
+        MDC.putCloseable("token", token).use {
             MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
-                stockService.createStock(cnpj = cnpj, file = file, token = token)
+                stockService.createStock(file = file, token = token)
             }
         }
     }
