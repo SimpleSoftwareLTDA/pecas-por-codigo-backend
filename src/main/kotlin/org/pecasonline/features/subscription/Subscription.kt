@@ -38,7 +38,7 @@ data class Subscription(
 
     @Enumerated(EnumType.STRING)
     @JsonProperty("status")
-    var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
+    var status: SubscriptionStatus = SubscriptionStatus.INACTIVE
 )
 
 enum class SubscriptionStatus(val description: String) {
@@ -46,3 +46,12 @@ enum class SubscriptionStatus(val description: String) {
     INACTIVE("Assinatura inativa"),
     LATE("Assinatura atrasada");
 }
+
+class InvalidTokenException : RuntimeException("Token inválido")
+class SupplierNotFoundException : RuntimeException("Fornecedor não encontrado")
+class SubscriptionInactiveException : RuntimeException("O primeiro pagamento não foi realizado")
+class InvalidSubscriptionException : RuntimeException("Assinatura inválida")
+class PaymentLateException : RuntimeException("Pagamento atrasado")
+
+
+

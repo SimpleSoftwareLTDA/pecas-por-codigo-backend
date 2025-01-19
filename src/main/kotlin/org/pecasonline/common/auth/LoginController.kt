@@ -21,16 +21,12 @@ class LoginController(
     fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         val token = magicLinkService.sendLoginLinkWithToken(request.email)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse("https://www.pecasonlinex.com.br/auth/${token}"))
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(TokenResponse("https://www.pecasonlinex.com.br/auth/${token}"))
     }
 
     @GetMapping("/login/verify")
-    fun verifyToken(@RequestParam token: String): ResponseEntity<Any> =
-        when {
-            magicLinkService.checkIsValidToken(token) -> ResponseEntity.ok().build()
-
-            else -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+    fun verifyToken(@RequestParam token: String): ResponseEntity<Any> = magicLinkService.checkIsValidTokenAndSubscriptionActive(token)
 }
 
 data class LoginRequest(
