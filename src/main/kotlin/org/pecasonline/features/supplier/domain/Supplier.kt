@@ -2,7 +2,7 @@ package org.pecasonline.features.supplier.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
-import org.pecasonline.common.service.Tokens
+import org.pecasonline.features.login.entities.Tokens
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description

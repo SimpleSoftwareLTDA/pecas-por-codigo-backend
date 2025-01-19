@@ -1,9 +1,9 @@
 package org.pecasonline.features.subscription
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.pecasonline.common.httpclients.BankingService
-import org.pecasonline.common.httpclients.CreateClientRequest
-import org.pecasonline.common.httpclients.CreateClientResponse
+import org.pecasonline.features.banking.BankingService
+import org.pecasonline.common.httpclients.dto.CreateClientRequest
+import org.pecasonline.common.httpclients.dto.CreateClientResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

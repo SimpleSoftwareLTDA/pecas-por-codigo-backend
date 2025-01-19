@@ -1,8 +1,8 @@
 package org.pecasonline.features.supplier.service
 
 import org.pecasonline.common.exceptions.NotFoundException
-import org.pecasonline.common.httpclients.BankingService
-import org.pecasonline.common.httpclients.CreateClientRequest
+import org.pecasonline.features.banking.BankingService
+import org.pecasonline.common.httpclients.dto.CreateClientRequest
 import org.pecasonline.features.address.service.IAddressService
 import org.pecasonline.features.brand.IBrandService
 import org.pecasonline.features.description.IDescriptionService

@@ -1,6 +1,7 @@
-package org.pecasonline.common.service
+package org.pecasonline.features.login.jobs
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.pecasonline.features.login.entities.TokenRepository
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -9,7 +10,7 @@ import java.time.temporal.ChronoUnit
 private val logger = KotlinLogging.logger {}
 
 @Component
-class TokenCleaner(private val tokenRepository: TokenRepository) {
+class TokenCleanerJob(private val tokenRepository: TokenRepository) {
 
     @Scheduled(cron = "0 */30 * * * *") // TODO: Migrar para o Redis, e usar o TTL.
     fun clean() {

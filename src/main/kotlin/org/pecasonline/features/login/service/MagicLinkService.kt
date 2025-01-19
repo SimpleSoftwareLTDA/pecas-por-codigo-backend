@@ -1,6 +1,8 @@
-package org.pecasonline.common.service
+package org.pecasonline.features.login.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.pecasonline.common.SecureRandomSingleton
+import org.pecasonline.features.login.entities.TokenRepository
+import org.pecasonline.features.login.entities.Tokens
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.*
 import org.pecasonline.features.supplier.domain.Supplier
@@ -9,10 +11,7 @@ import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.security.SecureRandom
 import java.time.Instant
-
-private val logger = KotlinLogging.logger {}
 
 @Service
 class MagicLinkService(
@@ -67,7 +66,7 @@ class MagicLinkService(
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
 
-    @Transactional
+    @Transactional(rollbackFor = [RuntimeException::class])
     fun checkIsValidTokenAndSubscriptionActive(token: String): ResponseEntity<Any> {
         val tokenEntity = tokenRepository.findByToken(token) ?: throw InvalidTokenException()
 
@@ -87,8 +86,4 @@ class MagicLinkService(
 
     private fun checkSupplierEmail(email: String): Boolean = contactRepository.existsByItemsEmail(email)
 
-}
-
-object SecureRandomSingleton {
-    val instance: SecureRandom by lazy { SecureRandom() }
 }
