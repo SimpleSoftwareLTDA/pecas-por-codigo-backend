@@ -1,20 +1,26 @@
-package org.pecasonline.common.httpclients
+package org.pecasonline.features.banking
 
 import feign.FeignException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.pecasonline.common.httpclients.AsaasClient
+import org.pecasonline.common.httpclients.dto.*
 import org.springframework.stereotype.Service
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class BankingService(
     private val asaasClient: AsaasClient
 ) {
-    private val logger = KotlinLogging.logger {}
 
     fun createCustomer(request: CreateClientRequest): CreateClientResponse {
         return try {
             logger.info { "Calling Asaas API to create a customer: ${request.name}" }
+
             val response = asaasClient.createCustomer(request)
+
             logger.info { "Customer created successfully. ID: ${response.id}" }
+
             response
         } catch (ex: RuntimeException) {
             logger.error(ex) { "Failed to create customer in Asaas API" }
@@ -22,7 +28,8 @@ class BankingService(
         }
     }
 
-    fun createSubscription(request: CreateSubscriptionRequest): CreateSubscriptionResponse = asaasClient.createSubscription(request)
+    fun createSubscription(request: CreateSubscriptionRequest): CreateSubscriptionResponse =
+        asaasClient.createSubscription(request)
 
     fun checkIfCustomerExists(asaasId: String): Boolean =
         try {
@@ -36,9 +43,4 @@ class BankingService(
             }
         }
 
-
 }
-
-
-
-

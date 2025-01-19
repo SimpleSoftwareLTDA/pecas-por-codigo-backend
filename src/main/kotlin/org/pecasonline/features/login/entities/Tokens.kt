@@ -1,4 +1,4 @@
-package org.pecasonline.common.service
+package org.pecasonline.features.login.entities
 
 import jakarta.persistence.*
 import jakarta.transaction.Transactional

@@ -1,8 +1,8 @@
 package org.pecasonline.features.subscription
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.pecasonline.common.httpclients.BankingService
-import org.pecasonline.common.httpclients.CreateSubscriptionRequest
+import org.pecasonline.features.banking.BankingService
+import org.pecasonline.common.httpclients.dto.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository

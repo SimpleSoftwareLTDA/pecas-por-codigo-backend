@@ -18,6 +18,7 @@ class CorsConfig {
             addAllowedMethod("*")
         }
         source.registerCorsConfiguration("/**", config)
+
         return CorsFilter(source)
     }
 }
