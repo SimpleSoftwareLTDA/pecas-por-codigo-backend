@@ -1,8 +1,7 @@
 package org.pecasonline.features.stock.swagger
 
-class StockExamples {
-    companion object {
-        const val GET_ALL_STOCKS = """
+object StockExamples {
+    const val GET_ALL_STOCKS = """
             {
               "content": [
                 {
@@ -132,7 +131,7 @@ class StockExamples {
             }
         """
 
-        const val GET_STOCK_BY_ID = """
+    const val GET_STOCK_BY_ID = """
            {
               "id": 355,
               "quantidade": 3,
@@ -192,14 +191,14 @@ class StockExamples {
             }
         """
 
-        const val STOCK_NOT_FOUND = """
+    const val STOCK_NOT_FOUND = """
             {
               "httpStatusCode": 404,
               "message": "Estoque não encontrado"
             }
         """
 
-        const val GET_STOCK_BY_ITEM_ID = """
+    const val GET_STOCK_BY_ITEM_ID = """
             {
               "totalPages": 0,
               "totalElements": 0,
@@ -296,7 +295,7 @@ class StockExamples {
             }
         """
 
-        const val GET_STOCK_BY_SUPPLIER_NAME = """
+    const val GET_STOCK_BY_SUPPLIER_NAME = """
             {
               "content": [
                 {
@@ -430,7 +429,7 @@ class StockExamples {
             }
         """
 
-        const val GET_STOCK_BY_SUPPLIER_ID = """
+    const val GET_STOCK_BY_SUPPLIER_ID = """
             {
               "content": [
                 {
@@ -576,7 +575,7 @@ class StockExamples {
             }
         """
 
-        const val GET_STOCK_BY_DESCRIPTION = """
+    const val GET_STOCK_BY_DESCRIPTION = """
             {
               "content": [
                 {
@@ -710,7 +709,7 @@ class StockExamples {
             }
         """
 
-        const val GET_STOCK_BY_ITEM_CODE = """
+    const val GET_STOCK_BY_ITEM_CODE = """
             {
               "content": [
                 {
@@ -843,5 +842,4 @@ class StockExamples {
               "empty": false
             }
         """
-    }
 }
