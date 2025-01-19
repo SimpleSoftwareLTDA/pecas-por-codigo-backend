@@ -9,7 +9,7 @@ import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns
 import org.pecasonline.features.stock.email.sender.EmailSenderService
-import org.pecasonline.features.subscription.SubscriptionService
+import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest

@@ -13,10 +13,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.plan.Plan
-import org.pecasonline.features.subscription.CreateSubscriptionDTO
-import org.pecasonline.features.subscription.Subscription
-import org.pecasonline.features.subscription.SubscriptionRepository
-import org.pecasonline.features.subscription.SubscriptionService
+import org.pecasonline.features.subscription.dto.CreateSubscription
+import org.pecasonline.features.subscription.entities.Subscription
+import org.pecasonline.features.subscription.repository.SubscriptionRepository
 import org.pecasonline.features.supplier.domain.Supplier
 
 class SubscriptionServiceTest {
@@ -58,7 +57,7 @@ class SubscriptionServiceTest {
             bigBanner = true
         )
 
-        val subscriptionDto = CreateSubscriptionDTO(
+        val subscriptionDto = CreateSubscription(
             planId = 1,
             paymentDay = 15,
             bigBannerUrl = "http://bigbanner.com",
@@ -98,7 +97,7 @@ class SubscriptionServiceTest {
             contact = mock()
         )
 
-        val subscriptionDto = CreateSubscriptionDTO(
+        val subscriptionDto = CreateSubscription(
             planId = 99,
             paymentDay = 10,
             bigBannerUrl = "http://bigbanner.com",

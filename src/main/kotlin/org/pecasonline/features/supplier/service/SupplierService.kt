@@ -6,7 +6,7 @@ import org.pecasonline.common.httpclients.dto.CreateClientRequest
 import org.pecasonline.features.address.service.IAddressService
 import org.pecasonline.features.brand.IBrandService
 import org.pecasonline.features.description.IDescriptionService
-import org.pecasonline.features.subscription.ISubscriptionService
+import org.pecasonline.features.subscription.service.ISubscriptionService
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
 import org.pecasonline.features.supplier.repository.ContactRepository

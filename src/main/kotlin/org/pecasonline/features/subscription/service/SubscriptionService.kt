@@ -1,9 +1,15 @@
-package org.pecasonline.features.subscription
+package org.pecasonline.features.subscription.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.common.httpclients.dto.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
+import org.pecasonline.features.subscription.constants.SubscriptionPlan
+import org.pecasonline.features.subscription.dto.CreateSubscription
+import org.pecasonline.features.subscription.entities.InvalidSubscriptionException
+import org.pecasonline.features.subscription.entities.Subscription
+import org.pecasonline.features.subscription.entities.SubscriptionStatus
+import org.pecasonline.features.subscription.repository.SubscriptionRepository
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.stereotype.Service
@@ -20,7 +26,7 @@ class SubscriptionService(
     private val subscriptionRepository: SubscriptionRepository,
     private val supplierRepository: SupplierRepository
 ) : ISubscriptionService {
-    override fun createSubscription(subscriptionDto: CreateSubscriptionDTO, supplier: Supplier): Subscription {
+    override fun createSubscription(subscriptionDto: CreateSubscription, supplier: Supplier): Subscription {
         val chosenPlan = runCatching {
             planService.getPlanById(subscriptionDto.planId)
         }.getOrElse {
