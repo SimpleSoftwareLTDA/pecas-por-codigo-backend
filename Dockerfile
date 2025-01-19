@@ -7,15 +7,15 @@ WORKDIR /app
 # Copy Gradle wrapper and build files
 COPY gradlew ./
 COPY gradle gradle
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts gradle.properties settings.gradle.kts ./
 
 # Ensure Gradle wrapper is executable and download dependencies
 RUN chmod +x ./gradlew
-RUN ./gradlew --no-daemon dependencies
+RUN ./gradlew dependencies
 
 # Copy the entire project and build the application
 COPY . .
-RUN ./gradlew --no-daemon --parallel --build-cache clean bootJar
+RUN ./gradlew --parallel --build-cache clean bootJar
 
 # Production stage: use a minimal JRE image for running the app
 FROM amazoncorretto:21-alpine as runtime
