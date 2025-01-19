@@ -32,7 +32,7 @@ class SubscriptionService(
             billingType = "BOLETO",
             nextDueDate = calculateNextDueDate(subscriptionDto.paymentDay),
             value = SubscriptionPlan.priceFromId(subscriptionDto.planId),
-            cycle = "MONTHLY",
+            cycle = getCycle(1),
             description = "Assinatura do fornecedor ${supplier.name} no plano ${SubscriptionPlan.nameFromId(subscriptionDto.planId)}"
         )
 
@@ -42,6 +42,14 @@ class SubscriptionService(
 
         return subscriptionRepository.save(subscription)
     }
+
+    private fun getCycle(option: Int): String =
+        when (option) {
+            1 -> "MONTHLY"
+            2 -> "YEARLY"
+
+            else -> throw InvalidSubscriptionException()
+        }
 
     @Transactional
     fun updateSubscriptionStatusByWebhook(asaasCustomerId: String, asaasStatus: String) {

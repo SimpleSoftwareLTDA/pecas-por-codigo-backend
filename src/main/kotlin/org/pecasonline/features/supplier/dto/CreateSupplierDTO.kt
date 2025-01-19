@@ -33,11 +33,9 @@ class CreateSupplierDTO(
     @JsonAlias("inscricao")
     val stateSubscription: String? = null,
 
-    @field:NotNull(message = "O ID da descrição do fornecedor é obrigatório")
     @JsonAlias("idDescricao")
     val descriptionId: Int? = null,
 
-    @field:NotNull(message = "O ID da marca do fornecedor é obrigatório")
     @JsonAlias("idMarca")
     val brandId: Int? = null,
 
