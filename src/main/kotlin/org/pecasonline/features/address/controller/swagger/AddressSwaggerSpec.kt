@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.features.address.domain.BrazilianState
-import org.pecasonline.features.brand.Brand
 
 
 @Tag(name = "Endereços", description = "Recursos relacionados a endereços, como estados e etc.")

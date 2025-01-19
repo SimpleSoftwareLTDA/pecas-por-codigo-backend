@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import org.pecasonline.features.category.Category
 import java.security.MessageDigest
-import java.util.Date
+import java.util.*
 
 @Entity
 data class Item(

@@ -1,12 +1,14 @@
 package org.pecasonline.features.address.service
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.*
+import org.mockito.kotlin.never
+import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState

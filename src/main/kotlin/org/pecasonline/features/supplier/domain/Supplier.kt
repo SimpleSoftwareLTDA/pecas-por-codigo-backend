@@ -7,7 +7,6 @@ import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
 import org.pecasonline.features.subscription.Subscription
-import java.security.MessageDigest
 
 @Entity(name = "supplier")
 data class Supplier(

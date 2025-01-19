@@ -1,7 +1,8 @@
 package org.pecasonline.features.brand.controller
 
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.brand.BrandController
 import org.pecasonline.features.brand.IBrandService

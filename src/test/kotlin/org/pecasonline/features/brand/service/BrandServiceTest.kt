@@ -1,9 +1,12 @@
 package org.pecasonline.features.brand.service
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.kotlin.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.brand.BrandRepository

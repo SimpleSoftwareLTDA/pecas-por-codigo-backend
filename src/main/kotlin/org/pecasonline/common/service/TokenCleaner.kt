@@ -3,7 +3,6 @@ package org.pecasonline.common.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 

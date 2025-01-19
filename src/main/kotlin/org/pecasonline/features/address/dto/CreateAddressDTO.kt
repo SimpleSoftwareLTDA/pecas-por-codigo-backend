@@ -2,7 +2,6 @@ package org.pecasonline.features.address.dto
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import jakarta.validation.constraints.NotNull
-import org.springframework.validation.annotation.Validated
 
 data class CreateAddressDTO(
     @field:NotNull(message = "O campo 'endereco' é obrigatório")
