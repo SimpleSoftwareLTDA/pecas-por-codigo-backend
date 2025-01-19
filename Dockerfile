@@ -15,7 +15,7 @@ RUN ./gradlew --no-daemon dependencies
 
 # Copy the entire project and build the application
 COPY . .
-RUN ./gradlew --no-daemon clean bootJar
+RUN ./gradlew --no-daemon --parallel --build-cache clean bootJar
 
 # Production stage: use a minimal JRE image for running the app
 FROM amazoncorretto:21-alpine as runtime
