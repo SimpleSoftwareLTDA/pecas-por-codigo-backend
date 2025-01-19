@@ -9,7 +9,7 @@ import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
-import org.pecasonline.features.subscription.CreateSubscriptionDTO
+import org.pecasonline.features.subscription.dto.CreateSubscription
 import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
 
@@ -41,7 +41,7 @@ class CreateSupplierDTO(
 
     @field:NotNull(message = "A assinatura do fornecedor é obrigatória")
     @JsonAlias("assinatura")
-    val subscription : CreateSubscriptionDTO? = null,
+    val subscription : CreateSubscription? = null,
 
     @get:Valid @field:NotNull(message = "O contato do fornecedor é obrigatório")
     @JsonAlias("contato")

@@ -6,7 +6,7 @@ import org.pecasonline.features.login.entities.Tokens
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
-import org.pecasonline.features.subscription.Subscription
+import org.pecasonline.features.subscription.entities.Subscription
 
 @Entity(name = "supplier")
 data class Supplier(

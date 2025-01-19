@@ -12,7 +12,7 @@ import org.pecasonline.features.stock.email.receiver.RegexPatterns.costRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.emailRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.productCodeRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.quantityRegex
-import org.pecasonline.features.subscription.SubscriptionService
+import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE

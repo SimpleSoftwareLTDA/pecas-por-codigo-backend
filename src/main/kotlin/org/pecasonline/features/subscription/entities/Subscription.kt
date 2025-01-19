@@ -1,4 +1,4 @@
-package org.pecasonline.features.subscription
+package org.pecasonline.features.subscription.entities
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
