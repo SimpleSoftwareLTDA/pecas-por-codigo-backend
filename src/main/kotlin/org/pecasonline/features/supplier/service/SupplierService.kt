@@ -29,6 +29,7 @@ class SupplierService(
     override fun findSuppliers(page: Int?, size: Int?): Page<Supplier> {
         val pageable = PageRequest.of(page!!, size!!)
         val suppliers = supplierRepository.findAll(pageable)
+
         if(suppliers.isEmpty) throw NotFoundException("Nenhum fornecedor encontrado.")
 
         return suppliers

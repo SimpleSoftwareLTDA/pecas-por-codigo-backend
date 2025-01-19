@@ -1,8 +1,7 @@
 package org.pecasonline.features.supplier.controller.swagger
 
-class SupplierExamples {
-    companion object {
-        const val GET_ALL_SUPPLIERS_EXAMPLE = """
+object SupplierExamples {
+    const val GET_ALL_SUPPLIERS_EXAMPLE = """
                     {
                         "content": [
                             {
@@ -108,8 +107,8 @@ class SupplierExamples {
                     }
                 """
 
-        const val GET_SUPPLIER_BY_ID =
-            """
+    const val GET_SUPPLIER_BY_ID =
+        """
                 {
                   "id": 1,
                   "nome": "Brasauto BH (BELO HORIZONTE-MG) 31,2109-3000",
@@ -152,14 +151,14 @@ class SupplierExamples {
                 }
     """
 
-        const val SUPPLIER_NOT_FOUND = """
+    const val SUPPLIER_NOT_FOUND = """
             {
                 "httpStatusCode": 404,
                 "message": "Fornecedor não encontrado."
             }
         """
 
-        const val INTERNAL_SERVER_ERROR = """
+    const val INTERNAL_SERVER_ERROR = """
         {
             "timestamp": "2024-10-30T03:42:58.933+00:00",
             "status": 500,
@@ -168,7 +167,7 @@ class SupplierExamples {
         }
     """
 
-        const val CREATE_SUPPLIER_REQUEST = """
+    const val CREATE_SUPPLIER_REQUEST = """
             {
               "empresa": "Fornecedor Exemplo",
               "linkFornecedorOriginal": "https://example.com",
@@ -205,7 +204,7 @@ class SupplierExamples {
             }
         """
 
-        const val CREATE_SUPPLIER_ANSWER = """
+    const val CREATE_SUPPLIER_ANSWER = """
             {
                 "id": 301,
                 "nome": "Fornecedor Exemplo",
@@ -248,7 +247,7 @@ class SupplierExamples {
             }
             """
 
-        const val BAD_REQUEST = """
+    const val BAD_REQUEST = """
         {
             "razaoSocial": "A razão social do fornecedor não pode ser vazio",
             "cnpj": "O CNPJ do fornecedor é obrigatório",
@@ -262,5 +261,5 @@ class SupplierExamples {
             "idPlano": "O ID do plano do fornecedor é obrigatório"
         }
         """
-    }
+
 }
