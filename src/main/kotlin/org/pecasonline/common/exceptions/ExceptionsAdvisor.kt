@@ -1,16 +1,16 @@
 package org.pecasonline.common.exceptions
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import jakarta.validation.constraints.NotNull
 import org.pecasonline.common.exceptions.http.BaseExceptionResponseJson
+import org.pecasonline.features.subscription.*
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -48,6 +48,61 @@ class ExceptionsAdvisor {
         }
         return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(InvalidTokenException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<JsonNode> {
+        val response: JsonNode = ObjectMapper().createObjectNode()
+            .put("status", 401)
+            .put("message", ex.message ?: "Token inválido")
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(SupplierNotFoundException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleSupplierNotFoundException(ex: SupplierNotFoundException): ResponseEntity<JsonNode> {
+        val response: JsonNode = ObjectMapper().createObjectNode()
+            .put("status", 401)
+            .put("message", ex.message)
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(SubscriptionInactiveException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleSubscriptionInactiveException(ex: SubscriptionInactiveException): ResponseEntity<JsonNode> {
+        val response: JsonNode = ObjectMapper().createObjectNode()
+            .put("status", 401)
+            .put("message", ex.message)
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(PaymentLateException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handlePaymentLateException(ex: PaymentLateException): ResponseEntity<JsonNode> {
+        val response: JsonNode = ObjectMapper().createObjectNode()
+            .put("status", 401)
+            .put("message", ex.message)
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(InvalidSubscriptionException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleInvalidSubscriptionException(ex: InvalidSubscriptionException): ResponseEntity<JsonNode> {
+        val response: JsonNode = ObjectMapper().createObjectNode()
+            .put("status", 401)
+            .put("message", ex.message)
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(RuntimeException::class)
+    fun handleGeneralException(ex: Exception): ResponseEntity<Map<String, Any>> {
+        val response = mapOf(
+            "status" to 500,
+            "message" to "Ocorreu um erro interno no servidor."
+        )
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
+    }
+
 
     private final fun getJsonAliasesWithJackson(clazz: KClass<*>, objectMapper: ObjectMapper = jacksonObjectMapper()): Map<String, String> {
         val fieldAliasMap = mutableMapOf<String, String>()

@@ -2,9 +2,11 @@ package org.pecasonline.common.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.subscription.*
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -66,11 +68,21 @@ class MagicLinkService(
 
     fun token(size: Int = 64): String = (1..size).map { alphabet[random.nextInt(alphabet.size)] }.joinToString("")
 
-    fun checkIsValidToken(token: String): Boolean {
-        val tokenEntity = tokenRepository.findByToken(token)
+    @Transactional
+    fun checkIsValidTokenAndSubscriptionActive(token: String): ResponseEntity<Any> {
+        val tokenEntity = tokenRepository.findByToken(token) ?: throw InvalidTokenException()
 
-        return tokenEntity != null
+        val supplier = tokenEntity.supplier ?: throw SupplierNotFoundException()
+
+        return when (supplier.subscription?.status) {
+            SubscriptionStatus.ACTIVE -> ResponseEntity.ok(mapOf("status" to 200, "message" to "Acesso permitido"))
+            SubscriptionStatus.INACTIVE -> throw SubscriptionInactiveException()
+            SubscriptionStatus.LATE -> throw PaymentLateException()
+
+            else -> throw InvalidSubscriptionException()
+        }
     }
+
 
     fun getTokenOwner(token: String): String? = tokenRepository.findSupplierCnpjByToken(token)
 
