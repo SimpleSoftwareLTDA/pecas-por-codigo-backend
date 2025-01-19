@@ -15,8 +15,8 @@ class AddressService(
 
     override fun save(address: CreateAddressDTO): Address {
         val state = stateService.findStateById(address.stateId!!)
-        if(isNull(state))
-            throw NotFoundException("Invalid state id: ${address.stateId}. No state found in the database")
+
+        if (isNull(state)) throw NotFoundException("Invalid state id: ${address.stateId}. No state found in the database")
 
         return addressRepository.save(
             Address(

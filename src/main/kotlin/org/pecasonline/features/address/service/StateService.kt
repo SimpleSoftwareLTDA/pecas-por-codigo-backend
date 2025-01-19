@@ -2,7 +2,6 @@ package org.pecasonline.features.address.service
 
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.repository.BrazilianStatesRepository
-import org.pecasonline.features.address.service.IStateService
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,35 +1,27 @@
 package org.pecasonline.features.supplier.service
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
-import org.pecasonline.features.address.domain.Address
-import org.pecasonline.features.address.domain.BrazilianState
-import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.address.service.IAddressService
-import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.brand.IBrandService
-import org.pecasonline.features.description.Description
 import org.pecasonline.features.description.IDescriptionService
-import org.pecasonline.features.subscription.CreateSubscriptionDTO
 import org.pecasonline.features.subscription.ISubscriptionService
-import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
-import org.pecasonline.features.supplier.dto.CreateContactDTO
-import org.pecasonline.features.supplier.dto.CreateSupplierDTO
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import java.util.Optional
+import java.util.*
 
 class SupplierServiceTest {
 

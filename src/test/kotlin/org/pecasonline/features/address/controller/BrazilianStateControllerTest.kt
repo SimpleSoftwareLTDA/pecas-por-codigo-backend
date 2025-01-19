@@ -1,16 +1,16 @@
 package org.pecasonline.features.address.controller
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.service.IStateService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.http.MediaType
 
 @WebMvcTest(BrazilianStateController::class)
 class BrazilianStateControllerTest(@Autowired val mockMvc: MockMvc) {

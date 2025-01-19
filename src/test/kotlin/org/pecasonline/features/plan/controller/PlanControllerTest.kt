@@ -1,7 +1,8 @@
 package org.pecasonline.features.plan.controller
 
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.plan.PlanController
@@ -11,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(PlanController::class)
 class PlanControllerTest(@Autowired val mockMvc: MockMvc) {

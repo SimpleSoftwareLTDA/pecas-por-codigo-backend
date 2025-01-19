@@ -3,7 +3,6 @@ package org.pecasonline.features.description
 import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.brand.swagger.DescriptionSwaggerSpec
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus

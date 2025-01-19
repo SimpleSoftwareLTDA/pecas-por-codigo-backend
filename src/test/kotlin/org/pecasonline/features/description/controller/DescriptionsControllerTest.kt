@@ -1,19 +1,17 @@
 package org.pecasonline.features.description.controller
 
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import org.pecasonline.common.exceptions.NotFoundException
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.features.description.Description
 import org.pecasonline.features.description.DescriptionsController
 import org.pecasonline.features.description.IDescriptionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.web.server.ResponseStatusException
 
 @WebMvcTest(DescriptionsController::class)
 class DescriptionsControllerTest(@Autowired val mockMvc: MockMvc) {

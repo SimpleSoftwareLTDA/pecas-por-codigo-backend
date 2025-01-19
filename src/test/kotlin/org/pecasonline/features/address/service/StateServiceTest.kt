@@ -2,7 +2,9 @@ package org.pecasonline.features.address.service
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.repository.BrazilianStatesRepository
 import java.util.*

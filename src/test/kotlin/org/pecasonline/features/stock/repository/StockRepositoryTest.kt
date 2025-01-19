@@ -1,20 +1,21 @@
 package org.pecasonline.features.stock.repository
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.pecasonline.features.items.Item
-import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.repository.BrazilianStatesRepository
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.description.Description
+import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.Stock
 import org.pecasonline.features.stock.StockRepository
 import org.pecasonline.features.supplier.domain.Contact
+import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
