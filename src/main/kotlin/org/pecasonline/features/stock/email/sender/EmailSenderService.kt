@@ -21,7 +21,7 @@ class EmailSenderService(
     private val siteUrl: String
 ) {
     private val EMAIL_NOT_ENABLED_MESSAGE = "Email service is disabled. Notification email will not be sent."
-    private val supplierEmail = "pecas.online.agora@gmail.com" // Para evitar mandar e-mail pra fornecedor que existe mesmo.
+    // private val supplierEmail = "pecas.online.agora@gmail.com" // Para evitar mandar e-mail pra fornecedor que existe mesmo.
 
     @Async
     fun sendStockProcessingStartNotification(supplierEmail: String, supplierName: String, fileName: String) {
@@ -64,7 +64,7 @@ class EmailSenderService(
             </html>
         """.trimIndent()
 
-        sendEmail(this.supplierEmail, subject, htmlContent)
+        sendEmail(supplierEmail, subject, htmlContent)
     }
 
     @Async
@@ -89,7 +89,7 @@ class EmailSenderService(
             </html>
         """.trimIndent()
 
-        sendEmail(this.supplierEmail, subject, htmlContent)
+        sendEmail(supplierEmail, subject, htmlContent)
     }
 
     @Async
@@ -110,7 +110,7 @@ class EmailSenderService(
             </html>
         """.trimIndent()
 
-        sendEmail(this.supplierEmail, subject, htmlContent)
+        sendEmail(supplierEmail, subject, htmlContent)
     }
 
 
