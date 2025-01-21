@@ -9,17 +9,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 
 class EmailServiceTest {
 
-    private lateinit var emailService: EmailService
+    private lateinit var emailService: EmailSenderService
     private val emailSender: JavaMailSender = mockk(relaxed = true)
 
     @BeforeEach
     fun setUp() {
-        emailService = EmailService(emailSender, emailEnabled = true)
+        emailService = EmailSenderService(emailSender, isEmailEnabled = true, siteUrl = "blah")
     }
 
 
@@ -49,8 +50,9 @@ class EmailServiceTest {
 
     @Test
     fun `should not send email and log message when email is disabled`() {
-        emailService = EmailService(emailSender, emailEnabled = false)
+        emailService = EmailSenderService(emailSender, isEmailEnabled = false, siteUrl = "blah")
         emailService.sendStockProcessingStartNotification("test@example.com", "Supplier Name", "inventory.csv")
+
         verify(exactly = 0) { emailSender.send(any<MimeMessage>()) }
     }
 
