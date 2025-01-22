@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull
 import org.hibernate.validator.constraints.br.CNPJ
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.dto.CreateAddressDTO
-import org.pecasonline.features.brand.Brand
-import org.pecasonline.features.description.Description
 import org.pecasonline.features.subscription.dto.CreateSubscription
 import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
@@ -51,17 +49,15 @@ class CreateSupplierDTO(
     @JsonAlias("endereco")
     val address: CreateAddressDTO? = null,
 ) {
-    fun toSupplier(contact: Contact,
-                   address: Address, description:
-                   Description, brand: Brand,
+    fun toSupplier(
+        contact: Contact,
+        address: Address
     ) = Supplier(
         name = name!!,
         supplierOriginalLink = supplierOriginalLink,
         socialName = socialName!!,
         cnpj = cnpj!!,
         stateSubscription = stateSubscription!!,
-        description = description,
-        brand = brand,
         address = address,
         contact = contact
     )

@@ -65,7 +65,7 @@ class SupplierService(
         val savedContact = contactRepository.save(supplier.contact!!.toContact())
         val savedAddress = addressService.save(supplier.address!!)
 
-        val chosenDescription = kotlin.runCatching {
+        val chosenDescription = runCatching {
             descriptionService.findDescriptionById(supplier.descriptionId!!)
         }.getOrElse {
             throw IllegalArgumentException("A descrição escolhida não existe. descriptionId: ${supplier.descriptionId}")
@@ -78,10 +78,8 @@ class SupplierService(
         }
 
         val newSupplier = supplier.toSupplier(
-            savedContact,
-            savedAddress,
-            chosenDescription,
-            chosenBrand
+            contact = savedContact,
+            address = savedAddress
         )
 
         val newlyCreatedCustomer = bankingService.createCustomer(
