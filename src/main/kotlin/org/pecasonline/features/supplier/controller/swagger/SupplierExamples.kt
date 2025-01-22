@@ -174,8 +174,6 @@ object SupplierExamples {
               "razaoSocial": "Fornecedor Exemplo LTDA",
               "cnpj": "15826705000130",
               "inscricao": "12345678",
-              "idDescricao": 1,
-              "idMarca": 2,
               "idPlano": 3,
               "assinatura": {
                 "diaPagamento": 15,
@@ -210,14 +208,6 @@ object SupplierExamples {
                 "nome": "Fornecedor Exemplo",
                 "linkFornecedorOriginal": null,
                 "razaoSocial": "Fornecedor Exemplo LTDA",
-                "descricao": {
-                    "id": 1,
-                    "descricao": "Concessionário"
-                },
-                "marca": {
-                    "id": 2,
-                    "marca": "Agrale"
-                },
                 "cnpj": "15826705000130",
                 "inscricaoEstadual": "12345678",
                 "endereco": {
@@ -253,10 +243,8 @@ object SupplierExamples {
             "cnpj": "O CNPJ do fornecedor é obrigatório",
             "empresa": "O nome do fornecedor é obrigatório",
             "inscricao": "A inscrição estadual do fornecedor não pode ser vazio",
-            "idMarca": "O ID da marca do fornecedor é obrigatório",
             "contato": "O contato do fornecedor é obrigatório",
             "endereco": "O endereço do fornecedor é obrigatório",
-            "idDescricao": "O ID da descrição do fornecedor é obrigatório",
             "assinatura": "A assinatura do fornecedor é obrigatória",
             "idPlano": "O ID do plano do fornecedor é obrigatório"
         }
