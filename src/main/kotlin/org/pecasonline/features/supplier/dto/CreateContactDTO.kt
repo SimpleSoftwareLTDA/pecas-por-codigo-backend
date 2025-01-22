@@ -13,7 +13,7 @@ data class CreateContactDTO(
 
     @field:NotNull(message = "O email de peças é obrigatório")
     @field:NotBlank(message = "O email de peças não pode ser vazio")
-    @JsonAlias("emailPecas")
+    @JsonAlias("emailPecas", "email")
     val itemsEmail: String? = null,
 
     @field:NotNull(message = "O telefone de peças é obrigatório")
