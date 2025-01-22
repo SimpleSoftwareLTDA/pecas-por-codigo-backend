@@ -22,7 +22,7 @@ class CreateSupplierDTO(
 
     @field:NotNull(message = "A razão social do fornecedor é obrigatório")
     @field:NotBlank(message = "A razão social do fornecedor não pode ser vazio")
-    @JsonAlias("razaoSocial")
+    @JsonAlias("razaoSocial", "socialName")
     val socialName: String? = null,
 
     @field:NotNull(message = "O CNPJ do fornecedor é obrigatório")
