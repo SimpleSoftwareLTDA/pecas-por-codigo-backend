@@ -16,7 +16,7 @@ import org.pecasonline.features.supplier.domain.Supplier
 class CreateSupplierDTO(
     @field:NotNull(message = "O nome do fornecedor é obrigatório")
     @field:NotBlank(message = "O nome do fornecedor não pode ser vazio")
-    @JsonAlias("empresa")
+    @JsonAlias("empresa", "name", "nome")
     val name: String? = null,
     val supplierOriginalLink: String? = null,
 
