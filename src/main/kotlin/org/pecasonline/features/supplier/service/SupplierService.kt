@@ -65,18 +65,6 @@ class SupplierService(
         val savedContact = contactRepository.save(supplier.contact!!.toContact())
         val savedAddress = addressService.save(supplier.address!!)
 
-        val chosenDescription = runCatching {
-            descriptionService.findDescriptionById(supplier.descriptionId!!)
-        }.getOrElse {
-            throw IllegalArgumentException("A descrição escolhida não existe. descriptionId: ${supplier.descriptionId}")
-        }
-
-        val chosenBrand = runCatching {
-            brandService.findBrandById(supplier.brandId!!)
-        }.getOrElse {
-            throw IllegalArgumentException("A marca escolhida não existe. brandId: ${supplier.brandId}")
-        }
-
         val newSupplier = supplier.toSupplier(
             contact = savedContact,
             address = savedAddress
