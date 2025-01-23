@@ -2,6 +2,7 @@ package org.pecasonline.features.stock.email.sender
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.mail.internet.MimeMessage
+import org.pecasonline.features.login.dto.TokenResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -97,7 +98,8 @@ class EmailSenderService(
         validateIfEmailIsEnabled()
 
         val subject = "O seu link para acesso ao Peças Online X"
-        val magicLink = "${siteUrl}/login?token=$token"
+        val magicLink = "${siteUrl}/auth/$token"
+
         val htmlContent = """
             <html>
             <body>
