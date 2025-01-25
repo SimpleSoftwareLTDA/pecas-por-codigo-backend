@@ -7,6 +7,7 @@ object Constants {
     const val DEFAULT_GROUP_NAME = "Novo Peças Online"
     const val INVALID_CNPJ = "CNPJ inválido"
     const val DEFAULT_FILE_NAME = "Arquivo de estoque"
+    const val CONTACT_EMAIL = "contato@pecasonlinex.com.br"
 }
 
 object SecureRandomSingleton {

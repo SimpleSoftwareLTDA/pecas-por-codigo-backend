@@ -2,6 +2,7 @@ package org.pecasonline.features.stock.email.sender
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.mail.internet.MimeMessage
+import org.pecasonline.common.Constants.CONTACT_EMAIL
 import org.pecasonline.features.login.dto.TokenResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
@@ -115,6 +116,29 @@ class EmailSenderService(
         sendEmail(supplierEmail, subject, htmlContent)
     }
 
+    @Async
+    fun processAndSendContactForm(name: String, email: String, subject: String, message: String) {
+        validateIfEmailIsEnabled()
+
+        val emailSubject = "Nova mensagem do formulário de contato: $subject"
+
+        val htmlContent = """
+        <html>
+        <body>
+            <p>Olá,</p>
+            <p>Você recebeu uma nova mensagem através do formulário de contato:</p>
+            <p><strong>Nome:</strong> $name</p>
+            <p><strong>Email:</strong> $email</p>
+            <p><strong>Assunto:</strong> $subject</p>
+            <p><strong>Mensagem:</strong></p>
+            <p>$message</p>
+            <p>Atenciosamente,<br>Equipe do sistema</p>
+        </body>
+        </html>
+    """.trimIndent()
+
+        sendEmail(CONTACT_EMAIL, emailSubject, htmlContent)
+    }
 
     private fun sendEmail(supplierEmail: String, subject: String, htmlContent: String) {
         runCatching {
