@@ -7,7 +7,9 @@ spring:
     enabled: false
   jpa:
     open-in-view: false
-
+  threads:
+    virtual:
+      enabled: true
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://www.pecasonlinex.com.br}

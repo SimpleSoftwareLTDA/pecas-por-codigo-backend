@@ -195,8 +195,7 @@ class StockService(
             ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $cnpj. Faça sua assinatura para usar esse serviço.")
 
     private fun getSupplierByToken(token: String): String =
-        supplierRepository.findCnpjByToken(token)
-            ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $token. Faça sua assinatura para usar esse serviço.")
+        supplierRepository.findCnpjByToken(token) ?: throw NotFoundException("Fornecedor não encontrado a partir desse token")
 
     fun cleanupTempFiles(directory: Path) {
         Files.list(directory).forEach { file ->
