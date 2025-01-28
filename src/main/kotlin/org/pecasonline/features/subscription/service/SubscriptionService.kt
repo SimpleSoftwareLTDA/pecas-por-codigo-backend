@@ -94,9 +94,11 @@ class SubscriptionService(
     ) {
         when {
             supplier.first().subscription?.status != SubscriptionStatus.ACTIVE -> {
+                logger.info { supplier.first().subscription?.status }
+
                 val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
 
-                logger.error { errorMessage }
+                logger.info { errorMessage }
 
                 error(errorMessage)
             }
