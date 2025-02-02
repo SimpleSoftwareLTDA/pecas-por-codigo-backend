@@ -54,6 +54,7 @@ data class Item(
     companion object {
         fun buildFromMinimalProperties(code: String, priceInCents: Long?, description: String?): Item {
             val item = Item(code = code, priceInCents = priceInCents, description = description, hash = "")
+
             return item.copy(hash = item.hash())
         }
     }

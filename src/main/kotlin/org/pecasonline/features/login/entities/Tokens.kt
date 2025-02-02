@@ -1,13 +1,8 @@
 package org.pecasonline.features.login.entities
 
 import jakarta.persistence.*
-import jakarta.transaction.Transactional
 import org.hibernate.Hibernate
 import org.pecasonline.features.supplier.domain.Supplier
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.stereotype.Repository
 import java.time.Instant
 
 @Entity
@@ -37,25 +32,5 @@ class Tokens {
     }
 
     override fun hashCode(): Int = id.hashCode()
-
-}
-
-@Repository
-interface TokenRepository : CrudRepository<Tokens, Long> {
-
-    fun findByToken(token: String): Tokens?
-
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Tokens t WHERE t.created < :threshold")
-    fun deleteExpired(threshold: Instant)
-
-    @Query("""
-        SELECT s.cnpj
-        FROM Tokens t
-        JOIN t.supplier s
-        WHERE t.token = :token
-    """)
-    fun findSupplierCnpjByToken(token: String): String?
 
 }

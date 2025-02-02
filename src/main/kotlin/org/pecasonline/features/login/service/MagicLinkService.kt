@@ -1,8 +1,8 @@
 package org.pecasonline.features.login.service
 
 import org.pecasonline.common.SecureRandomSingleton
-import org.pecasonline.features.login.entities.TokenRepository
 import org.pecasonline.features.login.entities.Tokens
+import org.pecasonline.features.login.repositories.TokenRepository
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.entities.InvalidSubscriptionException
 import org.pecasonline.features.subscription.entities.InvalidTokenException
