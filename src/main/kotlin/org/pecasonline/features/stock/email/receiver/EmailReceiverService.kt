@@ -7,7 +7,7 @@ import jakarta.mail.Message
 import jakarta.mail.Part.ATTACHMENT
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMultipart
-import org.pecasonline.features.stock.StockService
+import org.pecasonline.features.stock.IStockService
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.costRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.emailRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.productCodeRegex
@@ -31,7 +31,7 @@ private val logger = KotlinLogging.logger {}
 
 @Service
 class EmailReceiverService(
-    private val stockService: StockService,
+    private val stockService: IStockService,
     private val supplierRepository: SupplierRepository,
     private val subscriptionService: SubscriptionService,
     @Value("\${spring.mail.properties.mail.imap.host}") private val host: String,

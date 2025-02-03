@@ -104,6 +104,8 @@ class SubscriptionService(
             }
         }
     }
+
+    fun getBigBannerUrls(): List<String> = subscriptionRepository.findBigBannerUrls().filterNotNull()
 }
 
 fun String.toSubscriptionStatus(): SubscriptionStatus = when (this) {

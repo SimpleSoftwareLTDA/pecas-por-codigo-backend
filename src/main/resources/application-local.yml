@@ -4,6 +4,14 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: pecas
     password: online
+  logging:
+    level:
+      org.pecasonline: DEBUG
+      root: INFO
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   h2:
     console:
       enabled: false

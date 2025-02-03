@@ -6,10 +6,6 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: novo-pecas-online_owner
     password: cKkerHWVgX94
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
   mail:
     enabled: true
     host: smtp.gmail.com
