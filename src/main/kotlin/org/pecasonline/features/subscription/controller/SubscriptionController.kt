@@ -6,11 +6,14 @@ import org.pecasonline.common.httpclients.dto.CreateClientResponse
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.subscription.dto.AsaasWebhook
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
 
@@ -36,5 +39,25 @@ class SubscriptionController(
         subscriptionService.updateSubscriptionStatusByWebhook(asaasCustomerId, payload.event)
 
         return ResponseEntity.status(HttpStatus.OK).body("Webhook recebido com sucesso!")
+    }
+
+    private val bannerUrls = mutableListOf<String>()
+
+    @GetMapping("/v1/api/banner")
+    @Cacheable("banners")
+    fun getBannerUrl(): String? {
+        when {
+            bannerUrls.isEmpty() -> bannerUrls.addAll(subscriptionService.getBigBannerUrls())
+        }
+
+        when {
+            bannerUrls.isEmpty() -> return null
+
+            else -> {
+                val randomIndex = ThreadLocalRandom.current().nextInt(bannerUrls.size)
+
+                return bannerUrls[randomIndex]
+            }
+        }
     }
 }

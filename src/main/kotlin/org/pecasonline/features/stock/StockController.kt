@@ -16,7 +16,7 @@ import java.util.*
 @Tag(name = "Estoque", description = "Operações relacionadas ao estoque")
 class StockController(
     val stockService: IStockService
-): StockSwaggerSpec {
+) : StockSwaggerSpec {
 
     @GetMapping
     override fun stock(
