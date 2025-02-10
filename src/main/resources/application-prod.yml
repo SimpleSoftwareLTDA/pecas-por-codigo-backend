@@ -2,7 +2,7 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: jdbc:postgresql://ep-wandering-mouse-a5jp4pxe.us-east-2.aws.neon.tech/novo-pecas-online?user=novo-pecas-online_owner&password=cKkerHWVgX94&sslmode=require
+    url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
     driver-class-name: org.postgresql.Driver
     username: novo-pecas-online_owner
     password: cKkerHWVgX94

@@ -2,6 +2,7 @@ package org.pecasonline.common
 
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.HexFormat
 
 object Constants {
     const val BASE_ENDPOINT = "/api/v1"
@@ -16,6 +17,6 @@ object SecureRandomSingleton {
 }
 
 object HashGenerator {
-    val MD5_DIGEST: MessageDigest = MessageDigest.getInstance("MD5")
+    val HEX_FORMAT: HexFormat = HexFormat.of()
+    val MD5_DIGEST: MessageDigest by lazy { MessageDigest.getInstance("MD5") }
 }
-

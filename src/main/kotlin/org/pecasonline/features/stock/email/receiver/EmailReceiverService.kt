@@ -64,7 +64,7 @@ class EmailReceiverService(
                     supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
 
                         supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
-                            subscriptionService.checkIfSubscriptionIsActiveOrThrow(listOf(supplier), cnpj)
+                            subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
                         }
 
                         processAttachments(message, senderEmail = senderEmail, supplierCnpj = cnpj)

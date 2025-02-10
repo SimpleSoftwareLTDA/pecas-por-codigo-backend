@@ -70,7 +70,6 @@ class StockService(
             return
         }
 
-        // Se o processamento do arquivo for iniciado via site web, o token deve ser válido.
         token?.let {
             val supplierWithToken = supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)
 
@@ -82,9 +81,9 @@ class StockService(
             }
         }
 
-        val suppliers = getSupplierByCNPJ(cnpj)
+        val supplier = supplierRepository.findSupplierByCnpj(cnpj)
 
-        subscriptionService.checkIfSubscriptionIsActiveOrThrow(suppliers, cnpj)
+        subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
 
         when {
             file.isEmpty -> {
@@ -102,15 +101,16 @@ class StockService(
             else -> {
                 logger.info { "Iniciando criação de estoque a partir do arquivo do fornecedor CNPJ: $cnpj" }
 
-                suppliers.forEach { supplier ->
+                supplier.run {
                     emailSenderService.sendStockProcessingStartNotification(
-                        supplierEmail = supplier.contact.itemsEmail ?: emailAddress,
+                        supplierEmail = supplier.contact.itemsEmail,
                         supplierName = "${supplier.name} - ${supplier.cnpj}",
                         fileName = file.originalFilename ?: DEFAULT_FILE_NAME
                     )
                 }
 
-                val tempFile = saveTempFile(file, Files.createTempDirectory("pecas-"))
+                val tempDir = Files.createTempDirectory("pecas-")
+                val tempFile = saveTempFile(file, tempDir)
 
                 logger.info { "${"Saved $tempFile file locally at ${tempFile.pathString}"} " }
 
@@ -119,16 +119,16 @@ class StockService(
 
                 val updatedIds = mutableListOf<Long>()
 
-                stockList.parallelStream().forEach { stock ->
+                stockList.forEach { stock ->
                     val item = processItem(stock.item)
+
+                    val existingStocks = supplier.id?.let { stockRepository.findStocksBySupplierId(it) }
 
                     logger.info { "Item processado com ID: ${item.id}, Hash: ${item.hash}" }
 
-                    suppliers.forEach { supplier ->
-                        val existingStocks = stockRepository.findStockBySupplierIdAndItemId(supplier.id!!, item.id!!)
-
+                    supplier.run {
                         when {
-                            existingStocks.isEmpty() -> {
+                            existingStocks?.isEmpty() == true -> {
                                 val newStock = stock.copy(item = item, supplier = supplier)
                                 val savedStock = stockRepository.save(newStock)
 
@@ -138,7 +138,7 @@ class StockService(
                             }
 
                             else -> {
-                                existingStocks.forEach { existingStock ->
+                                existingStocks?.forEach { existingStock ->
                                     val updatedStock = existingStock.copy(quantity = stock.quantity)
 
                                     stockRepository.save(updatedStock)
@@ -153,11 +153,10 @@ class StockService(
 
                 Files.deleteIfExists(tempFile)
 
-                // Notificação de conclusão do processamento
-                suppliers.forEach {
+                supplier.run {
                     emailSenderService.sendStockProcessingCompletionNotification(
-                        supplierEmail = it.contact.itemsEmail,
-                        supplierName = "${it.name} - ${it.cnpj}",
+                        supplierEmail = this.contact.itemsEmail,
+                        supplierName = "${this.name} - ${this.cnpj}",
                         fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
                         updatedItemCount = updatedIds.size
                     )

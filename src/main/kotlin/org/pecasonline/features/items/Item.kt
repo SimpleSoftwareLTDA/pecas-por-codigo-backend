@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import org.pecasonline.common.HashGenerator.HEX_FORMAT
 import org.pecasonline.common.HashGenerator.MD5_DIGEST
 import org.pecasonline.features.category.Category
 import java.util.*
@@ -46,7 +47,6 @@ data class Item(
     val category: Category? = null
 
 ) {
-
     private fun hash(): String {
         val dataToHash = buildString {
             append(manufacturer)
@@ -57,7 +57,7 @@ data class Item(
 
         val hashBytes = MD5_DIGEST.digest(dataToHash.toByteArray())
 
-        val hash = HexFormat.of().formatHex(hashBytes)
+        val hash = HEX_FORMAT.formatHex(hashBytes)
 
         return hash
     }
