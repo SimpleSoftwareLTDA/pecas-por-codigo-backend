@@ -54,6 +54,3 @@ class SupplierNotFoundException : RuntimeException("Fornecedor não encontrado")
 class SubscriptionInactiveException : RuntimeException("O primeiro pagamento não foi realizado")
 class InvalidSubscriptionException : RuntimeException("Assinatura inválida")
 class PaymentLateException : RuntimeException("Pagamento atrasado")
-
-
-
