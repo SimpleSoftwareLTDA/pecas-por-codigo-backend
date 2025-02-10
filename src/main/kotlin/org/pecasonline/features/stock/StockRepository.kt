@@ -12,6 +12,7 @@ interface StockRepository : JpaRepository<Stock, Int> {
     fun findStockByItemDescriptionContainsIgnoreCase(description: String, pageable: Pageable): Page<Stock>
     fun findStockByItemId(id: Int, pageable: Pageable): Page<Stock>
     fun findStockByItemCode(code: String, pageable: Pageable): Page<Stock>
+    fun findByItemCode(code: String, pageable: Pageable): Page<Stock>
     fun findStockBySupplierId(id: Int, pageable: Pageable): Page<Stock>
     fun findStockBySupplierNameContainsIgnoreCase(name: String, pageable: Pageable): Page<Stock>
     fun findStockBySupplierIdAndItemId(supplierId: Int, itemId: Int): List<Stock>
