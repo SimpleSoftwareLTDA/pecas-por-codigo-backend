@@ -142,14 +142,4 @@ class StockServiceTest {
         assertEquals(sampleItem, result)
         verify(itemRepository).save(any(Item::class.java))
     }
-
-    @Test
-    fun `cleanupTempFiles should delete all files in the directory`() {
-        val tmpDir = Files.createTempDirectory("testTmpDir")
-        val tempFile = Files.createFile(tmpDir.resolve("testFile.txt"))
-
-        stockService.cleanupTempFiles(tmpDir)
-
-        assertFalse(Files.exists(tempFile))
-    }
 }

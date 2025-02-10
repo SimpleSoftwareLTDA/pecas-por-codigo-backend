@@ -59,7 +59,7 @@ data class Supplier(
     @JsonProperty("token")
     val token: Tokens? = null,
 
-    @OneToOne(mappedBy = "supplier")
+    @OneToOne(mappedBy = "supplier", fetch = FetchType.LAZY)
     @JsonBackReference
     val subscription: Subscription? = null
 
