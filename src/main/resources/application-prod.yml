@@ -4,8 +4,8 @@ spring:
   datasource:
     url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
     driver-class-name: org.postgresql.Driver
-    username: novo-pecas-online_owner
-    password: cKkerHWVgX94
+    username: usuario
+    password: senha
   mail:
     enabled: true
     host: smtp.gmail.com
