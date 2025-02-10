@@ -1,7 +1,7 @@
 spring:
   datasource:
 #    url: jdbc:postgresql://localhost:5432/novo-pecas-online?currentSchema=public
-    url: jdbc:postgresql://193.123.119.28:5432/meubanco
+    url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
     driver-class-name: org.postgresql.Driver
     username: usuario
     password: senha

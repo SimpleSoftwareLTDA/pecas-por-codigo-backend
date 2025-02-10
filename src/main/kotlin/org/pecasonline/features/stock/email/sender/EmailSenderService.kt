@@ -3,7 +3,7 @@ package org.pecasonline.features.stock.email.sender
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.mail.internet.MimeMessage
 import org.pecasonline.common.Constants.CONTACT_EMAIL
-import org.pecasonline.features.login.dto.TokenResponse
+import org.pecasonline.common.warnWithoutStacktrace
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -157,10 +157,6 @@ class EmailSenderService(
     }
 
     private fun validateIfEmailIsEnabled() {
-        if (!isEmailEnabled) {
-            logger.warn { EMAIL_NOT_ENABLED_MESSAGE }
-            return
-        }
+        if (!isEmailEnabled) warnWithoutStacktrace(EMAIL_NOT_ENABLED_MESSAGE)
     }
-
 }

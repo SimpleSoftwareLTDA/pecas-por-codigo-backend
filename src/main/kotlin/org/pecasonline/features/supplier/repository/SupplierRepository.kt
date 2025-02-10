@@ -13,6 +13,8 @@ interface SupplierRepository : JpaRepository<Supplier, Int> {
     fun findSupplierByCnpj(cnpj: String, pageable: Pageable): Page<Supplier>
     fun findSuppliersByCnpj(cnpj: String): List<Supplier>
 
+    fun findSupplierByCnpj(cnpj: String): Supplier
+
 
     @Query("SELECT s.cnpj FROM supplier s JOIN s.contact c WHERE c.itemsEmail = :email")
     fun findSupplierCnpjByEmail(email: String): String?

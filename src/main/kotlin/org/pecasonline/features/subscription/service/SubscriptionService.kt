@@ -88,12 +88,12 @@ class SubscriptionService(
     }
 
     fun checkIfSubscriptionIsActiveOrThrow(
-        supplier: List<Supplier>,
+        supplier: Supplier,
         cnpj: String
     ) {
         when {
-            supplier.first().subscription?.status != SubscriptionStatus.ACTIVE -> {
-                logger.info { supplier.first().subscription?.status }
+            supplier.subscription?.status != SubscriptionStatus.ACTIVE -> {
+                logger.info { supplier.subscription?.status }
 
                 val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
 
