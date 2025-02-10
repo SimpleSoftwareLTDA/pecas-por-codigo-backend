@@ -1,5 +1,6 @@
 package org.pecasonline.common
 
+import java.security.MessageDigest
 import java.security.SecureRandom
 
 object Constants {
@@ -13,3 +14,8 @@ object Constants {
 object SecureRandomSingleton {
     val instance: SecureRandom by lazy { SecureRandom() }
 }
+
+object HashGenerator {
+    val MD5_DIGEST: MessageDigest = MessageDigest.getInstance("MD5")
+}
+

@@ -64,7 +64,7 @@ class EmailReceiverService(
                     supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
 
                         supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
-                            subscriptionService.checkIfSubscriptionIsActive(listOf(supplier), cnpj)
+                            subscriptionService.checkIfSubscriptionIsActiveOrThrow(listOf(supplier), cnpj)
                         }
 
                         processAttachments(message, senderEmail = senderEmail, supplierCnpj = cnpj)
@@ -175,6 +175,7 @@ object RegexPatterns {
     val quantityRegex = Pattern.compile("\\d+")
     val costRegex = Pattern.compile("\\d+\\.\\d{2}")
     val emailRegex = Pattern.compile("<(.*?)>|([\\w.-]+@[\\w.-]+\\.[\\w]{2,})").matcher("")
+    val whitespaceRegex = Pattern.compile("\\s+")
 }
 
 class CustomMultipartFile(

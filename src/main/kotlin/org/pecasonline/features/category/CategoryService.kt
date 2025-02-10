@@ -33,9 +33,8 @@ class CategoryService(
             .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } } // Capitalize each word
 
         val existingCategory = categoryRepository.findByNameContainsIgnoreCase(formattedName, PageRequest.of(0, 1))
-        if (!existingCategory.isEmpty) {
-            return existingCategory.content[0]
-        }
+
+        if (!existingCategory.isEmpty) return existingCategory.content[0]
 
         val newCategory = category.copy(name = formattedName)
         return categoryRepository.save(newCategory)

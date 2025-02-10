@@ -74,7 +74,7 @@ class StockBatchService(
 
         val supplier = getSupplierByCNPJ(cnpj)
 
-        subscriptionService.checkIfSubscriptionIsActive(supplier, cnpj)
+        subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
 
         when {
             file.isEmpty -> {
@@ -180,7 +180,7 @@ class StockBatchService(
     }
 
     private fun getSupplierByCNPJ(cnpj: String) =
-        supplierRepository.findSupplierByCnpj(cnpj)
+        supplierRepository.findSuppliersByCnpj(cnpj)
             .takeIf { it.isNotEmpty() }
             ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $cnpj. Faça sua assinatura para usar esse serviço.")
 
