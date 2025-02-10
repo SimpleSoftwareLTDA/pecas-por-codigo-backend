@@ -1,6 +1,7 @@
 package org.pecasonline.features.subscription.entities
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonManagedReference
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import org.pecasonline.features.plan.Plan
@@ -20,6 +21,7 @@ data class Subscription(
     @JoinColumn(name = "supplier_id", nullable = false)
     @JsonProperty("fornecedor")
     @JsonAlias("supplier")
+    @JsonManagedReference
     val supplier: Supplier,
 
     @ManyToOne

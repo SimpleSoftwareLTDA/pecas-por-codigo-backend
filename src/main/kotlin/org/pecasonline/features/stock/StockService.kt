@@ -49,7 +49,7 @@ class StockService(
         stockRepository.findStockByItemId(id, PageRequest.of(page ?: 0, size ?: 10))
 
     override fun findStockByItemCode(code: String, page: Int?, size: Int?): Page<Stock> =
-        stockRepository.findStockByItemCode(code, PageRequest.of(page ?: 0, size ?: 10))
+        stockRepository.findByItemCode(code, PageRequest.of(page ?: 0, size ?: 10))
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
         stockRepository.findStockBySupplierId(id, PageRequest.of(page ?: 0, size ?: 10))

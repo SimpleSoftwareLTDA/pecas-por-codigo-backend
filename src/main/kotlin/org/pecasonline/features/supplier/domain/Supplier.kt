@@ -1,5 +1,6 @@
 package org.pecasonline.features.supplier.domain
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import org.pecasonline.features.login.entities.Tokens
@@ -59,6 +60,7 @@ data class Supplier(
     val token: Tokens? = null,
 
     @OneToOne(mappedBy = "supplier")
+    @JsonBackReference
     val subscription: Subscription? = null
 
 ) {
