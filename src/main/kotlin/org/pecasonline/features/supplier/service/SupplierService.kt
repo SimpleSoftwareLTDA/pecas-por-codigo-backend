@@ -52,7 +52,7 @@ class SupplierService(
 
     @Transactional(rollbackFor = [Exception::class])
     override fun createSupplier(supplier: CreateSupplierDTO): Supplier {
-        val existingSupplier = supplier.cnpj?.let { supplierRepository.findSupplierByCnpj(it) }
+        val existingSupplier = supplier.cnpj?.let { supplierRepository.findSuppliersByCnpj(it) }
 
         when {
             existingSupplier?.isNotEmpty() == true -> {

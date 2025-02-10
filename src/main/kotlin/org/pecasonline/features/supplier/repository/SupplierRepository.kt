@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SupplierRepository : JpaRepository<Supplier, Int> {
     fun findSupplierByCnpj(cnpj: String, pageable: Pageable): Page<Supplier>
-    fun findSupplierByCnpj(cnpj: String): List<Supplier>
+    fun findSuppliersByCnpj(cnpj: String): List<Supplier>
 
 
     @Query("SELECT s.cnpj FROM supplier s JOIN s.contact c WHERE c.itemsEmail = :email")

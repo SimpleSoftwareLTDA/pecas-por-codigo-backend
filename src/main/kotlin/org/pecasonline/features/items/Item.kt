@@ -2,9 +2,14 @@ package org.pecasonline.features.items
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import org.pecasonline.common.HashGenerator.MD5_DIGEST
 import org.pecasonline.features.category.Category
-import java.security.MessageDigest
 import java.util.*
 
 @Entity
@@ -43,11 +48,17 @@ data class Item(
 ) {
 
     private fun hash(): String {
-        val dataToHash = "$manufacturer$code$priceInCents$description"
-        val md = MessageDigest.getInstance("MD5")
-        val hashBytes = md.digest(dataToHash.toByteArray())
+        val dataToHash = buildString {
+            append(manufacturer)
+            append(code)
+            append(priceInCents)
+            append(description)
+        }
 
-        val hash = hashBytes.joinToString("") { "%02x".format(it) }
+        val hashBytes = MD5_DIGEST.digest(dataToHash.toByteArray())
+
+        val hash = HexFormat.of().formatHex(hashBytes)
+
         return hash
     }
 

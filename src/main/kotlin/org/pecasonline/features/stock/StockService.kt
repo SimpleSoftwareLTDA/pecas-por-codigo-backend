@@ -3,26 +3,26 @@ package org.pecasonline.features.stock
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.common.Constants.DEFAULT_FILE_NAME
 import org.pecasonline.common.exceptions.NotFoundException
+import org.pecasonline.common.isInvalidColumnSize
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
-import org.pecasonline.features.stock.email.receiver.RegexPatterns
+import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.io.BufferedReader
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.pathString
+import kotlin.streams.asSequence
 
 private val logger = KotlinLogging.logger {}
 
@@ -82,15 +82,13 @@ class StockService(
             }
         }
 
-        val supplier = getSupplierByCNPJ(cnpj)
+        val suppliers = getSupplierByCNPJ(cnpj)
 
-        subscriptionService.checkIfSubscriptionIsActive(supplier, cnpj)
+        subscriptionService.checkIfSubscriptionIsActiveOrThrow(suppliers, cnpj)
 
         when {
             file.isEmpty -> {
                 val errorMessage = "Arquivo vazio, por favor selecione um arquivo de estoque com dados para upload."
-
-                supplierRepository.findSupplierEmailByCnpj(cnpj)
 
                 emailSenderService.sendStockProcessingErrorNotification(
                     supplierEmail = emailAddress,
@@ -102,12 +100,9 @@ class StockService(
             }
 
             else -> {
-                val tmpDir: Path = Files.createTempDirectory("pecas-")
                 logger.info { "Iniciando criação de estoque a partir do arquivo do fornecedor CNPJ: $cnpj" }
 
-                val allSuppliers = getSupplierByCNPJ(cnpj)
-
-                allSuppliers.forEach { supplier ->
+                suppliers.forEach { supplier ->
                     emailSenderService.sendStockProcessingStartNotification(
                         supplierEmail = supplier.contact.itemsEmail ?: emailAddress,
                         supplierName = "${supplier.name} - ${supplier.cnpj}",
@@ -115,27 +110,19 @@ class StockService(
                     )
                 }
 
-                logger.debug { "${"Created temporary directory: {}"} $tmpDir" }
+                val tempFile = saveTempFile(file, Files.createTempDirectory("pecas-"))
 
-                val tempFile = saveFileLocallyTemporarily(file, tmpDir)
-                logger.debug { "${"Saved file locally: {}"} $tempFile" }
+                logger.info { "${"Saved $tempFile file locally at ${tempFile.pathString}"} " }
 
                 val stockList = getFileValuesOptimized(tempFile)
-                logger.debug { "${"Parsed stock entries: {}"} ${stockList.size}" }
+                logger.info { "Parsed stock entries: ${stockList.size}" }
 
                 val updatedIds = mutableListOf<Long>()
 
-                stockList.forEach { stock ->
+                stockList.parallelStream().forEach { stock ->
                     val item = processItem(stock.item)
 
-                    logger.debug { "Item processado com ID: ${item.id}, Hash: ${item.hash}" }
-
-                    val suppliers = getSupplierByCNPJ(cnpj)
-
-                    if (suppliers.isEmpty()) {
-                        val errorMessage = "Fornecedor não encontrado para CNPJ: $cnpj"
-                        throw NotFoundException(errorMessage)
-                    }
+                    logger.info { "Item processado com ID: ${item.id}, Hash: ${item.hash}" }
 
                     suppliers.forEach { supplier ->
                         val existingStocks = stockRepository.findStockBySupplierIdAndItemId(supplier.id!!, item.id!!)
@@ -147,7 +134,7 @@ class StockService(
 
                                 updatedIds.add(savedStock.id!!)
 
-                                logger.debug { "Novo estoque salvo com ID: ${savedStock.id}" }
+                                logger.info { "Novo estoque salvo com ID: ${savedStock.id}" }
                             }
 
                             else -> {
@@ -157,18 +144,19 @@ class StockService(
                                     stockRepository.save(updatedStock)
                                     updatedIds.add(updatedStock.id!!)
 
-                                    logger.debug { "Estoque atualizado com ID: ${updatedStock.id}, Quantidade: ${updatedStock.quantity}" }
+                                    logger.info { "Estoque atualizado com ID: ${updatedStock.id}, Quantidade: ${updatedStock.quantity}" }
                                 }
                             }
                         }
                     }
                 }
 
-                cleanupTempFiles(tmpDir)
+                Files.deleteIfExists(tempFile)
+
                 // Notificação de conclusão do processamento
-                allSuppliers.forEach {
+                suppliers.forEach {
                     emailSenderService.sendStockProcessingCompletionNotification(
-                        supplierEmail = it.contact.itemsEmail ?: emailAddress,
+                        supplierEmail = it.contact.itemsEmail,
                         supplierName = "${it.name} - ${it.cnpj}",
                         fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
                         updatedItemCount = updatedIds.size
@@ -184,67 +172,58 @@ class StockService(
         val category = getOrCreateCategory(item.description)
         val itemWithCategory = item.copy(category = category)
 
-        logger.debug { "Assigning category ${category.name} to item with hash ${item.hash}" }
+        logger.info { "Assigning category ${category.name} to item with hash ${item.hash}" }
 
         return itemRepository.findByHash(itemWithCategory.hash) ?: itemRepository.save(itemWithCategory)
     }
 
     private fun getSupplierByCNPJ(cnpj: String) =
-        supplierRepository.findSupplierByCnpj(cnpj)
+        supplierRepository.findSuppliersByCnpj(cnpj)
             .takeIf { it.isNotEmpty() }
             ?: throw NotFoundException("Fornecedor não encontrado para o CNPJ: $cnpj. Faça sua assinatura para usar esse serviço.")
 
     private fun getSupplierByToken(token: String): String =
-        supplierRepository.findCnpjByToken(token) ?: throw NotFoundException("Fornecedor não encontrado a partir desse token")
+        supplierRepository.findCnpjByToken(token)
+            ?: throw NotFoundException("Fornecedor não encontrado a partir desse token")
 
     fun cleanupTempFiles(directory: Path) {
         Files.list(directory).forEach { file ->
             runCatching {
                 file.deleteIfExists()
 
-                logger.debug { "${"Deleted temporary file: $file"} " }
+                logger.info { "${"Deleted temporary file: $file"} " }
             }.onFailure { ex ->
                 logger.error(ex) { "Failed to delete file: $file" }
             }
         }
     }
 
-    private fun saveFileLocallyTemporarily(file: MultipartFile, tmpDir: Path): Path {
-        val tempFile = Files.createTempFile(tmpDir,"tmp_", "_${file.originalFilename}")
+    private fun saveTempFile(file: MultipartFile, tmpDir: Path): Path =
+        Files.createTempFile(tmpDir, "tmp_", "_${file.originalFilename ?: "unknown"}")
+            .also { Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING) }
 
-        file.inputStream.use { inputStream ->
-            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING)
-        }
-
-        return tempFile
-    }
-
-
-    private fun getFileValues(tempFile: Path): List<Stock> =
-        Files.newBufferedReader(tempFile).use { reader ->
-            reader.lineSequence().mapNotNull { parseStockLine(it) }.toList()
-        }
 
     private fun getFileValuesOptimized(tempFile: Path): List<Stock> =
         Files.lines(tempFile).use { lines ->
-            lines.parallel()
+            lines.asSequence()
+                .filterNot { it.isNullOrBlank() }
                 .map { parseStockLine(it) }
-                .filter { it != null }
-                .map { it!! }
+                .filterNotNull()
+                .map { it }
                 .toList()
         }
 
     private fun parseStockLine(line: String): Stock? {
-        val columns = line.split("\\s+".toRegex()).filter { it.isNotEmpty() }
+        val columns = line.trim().split(whitespaceRegex, 4).filter { it.isNotEmpty() }
 
         when {
-            columns.size < 4 -> return null
+            columns.isInvalidColumnSize() -> return null
 
             else -> {
                 val (code, quantityStr, priceStr, description) = columns
 
-                val quantity = quantityStr.toIntOrNull() ?: 0
-                val priceInCents = ((priceStr.toDoubleOrNull() ?: 0.0) * 100).toLong()
+                val quantity = quantityStr.toIntOrNull()?: 0
+                val priceInCents = ((priceStr.toDoubleOrNull()?: 0.0) * 100).toLong()
 
                 val item = Item.buildFromMinimalProperties(code, priceInCents, description)
 
@@ -254,77 +233,11 @@ class StockService(
     }
 
     private fun getOrCreateCategory(description: String?): Category {
-        val categoryName = description?.split(" ")?.firstOrNull()?.replace("\"", "") ?: "Uncategorized"
-        val formattedName = categoryName.replaceFirstChar { it.uppercaseChar() }.lowercase()
+        val formattedName = description ?: "Uncategorized".replaceFirstChar { it.uppercaseChar() }.lowercase()
         val category = categoryService.findByNameIgnoreCase(formattedName) ?: categoryService.addCategory(Category(name = formattedName))
 
-        logger.debug { "${"Retrieved or created category with name: ${category.name}"} " }
+        logger.info { "${"Retrieved or created category with name: ${category.name}"} " }
 
         return category
-    }
-
-    private fun processFileDirectly(inputStream: InputStream): List<Stock> =
-        inputStream.bufferedReader().use { reader ->
-            reader.lineSequence()
-                .mapNotNull { parseStockLine(it) }
-                .toList()
-        }
-
-}
-
-
-@Service
-class FileProcessor {
-    fun validateFileStructure(reader: BufferedReader, requiredLines: Int = 3): Boolean {
-        var lineCount = 0
-        reader.useLines { lines ->
-            for (line in lines) {
-                val fields = line.trim().split("\\s+".toRegex())
-                if (fields.size != 4 ||
-                    !RegexPatterns.productCodeRegex.matcher(fields[0]).matches() ||
-                    !RegexPatterns.quantityRegex.matcher(fields[1]).matches() ||
-                    !RegexPatterns.costRegex.matcher(fields[2]).matches()
-                ) return false
-
-                lineCount++
-                if (lineCount >= requiredLines) break
-            }
-        }
-        return lineCount >= requiredLines
-    }
-
-    fun parseFile(inputStream: InputStream): List<Stock> {
-        return inputStream.bufferedReader().use { reader ->
-            reader.lineSequence()
-                .mapNotNull { parseStockLine(it) }
-                .toList()
-        }
-    }
-
-    private fun parseStockLine(line: String): Stock? {
-        val columns = line.split("\\s+".toRegex()).filter { it.isNotEmpty() }
-        if (columns.size < 4) return null
-
-        val (code, quantityStr, priceStr, description) = columns
-        val quantity = quantityStr.toIntOrNull() ?: return null
-        val priceInCents = ((priceStr.toDoubleOrNull() ?: 0.0) * 100).toLong()
-
-        val item = Item.buildFromMinimalProperties(code, priceInCents, description)
-        return Stock(quantity = quantity, item = item)
-    }
-}
-
-
-@Service
-class AsyncService(private val stockService: StockService) {
-
-    @Async
-    fun processStockAsync(cnpj: String, file: MultipartFile, emailAddress: String) {
-        try {
-            stockService.createStock(file, emailAddress, null)
-        } catch (e: Exception) {
-            // Lidar com erros, logar ou enviar notificações
-            println("Erro no processamento assíncrono: ${e.message}")
-        }
     }
 }

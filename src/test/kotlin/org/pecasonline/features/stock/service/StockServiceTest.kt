@@ -123,7 +123,7 @@ class StockServiceTest {
         val mockFile = createMockFile()
         val cnpj = "15826705000130"
 
-        `when`(supplierRepository.findSupplierByCnpj(cnpj)).thenReturn(emptyList())
+        `when`(supplierRepository.findSuppliersByCnpj(cnpj)).thenReturn(emptyList())
         `when`(itemRepository.save(any(Item::class.java))).thenReturn(sampleItem) // Ensure itemRepository.save returns a non-null value
         `when`(categoryService.findByNameIgnoreCase(anyOrNull())).thenReturn(sampleCategory)
         assertThrows<NotFoundException> {

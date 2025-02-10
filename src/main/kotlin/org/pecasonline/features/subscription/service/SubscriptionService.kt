@@ -78,17 +78,16 @@ class SubscriptionService(
         val currentDate = LocalDate.now()
         val nextDueDate = currentDate.withDayOfMonth(paymentDay)
             .let {
-                if (it.isBefore(currentDate)) {
-                    // Se a data já passou neste mês, ajusta para o próximo mês
-                    it.plusMonths(1)
-                } else {
-                    it
+                when {
+                    it.isBefore(currentDate) -> it.plusMonths(1) // Se a data já passou neste mês, ajusta para o próximo mês
+
+                    else -> it
                 }
             }
         return nextDueDate.format(DateTimeFormatter.ISO_LOCAL_DATE) // Formato yyyy-MM-dd
     }
 
-    fun checkIfSubscriptionIsActive(
+    fun checkIfSubscriptionIsActiveOrThrow(
         supplier: List<Supplier>,
         cnpj: String
     ) {
