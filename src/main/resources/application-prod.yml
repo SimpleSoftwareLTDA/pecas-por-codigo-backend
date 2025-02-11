@@ -2,7 +2,7 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
+    url: jdbc:postgresql://novo-pecas-online-db:5432/meubanco
     driver-class-name: org.postgresql.Driver
     username: usuario
     password: senha
@@ -43,10 +43,8 @@ springdoc:
 logging:
   level:
     org:
-      pecasonline:
-        features:
-          stock:
-            StockService: INFO
+      pecasonline: INFO
+
 server:
   forward-headers-strategy: native
 

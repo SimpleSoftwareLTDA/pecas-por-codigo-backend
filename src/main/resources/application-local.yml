@@ -1,12 +1,12 @@
 spring:
   datasource:
-#    url: jdbc:postgresql://localhost:5432/novo-pecas-online?currentSchema=public
     url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
     driver-class-name: org.postgresql.Driver
     username: usuario
     password: senha
   logging:
     level:
+      pecasonline: DEBUG
       org.pecasonline: DEBUG
       root: DEBUG
   servlet:
