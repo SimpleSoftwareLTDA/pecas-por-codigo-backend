@@ -98,7 +98,9 @@ class StockService(
                 contact = Contact(
                     sellerName = phoneNumber,
                     itemsEmail = phoneNumber,
-                    itemsPhone = phoneNumber
+                    itemsPhone = phoneNumber,
+                    whatsapp = phoneNumber,
+                    itemsWhatsapp = phoneNumber
                 )
             )
 
