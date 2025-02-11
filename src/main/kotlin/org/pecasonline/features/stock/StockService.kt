@@ -3,6 +3,7 @@ package org.pecasonline.features.stock
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.common.Constants.DEFAULT_FILE_NAME
 import org.pecasonline.common.exceptions.NotFoundException
+import org.pecasonline.common.httpclients.PecaDTO
 import org.pecasonline.common.httpclients.PecaService
 import org.pecasonline.common.httpclients.parseResultadoPesquisa
 import org.pecasonline.common.isInvalidColumnSize
@@ -114,7 +115,7 @@ class StockService(
             Stock(
                 quantity = dto.qtd,
                 supplier = supplier,
-                item = Item(code = dto.codigo, hash = "", description = dto.descricao, priceInCents = dto.preco?.toLong(), category = Category(name = "Genérica") )
+                item = getItemWithPriceInCents(dto)
             )
         }
 
@@ -330,5 +331,22 @@ fun parseFornecedor(descricao: String): Triple<String, String, String> {
         // ou tratamos de outra forma
         Triple(descricao, "", "")
     }
+}
+
+private fun getItemWithPriceInCents(dto: PecaDTO): Item {
+    val precoStr = dto.preco ?: ""
+
+    val precoEmCentavos = if (precoStr.isBlank() || precoStr == "Valor não informado") {
+        0L
+    } else precoStr.replace(",", ".").toLongOrNull() ?: 0L
+
+    val item = Item(
+        code = dto.codigo,
+        hash = "",
+        description = dto.descricao,
+        priceInCents = precoEmCentavos.toLong(),
+        category = Category(name = "Genérica")
+    )
+    return item
 }
 
