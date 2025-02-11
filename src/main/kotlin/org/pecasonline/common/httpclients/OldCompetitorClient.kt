@@ -82,7 +82,8 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
         val fornecedor = cols[2].text().trim()
         val qtdStr = cols[3].text().trim()
         val qtd = qtdStr.toIntOrNull() ?: 0
-        val preco = cols[4].text().trim().ifEmpty { null }
+        val precoStr = cols[4].text().trim()
+        val preco = precoStr.replace(",", ".").toDoubleOrNull() ?: 0.0
         val descricao = cols[5].text().trim()
         val atualizacao = cols[6].text().trim()
 
@@ -92,7 +93,7 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
                 codigo = codigo,
                 fornecedor = fornecedor,
                 qtd = qtd,
-                preco = preco,
+                preco = preco.toString(),
                 descricao = descricao,
                 atualizacao = atualizacao
             )
