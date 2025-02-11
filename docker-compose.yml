@@ -1,17 +1,25 @@
-version: "3.9"  # Especifica a versão do Docker Compose
-
 services:
-  postgres:
+  novo-pecas-online-db:
     image: postgres:17-alpine
-    restart: always
+    container_name: novo-pecas-online-db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: pecas
-      POSTGRES_PASSWORD: online
-      POSTGRES_DB: novo-pecas-online
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: senha
+      POSTGRES_DB: meubanco
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  novo-pecas-online-backend:
+    image: randintn/novo-pecas-online:0.1.1
+    container_name: novo-pecas-online-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres_data:
