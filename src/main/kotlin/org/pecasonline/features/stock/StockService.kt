@@ -105,7 +105,7 @@ class StockService(
             Stock(
                 quantity = dto.qtd,
                 supplier = supplier,
-                item = Item(code = dto.codigo, hash = "", description = dto.descricao, priceInCents = dto.preco?.toLong() )
+                item = Item(code = dto.codigo, hash = "", description = dto.descricao, priceInCents = dto.preco?.toLong(), category = Category(name = "Genérica") )
             )
         }
 
