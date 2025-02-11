@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import jakarta.servlet.http.HttpServletResponse
 import org.pecasonline.common.exceptions.http.BaseExceptionResponseJson
 import org.pecasonline.features.subscription.entities.InvalidSubscriptionException
 import org.pecasonline.features.subscription.entities.InvalidTokenException
@@ -27,6 +28,13 @@ import kotlin.reflect.KClass
 class ExceptionsAdvisor {
 
     private val fieldAliases = getJsonAliasesWithJackson(CreateSupplierDTO::class)
+
+    @ExceptionHandler(Exception::class)
+    fun handleException(ex: Exception, response: HttpServletResponse): ResponseEntity<Pair<String, String?>> {
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error" to ex.message)
+    }
+
 
     @ExceptionHandler(NotFoundException::class)
     fun handleGenericException(ex: Exception): ResponseEntity<BaseExceptionResponseJson> {

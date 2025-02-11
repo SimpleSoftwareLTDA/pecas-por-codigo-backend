@@ -3,7 +3,11 @@ package org.pecasonline.features.stock
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.common.Constants.DEFAULT_FILE_NAME
 import org.pecasonline.common.exceptions.NotFoundException
+import org.pecasonline.common.httpclients.PecaService
+import org.pecasonline.common.httpclients.parseResultadoPesquisa
 import org.pecasonline.common.isInvalidColumnSize
+import org.pecasonline.features.address.domain.Address
+import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
@@ -11,8 +15,11 @@ import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.service.SubscriptionService
+import org.pecasonline.features.supplier.domain.Contact
+import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,8 +27,10 @@ import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.collections.ArrayList
 import kotlin.io.path.pathString
 import kotlin.streams.asSequence
+import kotlin.time.measureTime
 
 private val logger = KotlinLogging.logger {}
 
@@ -32,7 +41,8 @@ class StockService(
     private val supplierRepository: SupplierRepository,
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
-    private val subscriptionService: SubscriptionService
+    private val subscriptionService: SubscriptionService,
+    private val pecaService: PecaService
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -47,8 +57,41 @@ class StockService(
     override fun findStockByItemId(id: Int, page: Int?, size: Int?): Page<Stock> =
         stockRepository.findStockByItemId(id, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun findStockByItemCode(code: String, page: Int?, size: Int?): Page<Stock> =
-        stockRepository.findByItemCode(code, PageRequest.of(page ?: 0, size ?: 10))
+    override fun findStockByItemCode(code: String, page: Int?, size: Int?): Page<Stock> {
+        val pageable = PageRequest.of(page ?: 0, size ?: 10)
+
+        val stockPage = stockRepository.findByItemCode(code, pageable)
+
+        if (stockPage.hasContent())return stockPage
+
+        val html = pecaService.buscarPeca(partNumber = code)
+
+        val dtos = parseResultadoPesquisa(html)
+
+        val mockState = BrazilianState(stateCode = "SP", stateName = "São Paulo")
+
+        val mockAddress = Address(
+            id = null,
+            street = "Rua Fictícia",
+            city = "São Paulo",
+            state = mockState,
+            cep = "01000-000",
+            country = "Brasil"
+        )
+        val stocksFromHtml = dtos.map { dto ->
+            Stock(
+                quantity = dto.qtd,
+                supplier = Supplier(name = dto.fornecedor, socialName = "blah", cnpj = "", address = mockAddress, contact = Contact(sellerName = "", itemsEmail = "", itemsPhone = "") ),
+                item = Item(code = dto.codigo, hash = "")
+            )
+        }
+
+        return PageImpl(
+            stocksFromHtml,
+            pageable,
+            stocksFromHtml.size.toLong()
+        )
+    }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
         stockRepository.findStockBySupplierId(id, PageRequest.of(page ?: 0, size ?: 10))
@@ -62,95 +105,144 @@ class StockService(
             getSupplierByToken(token)
         } ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
 
-        if (cnpj == null) error("CNPJ não encontrado para o token ou email fornecido.")
+        if (cnpj == null) {
+            throw IllegalArgumentException("CNPJ não encontrado para o token ou email fornecido.")
+        }
 
         token?.let {
-            if (!supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)) error("Token inválido ou não associado ao fornecedor com CNPJ: $cnpj.")
+            if (!supplierRepository.isTokenAssociatedWithCnpj(cnpj, token)) {
+                throw IllegalArgumentException("Token inválido ou não associado ao fornecedor com CNPJ: $cnpj.")
+            }
         }
 
         val supplier = supplierRepository.findSupplierByCnpj(cnpj)
         subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
 
-        when {
-            file.isEmpty -> {
-                val errorMessage = "Arquivo vazio. Selecione um arquivo de estoque com dados para upload."
-                emailSenderService.sendStockProcessingErrorNotification(
-                    supplierEmail = emailAddress,
-                    fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
-                    errorMessage = errorMessage
-                )
-                throw IllegalArgumentException(errorMessage)
-            }
+        if (file.isEmpty) {
+            val errorMessage = "Arquivo vazio. Selecione um arquivo de estoque com dados para upload."
+            emailSenderService.sendStockProcessingErrorNotification(
+                supplierEmail = emailAddress,
+                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
+                errorMessage = errorMessage
+            )
+            throw IllegalArgumentException(errorMessage)
+        }
 
-            else -> {
-                logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $cnpj" }
+        logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $cnpj" }
 
-                emailSenderService.sendStockProcessingStartNotification(
-                    supplierEmail = supplier.contact.itemsEmail,
-                    supplierName = "${supplier.name} - ${supplier.cnpj}",
-                    fileName = file.originalFilename ?: DEFAULT_FILE_NAME
-                )
+        emailSenderService.sendStockProcessingStartNotification(
+            supplierEmail = supplier.contact.itemsEmail,
+            supplierName = "${supplier.name} - ${supplier.cnpj}",
+            fileName = file.originalFilename ?: DEFAULT_FILE_NAME
+        )
 
-                val tempDir = Files.createTempDirectory("pecas-")
-                val tempFile = saveTempFile(file, tempDir)
+        val tempDir = Files.createTempDirectory("pecas-")
+        val tempFile = saveTempFile(file, tempDir)
 
-                try {
-                    val stockList = getFileValuesOptimized(tempFile)
-                    logger.info { "Total de itens processados no arquivo: ${stockList.size}" }
+        try {
+            val newStockItems = getFileValuesOptimized(tempFile)
+            logger.info { "Total de itens válidos no arquivo: ${newStockItems.size}" }
 
-                    val existingStocks = stockRepository.findStocksBySupplierId(supplier.id!!)
-                    val existingStocksMap = existingStocks.associateBy { it.item.hash }
+            // 1) Extrai todos os itens do arquivo (sem categoria) e processa em lote (batch)
+            val allItemsFromFile = newStockItems.map { it.item }
+            val processedItemsMap = processAllItems(allItemsFromFile)
 
-                    val updatedIds = mutableSetOf<Long>()
-                    val newStocks = mutableListOf<Stock>()
+            // 2) Busca os estoques existentes para este fornecedor
+            val existingStocks = stockRepository.findStocksBySupplierId(supplier.id!!)
+            val existingStocksMap = existingStocks.associateBy { it.item.code }
 
-                    stockList.forEach { stock ->
-                        val item = processItem(stock.item)
+            // 3) Separa as listas de atualização e criação
+            val updatedStocks = mutableListOf<Stock>()
+            val newStocks = mutableListOf<Stock>()
+            val updatedIds = mutableSetOf<Long>()
 
-                        val existingStock = existingStocksMap[item.hash]
+            newStockItems.forEachIndexed { index, stockLine ->
+                val itemProcessed = processedItemsMap[stockLine.item.hash]
+                    ?: error("Item com hash=${stockLine.item.hash} não foi processado corretamente")
 
-                        if (existingStock != null) {
-                            val updatedStock = existingStock.copy(quantity = stock.quantity)
-                            stockRepository.save(updatedStock)
-                            updatedIds.add(updatedStock.id!!)
+                val existingStock = existingStocksMap[itemProcessed.code]
 
-                            logger.info { "Estoque atualizado: ID=${updatedStock.id}, Quantidade=${updatedStock.quantity} Código=${updatedStock.item.code}" }
-                        } else {
-                            newStocks.add(stock.copy(item = item, supplier = supplier))
-
-                            logger.info { "Novo item adicionado ao estoque: Item=${item.hash}" }
-                        }
+                when {
+                    existingStock != null -> {
+                        // Se já existe, só atualiza a quantidade
+                        val updatedStock = existingStock.copy(quantity = stockLine.quantity)
+                        updatedStocks.add(updatedStock)
                     }
-
-                    if (newStocks.isNotEmpty()) {
-                        stockRepository.saveAll(newStocks)
-                        updatedIds.addAll(newStocks.map { it.id!! })
+                    else -> {
+                        // Caso contrário, é uma nova entrada de estoque
+                        newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
                     }
-
-                    emailSenderService.sendStockProcessingCompletionNotification(
-                        supplierEmail = supplier.contact.itemsEmail,
-                        supplierName = "${supplier.name} - ${supplier.cnpj}",
-                        fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
-                        updatedItemCount = updatedIds.size
-                    )
-
-                    logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $cnpj" }
-
-                } finally {
-                    Files.deleteIfExists(tempFile)
-                    logger.info { "Arquivo temporário removido: ${tempFile.pathString}" }
                 }
+
+                logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, " + "item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
             }
+
+            if (updatedStocks.isNotEmpty()) {
+                val savedUpdated = stockRepository.saveAll(updatedStocks)
+                savedUpdated.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+
+                logger.info { "Foram atualizados ${savedUpdated.size} registros de estoque para o fornecedor ID=${supplier.id}" }
+            }
+
+            if (newStocks.isNotEmpty()) {
+                val savedNew = stockRepository.saveAll(newStocks)
+                savedNew.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+
+                logger.info { "Foram criados ${savedNew.size} novos registros de estoque para o fornecedor ID=${supplier.id}" }
+            }
+
+            // Notifica a conclusão
+            emailSenderService.sendStockProcessingCompletionNotification(
+                supplierEmail = supplier.contact.itemsEmail,
+                supplierName = "${supplier.name} - ${supplier.cnpj}",
+                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
+                updatedItemCount = updatedIds.size
+            )
+
+            logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $cnpj" }
+        } finally {
+            Files.deleteIfExists(tempFile)
+            logger.info { "Arquivo temporário removido: ${tempFile.pathString}" }
         }
     }
 
-    fun processItem(item: Item): Item {
-        val category = getOrCreateCategory(item.description)
-        val itemWithCategory = item.copy(category = category)
+    private fun processAllItems(allItems: List<Item>): Map<String, Item> {
+        val itemsByHash = allItems.associateBy { it.hash }
+        val allHashes = itemsByHash.keys
+        var existing = ArrayList<Item>(200000)
 
-        logger.info { "Assigning category ${category.name} to item with hash ${item.hash}" }
+        existing = itemRepository.findAllByHashIn(allHashes) as ArrayList<Item>
 
-        return itemRepository.findByHash(itemWithCategory.hash) ?: itemRepository.save(itemWithCategory)
+        logger.info { "Sem parallel: ${measureTime { existing.associateBy { it.hash } }}" }
+        val existingMap = existing.associateBy { it.hash }
+
+        val newHashes = allHashes - existingMap.keys
+
+        val newItems = newHashes.map { hash ->
+            val originalItem = itemsByHash[hash]!!
+            val category = getOrCreateCategory(originalItem.description)
+            originalItem.copy(category = category)
+        }
+
+        val savedNewItems = itemRepository.saveAll(newItems)
+        val savedNewMap = savedNewItems.associateBy { it.hash }
+
+        return existingMap + savedNewMap
+    }
+
+    private fun getOrCreateCategory(description: String?): Category {
+        val safeDesc = description?.trim().takeUnless { it.isNullOrEmpty() } ?: "Uncategorized"
+        val formattedName = safeDesc.replaceFirstChar { it.uppercaseChar() }
+
+        val existing = categoryService.findByNameIgnoreCase(formattedName)
+
+        if (existing != null) return existing
+
+        val newCat = categoryService.addCategory(Category(name = formattedName))
+
+        logger.debug { "Criando nova categoria: ${newCat.name}" }
+
+        return newCat
     }
 
     private fun getSupplierByToken(token: String): String =
@@ -158,45 +250,34 @@ class StockService(
             ?: throw NotFoundException("Fornecedor não encontrado a partir desse token")
 
     private fun saveTempFile(file: MultipartFile, tmpDir: Path): Path =
-        Files.createTempFile(tmpDir, "tmp_", "_${file.originalFilename ?: "unknown"}")
-            .also { Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING) }
-
+        Files.createTempFile(tmpDir, "tmp_", "_${file.originalFilename ?: "unknown"}").also {
+            Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING)
+        }
 
     private fun getFileValuesOptimized(tempFile: Path): List<Stock> =
         Files.lines(tempFile).use { lines ->
             lines.asSequence()
-                .filterNot { it.isNullOrBlank() }
-                .map { parseStockLine(it) }
-                .filterNotNull()
-                .map { it }
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .mapNotNull { parseStockLine(it) }
                 .toList()
         }
 
     private fun parseStockLine(line: String): Stock? {
-        val columns = line.trim().split(whitespaceRegex, 4).filter { it.isNotEmpty() }
+        val columns = line.split(whitespaceRegex, 4).filter { it.isNotEmpty() }
 
-        when {
-            columns.isInvalidColumnSize() -> return null
+        if (columns.isInvalidColumnSize()) return null
 
-            else -> {
-                val (code, quantityStr, priceStr, description) = columns
+        val (code, quantityStr, priceStr, description) = columns
+        val quantity = quantityStr.toIntOrNull() ?: 0
+        val priceInCents = ((priceStr.toDoubleOrNull() ?: 0.0) * 100).toLong()
 
-                val quantity = quantityStr.toIntOrNull()?: 0
-                val priceInCents = ((priceStr.toDoubleOrNull()?: 0.0) * 100).toLong()
+        val item = Item.buildFromMinimalProperties(
+            code = code,
+            priceInCents = priceInCents,
+            description = description
+        )
 
-                val item = Item.buildFromMinimalProperties(code, priceInCents, description)
-
-                return Stock(quantity = quantity, item = item)
-            }
-        }
-    }
-
-    private fun getOrCreateCategory(description: String?): Category {
-        val formattedName = description ?: "Uncategorized".replaceFirstChar { it.uppercaseChar() }.lowercase()
-        val category = categoryService.findByNameIgnoreCase(formattedName) ?: categoryService.addCategory(Category(name = formattedName))
-
-        logger.info { "${"Retrieved or created category with name: ${category.name}"} " }
-
-        return category
+        return Stock(quantity = quantity, item = item)
     }
 }
