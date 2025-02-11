@@ -92,7 +92,7 @@ class StockService(
 
             val supplier = Supplier(
                 name = nomeFornecedor,
-                socialName = "Consulte por telefone",
+                socialName = nomeFornecedor,
                 cnpj = "",
                 address = address,
                 contact = Contact(
