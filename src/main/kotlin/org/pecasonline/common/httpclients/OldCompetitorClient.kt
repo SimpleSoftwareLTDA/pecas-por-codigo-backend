@@ -89,7 +89,7 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
         val atualizacao = cols[6].text().trim()
 
         val finalValueOrDefault = when {
-            precoStr.isBlank() || priceInCents.toDouble() == 0.0 -> 0.0
+            precoStr.isBlank() || priceInCents.toDouble() == 0.0 -> 0
 
             else -> priceInCents.toString()
         }
