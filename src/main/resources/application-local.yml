@@ -9,10 +9,6 @@ spring:
       pecasonline: DEBUG
       org.pecasonline: DEBUG
       root: DEBUG
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
   h2:
     console:
       enabled: false

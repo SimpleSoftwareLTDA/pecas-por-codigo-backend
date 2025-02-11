@@ -3,6 +3,10 @@ spring:
     name: novo-pecas-online
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   mail:
     enabled: false
   jpa:
