@@ -72,14 +72,21 @@ class StockService(
         val stocksFromHtml = dtos.map { dto ->
             val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
 
-            val parts = cidadeUf.split("-")
-            val city = parts.getOrNull(0)?.trim() ?: "CidadeDesconhecida"
-            val uf = parts.getOrNull(1)?.trim() ?: "XX"
+            val lastDashIndex = cidadeUf.lastIndexOf("-")
+            val (city, uf) = if (lastDashIndex >= 0) {
+                val cityPart = cidadeUf.substring(0, lastDashIndex).trim()
+                val ufPart = cidadeUf.substring(lastDashIndex + 1).trim()
 
+                cityPart to ufPart
+            } else {
+                // se não houver "-",
+                // retorne cityUf como "cidade" e "SP" (ou algum default) como UF
+                cidadeUf to "SP"
+            }
 
             val dynamicState = BrazilianState(
                 stateCode = uf,
-                stateName = uf
+                stateName = city
             )
 
             val address = Address(
