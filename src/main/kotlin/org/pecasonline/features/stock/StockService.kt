@@ -61,36 +61,55 @@ class StockService(
         val pageable = PageRequest.of(page ?: 0, size ?: 10)
 
         val stockPage = stockRepository.findByItemCode(code, pageable)
-
-        if (stockPage.hasContent())return stockPage
+        if (stockPage.hasContent()) return stockPage
 
         val html = pecaService.buscarPeca(partNumber = code)
 
         val dtos = parseResultadoPesquisa(html)
 
-        val mockState = BrazilianState(stateCode = "SP", stateName = "São Paulo")
+        if (dtos.isEmpty()) return PageImpl(emptyList(), pageable, 0)
 
-        val mockAddress = Address(
-            id = null,
-            street = "Rua Fictícia",
-            city = "São Paulo",
-            state = mockState,
-            cep = "01000-000",
-            country = "Brasil"
-        )
         val stocksFromHtml = dtos.map { dto ->
+            val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
+
+            val parts = cidadeUf.split("-")
+            val city = parts.getOrNull(0)?.trim() ?: "CidadeDesconhecida"
+            val uf = parts.getOrNull(1)?.trim() ?: "XX"
+
+
+            val dynamicState = BrazilianState(
+                stateCode = uf,
+                stateName = uf
+            )
+
+            val address = Address(
+                street = "Consulte por telefone",
+                city = city,
+                state = dynamicState,
+                cep = "01000-000",
+                country = "Brasil"
+            )
+
+            val supplier = Supplier(
+                name = nomeFornecedor,
+                socialName = "Consulte por telefone",
+                cnpj = "",
+                address = address,
+                contact = Contact(
+                    sellerName = phoneNumber,
+                    itemsEmail = phoneNumber,
+                    itemsPhone = phoneNumber
+                )
+            )
+
             Stock(
                 quantity = dto.qtd,
-                supplier = Supplier(name = dto.fornecedor, socialName = "blah", cnpj = "", address = mockAddress, contact = Contact(sellerName = "", itemsEmail = "", itemsPhone = "") ),
-                item = Item(code = dto.codigo, hash = "")
+                supplier = supplier,
+                item = Item(code = dto.codigo, hash = "", description = dto.descricao, priceInCents = dto.preco?.toLong() )
             )
         }
 
-        return PageImpl(
-            stocksFromHtml,
-            pageable,
-            stocksFromHtml.size.toLong()
-        )
+        return PageImpl(stocksFromHtml, pageable, stocksFromHtml.size.toLong())
     }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
@@ -281,3 +300,26 @@ class StockService(
         return Stock(quantity = quantity, item = item)
     }
 }
+
+fun parseFornecedor(descricao: String): Triple<String, String, String> {
+    // Regex que pega:
+    //  ^ => início da string
+    //  (.+?) => captura nome até encontrar espaço + parêntese (modo não guloso)
+    //  \s*\( => ignora espaços opcionais e abre parêntese
+    //  ([^)]*) => captura tudo até fechar parêntese
+    //  \)\s+ => fecha parêntese e ignora espaços
+    //  (.+)$ => captura o restante (telefone)
+    val regex = Regex("""^(.+?)\s*\(([^)]*)\)\s+(.+)$""")
+
+    val matchResult = regex.matchEntire(descricao)
+
+    return if (matchResult != null) {
+        val (nome, cidadeUf, telefone) = matchResult.destructured
+        Triple(nome.trim(), cidadeUf.trim(), telefone.trim())
+    } else {
+        // Se não bater o padrão, retornamos tudo no primeiro campo
+        // ou tratamos de outra forma
+        Triple(descricao, "", "")
+    }
+}
+
