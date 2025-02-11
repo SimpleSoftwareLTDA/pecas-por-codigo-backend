@@ -83,9 +83,16 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
         val qtdStr = cols[3].text().trim()
         val qtd = qtdStr.toIntOrNull() ?: 0
         val precoStr = cols[4].text().trim()
-        val preco = precoStr.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val valorEmDouble = precoStr.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val priceInCents = (valorEmDouble * 100).toLong()
         val descricao = cols[5].text().trim()
         val atualizacao = cols[6].text().trim()
+
+        val finalValueOrDefault = when {
+            precoStr.isBlank() || priceInCents.toDouble() == 0.0 -> 0.0
+
+            else -> priceInCents.toString()
+        }
 
         listaDTO.add(
             PecaDTO(
@@ -93,7 +100,7 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
                 codigo = codigo,
                 fornecedor = fornecedor,
                 qtd = qtd,
-                preco = preco.toString(),
+                preco = finalValueOrDefault.toString(),
                 descricao = descricao,
                 atualizacao = atualizacao
             )
