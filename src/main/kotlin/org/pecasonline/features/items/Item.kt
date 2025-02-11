@@ -38,6 +38,7 @@ data class Item(
     @JsonProperty("dataDeAtualizacao")
     @JsonAlias(value = ["updateDate", "update_date"])
     val updateDate: Date? = Date(),
+
     val hash: String,
 
     @JsonProperty("categoria")

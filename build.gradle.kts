@@ -60,6 +60,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.16")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
 
+    implementation("org.jsoup:jsoup:1.18.3")
+
     // Documentation dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 

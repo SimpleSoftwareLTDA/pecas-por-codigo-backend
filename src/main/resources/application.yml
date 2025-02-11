@@ -7,6 +7,12 @@ spring:
     enabled: false
   jpa:
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        order_updates: true
   threads:
     virtual:
       enabled: true
