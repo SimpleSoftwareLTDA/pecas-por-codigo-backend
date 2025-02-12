@@ -66,52 +66,7 @@ class StockService(
 
         if (dtos.isEmpty()) return PageImpl(emptyList(), pageable, 0)
 
-        val stocksFromHtml = dtos.map { dto ->
-            val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
-
-            val lastDashIndex = cidadeUf.lastIndexOf("-")
-            val (city, uf) = (if (lastDashIndex >= 0) {
-                val cityPart = cidadeUf.substring(0, lastDashIndex).trim()
-                val ufPart = cidadeUf.substring(lastDashIndex + 1).trim()
-
-                cityPart to ufPart
-            } else cidadeUf to "SP")
-
-            val dynamicState = BrazilianState(
-                stateCode = uf,
-                stateName = city
-            )
-
-            val address = Address(
-                street = "Consulte por telefone",
-                city = city,
-                state = dynamicState,
-                cep = "01000-000",
-                country = "Brasil"
-            )
-
-            val supplier = Supplier(
-                name = nomeFornecedor,
-                socialName = nomeFornecedor,
-                cnpj = "",
-                address = address,
-                contact = Contact(
-                    sellerName = phoneNumber,
-                    itemsEmail = phoneNumber,
-                    itemsPhone = phoneNumber,
-                    whatsapp = phoneNumber,
-                    itemsWhatsapp = phoneNumber
-                )
-            )
-
-            Stock(
-                quantity = dto.qtd,
-                supplier = supplier,
-                item = getItemWithPriceInCents(dto)
-            )
-        }
-
-        stockPage.distinctBy { it.item.hash }
+        val stocksFromHtml = getPecasFromOldSite(dtos)
 
         return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, stocksFromHtml.size.toLong())
     }
@@ -209,7 +164,7 @@ class StockService(
                 val batchSize = 10_000
                 val savedIds = mutableSetOf<Long>()
 
-                newStocks.chunked(batchSize).parallelStream().forEach { batch ->
+                newStocks.chunked(batchSize).forEach { batch ->
                     val savedBatch = stockRepository.saveAll(batch)
 
                     savedBatch.mapNotNull { it.id }.let { savedIds.addAll(it) }
@@ -327,6 +282,54 @@ fun parseFornecedor(descricao: String): Triple<String, String, String> {
         // ou tratamos de outra forma
         Triple(descricao, "", "")
     }
+}
+
+private fun getPecasFromOldSite(dtos: List<PecaDTO>): List<Stock> {
+    val stocksFromHtml = dtos.map { dto ->
+        val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
+
+        val lastDashIndex = cidadeUf.lastIndexOf("-")
+        val (city, uf) = (if (lastDashIndex >= 0) {
+            val cityPart = cidadeUf.substring(0, lastDashIndex).trim()
+            val ufPart = cidadeUf.substring(lastDashIndex + 1).trim()
+
+            cityPart to ufPart
+        } else cidadeUf to "SP")
+
+        val dynamicState = BrazilianState(
+            stateCode = uf,
+            stateName = city
+        )
+
+        val address = Address(
+            street = "Consulte por telefone",
+            city = city,
+            state = dynamicState,
+            cep = "01000-000",
+            country = "Brasil"
+        )
+
+        val supplier = Supplier(
+            name = nomeFornecedor,
+            socialName = nomeFornecedor,
+            cnpj = "",
+            address = address,
+            contact = Contact(
+                sellerName = phoneNumber,
+                itemsEmail = phoneNumber,
+                itemsPhone = phoneNumber,
+                whatsapp = phoneNumber,
+                itemsWhatsapp = phoneNumber
+            )
+        )
+
+        Stock(
+            quantity = dto.qtd,
+            supplier = supplier,
+            item = getItemWithPriceInCents(dto)
+        )
+    }
+    return stocksFromHtml
 }
 
 private fun getItemWithPriceInCents(dto: PecaDTO): Item {
