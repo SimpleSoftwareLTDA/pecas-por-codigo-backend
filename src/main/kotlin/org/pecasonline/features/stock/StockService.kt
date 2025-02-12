@@ -23,15 +23,12 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import kotlin.collections.ArrayList
 import kotlin.io.path.pathString
 import kotlin.streams.asSequence
-import kotlin.time.measureTime
 
 private val logger = KotlinLogging.logger {}
 
@@ -62,7 +59,6 @@ class StockService(
         val pageable = PageRequest.of(page ?: 0, size ?: 10)
 
         val stockPage = stockRepository.findByItemCode(code, pageable)
-        if (stockPage.hasContent()) return stockPage
 
         val html = pecaService.buscarPeca(partNumber = code)
 
@@ -74,16 +70,12 @@ class StockService(
             val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
 
             val lastDashIndex = cidadeUf.lastIndexOf("-")
-            val (city, uf) = if (lastDashIndex >= 0) {
+            val (city, uf) = (if (lastDashIndex >= 0) {
                 val cityPart = cidadeUf.substring(0, lastDashIndex).trim()
                 val ufPart = cidadeUf.substring(lastDashIndex + 1).trim()
 
                 cityPart to ufPart
-            } else {
-                // se não houver "-",
-                // retorne cityUf como "cidade" e "SP" (ou algum default) como UF
-                cidadeUf to "SP"
-            }
+            } else cidadeUf to "SP")
 
             val dynamicState = BrazilianState(
                 stateCode = uf,
@@ -119,7 +111,9 @@ class StockService(
             )
         }
 
-        return PageImpl(stocksFromHtml, pageable, stocksFromHtml.size.toLong())
+        stockPage.distinctBy { it.item.hash }
+
+        return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, stocksFromHtml.size.toLong())
     }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
@@ -128,7 +122,6 @@ class StockService(
     override fun findStockBySupplierName(name: String, page: Int?, size: Int?): Page<Stock> =
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
-    @Transactional(rollbackFor = [Exception::class])
     override fun createStock(file: MultipartFile, emailAddress: String, token: String?) {
         val cnpj = token?.let {
             getSupplierByToken(token)
@@ -186,41 +179,47 @@ class StockService(
             val updatedIds = mutableSetOf<Long>()
 
             newStockItems.forEachIndexed { index, stockLine ->
-                val itemProcessed = processedItemsMap[stockLine.item.hash]
-                    ?: error("Item com hash=${stockLine.item.hash} não foi processado corretamente")
+                val itemProcessed = processedItemsMap[stockLine.item.hash] ?: error("Item com hash=${stockLine.item.hash} não foi processado corretamente")
 
                 val existingStock = existingStocksMap[itemProcessed.code]
 
                 when {
                     existingStock != null -> {
-                        // Se já existe, só atualiza a quantidade
                         val updatedStock = existingStock.copy(quantity = stockLine.quantity)
                         updatedStocks.add(updatedStock)
                     }
-                    else -> {
-                        // Caso contrário, é uma nova entrada de estoque
-                        newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
-                    }
-                }
 
+                    else -> newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
+                }
                 logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, " + "item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
             }
 
             if (updatedStocks.isNotEmpty()) {
-                val savedUpdated = stockRepository.saveAll(updatedStocks)
-                savedUpdated.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+                val batchSize = 10_000
 
-                logger.info { "Foram atualizados ${savedUpdated.size} registros de estoque para o fornecedor ID=${supplier.id}" }
+                updatedStocks.chunked(batchSize).forEachIndexed { index, _ ->
+                    val savedUpdated = stockRepository.saveAll(updatedStocks)
+                    savedUpdated.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+
+                    logger.info { "Lote: $index -> Foram atualizados ${savedUpdated.size} registros de estoque para o fornecedor ID=${supplier.id}" }
+                }
             }
 
             if (newStocks.isNotEmpty()) {
-                val savedNew = stockRepository.saveAll(newStocks)
-                savedNew.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+                val batchSize = 10_000
+                val savedIds = mutableSetOf<Long>()
 
-                logger.info { "Foram criados ${savedNew.size} novos registros de estoque para o fornecedor ID=${supplier.id}" }
+                newStocks.chunked(batchSize).parallelStream().forEach { batch ->
+                    val savedBatch = stockRepository.saveAll(batch)
+
+                    savedBatch.mapNotNull { it.id }.let { savedIds.addAll(it) }
+                    logger.info { "Vai salvar ${savedBatch.size} no banco." }
+                }
+
+                updatedIds.addAll(savedIds)
+                logger.info { "Total de novos registros salvos: ${savedIds.size} para o fornecedor ID=${supplier.id}" }
             }
 
-            // Notifica a conclusão
             emailSenderService.sendStockProcessingCompletionNotification(
                 supplierEmail = supplier.contact.itemsEmail,
                 supplierName = "${supplier.name} - ${supplier.cnpj}",
@@ -231,6 +230,7 @@ class StockService(
             logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $cnpj" }
         } finally {
             Files.deleteIfExists(tempFile)
+
             logger.info { "Arquivo temporário removido: ${tempFile.pathString}" }
         }
     }
@@ -238,19 +238,15 @@ class StockService(
     private fun processAllItems(allItems: List<Item>): Map<String, Item> {
         val itemsByHash = allItems.associateBy { it.hash }
         val allHashes = itemsByHash.keys
-        var existing = ArrayList<Item>(200000)
 
-        existing = itemRepository.findAllByHashIn(allHashes) as ArrayList<Item>
+        val existing = itemRepository.findAllByHashIn(allHashes)
 
-        logger.info { "Sem parallel: ${measureTime { existing.associateBy { it.hash } }}" }
         val existingMap = existing.associateBy { it.hash }
 
         val newHashes = allHashes - existingMap.keys
 
-        val newItems = newHashes.map { hash ->
-            val originalItem = itemsByHash[hash]!!
-            val category = getOrCreateCategory(originalItem.description)
-            originalItem.copy(category = category)
+        val newItems = newHashes.mapNotNull { hash ->
+            itemsByHash[hash]
         }
 
         val savedNewItems = itemRepository.saveAll(newItems)
@@ -344,8 +340,7 @@ private fun getItemWithPriceInCents(dto: PecaDTO): Item {
         code = dto.codigo,
         hash = "",
         description = dto.descricao,
-        priceInCents = precoEmCentavos.toLong(),
-        category = Category(name = "Genérica")
+        priceInCents = precoEmCentavos
     )
     return item
 }

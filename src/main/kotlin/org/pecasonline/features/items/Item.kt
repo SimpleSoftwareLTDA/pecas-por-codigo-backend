@@ -6,11 +6,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
 import org.pecasonline.common.HashGenerator.HEX_FORMAT
 import org.pecasonline.common.HashGenerator.MD5_DIGEST
-import org.pecasonline.features.category.Category
 import java.util.*
 
 @Entity
@@ -41,11 +38,7 @@ data class Item(
 
     val hash: String,
 
-    @JsonProperty("categoria")
-    @JsonAlias(value = ["category"])
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = true)
-    val category: Category? = null
+    val category: String = "Não informada"
 
 ) {
     private fun hash(): String {
