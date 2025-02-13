@@ -29,7 +29,7 @@ class SubscriptionController(
         return ResponseEntity.ok(response)
     }
 
-    @PostMapping("/v1/api/payments/status")
+    @PostMapping("/api/v1/payments/status")
     fun handleWebhook(@RequestBody payload: AsaasWebhook): ResponseEntity<String> {
         logger.debug { "Recebido Webhook do Asaas: $payload" }
 
@@ -43,7 +43,7 @@ class SubscriptionController(
 
     private val bannerUrls = mutableListOf<String>()
 
-    @GetMapping("/v1/api/banner")
+    @GetMapping("/api/v1/banner")
     @Cacheable("banners")
     fun getBannerUrl(): String? {
         when {
