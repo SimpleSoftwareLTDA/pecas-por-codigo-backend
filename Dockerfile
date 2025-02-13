@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine AS build
+FROM amazoncorretto:23-alpine AS build
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN ./gradlew --no-daemon --parallel --build-cache clean bootJar
 
 # Production stage: use a minimal JRE image for running the app
-FROM amazoncorretto:21-alpine AS runtime
+FROM amazoncorretto:23-alpine AS runtime
 
 # Set working directory and copy over the built JAR file
 WORKDIR /app
@@ -26,4 +26,4 @@ COPY --from=build /app/build/libs/*.jar app.jar
 # Expose the application port
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseStringDeduplication", "-Xms256m", "-Xmx512m", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:+UseStringDeduplication", "-Xms512m", "-Xmx750m", "-jar", "/app/app.jar"]
