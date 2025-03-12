@@ -73,10 +73,12 @@ class StockController(
     ) {
         MDC.putCloseable("token", token).use {
             MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
-                val uploadDir = File("C:/meus-arquivos-temporarios").apply { mkdirs() }
+                val tempDir = System.getProperty("java.io.tmpdir")
+
+                val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
                 val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
 
-                file.transferTo(tempFile) // Salva o arquivo no sistema de arquivos
+                file.transferTo(tempFile)
 
                 stockService.createStock(file = tempFile, token = token)
             }
