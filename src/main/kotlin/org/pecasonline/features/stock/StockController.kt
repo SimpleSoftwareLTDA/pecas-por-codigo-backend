@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.util.*
 
 @Validated
@@ -72,7 +73,12 @@ class StockController(
     ) {
         MDC.putCloseable("token", token).use {
             MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
-                stockService.createStock(file = file, token = token)
+                val uploadDir = File("C:/meus-arquivos-temporarios").apply { mkdirs() }
+                val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
+
+                file.transferTo(tempFile) // Salva o arquivo no sistema de arquivos
+
+                stockService.createStock(file = tempFile, token = token)
             }
         }
     }
