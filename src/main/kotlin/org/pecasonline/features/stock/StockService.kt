@@ -22,8 +22,10 @@ import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -77,7 +79,8 @@ class StockService(
     override fun findStockBySupplierName(name: String, page: Int?, size: Int?): Page<Stock> =
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
-    override fun createStock(file: MultipartFile, emailAddress: String, token: String?) {
+    @Async
+    override fun createStock(file: File, emailAddress: String, token: String?) {
         val cnpj = token?.let {
             getSupplierByToken(token)
         } ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
@@ -93,13 +96,15 @@ class StockService(
         }
 
         val supplier = supplierRepository.findSupplierByCnpj(cnpj)
+
         subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
 
-        if (file.isEmpty) {
+        if (file.length() == 0L) {
             val errorMessage = "Arquivo vazio. Selecione um arquivo de estoque com dados para upload."
+
             emailSenderService.sendStockProcessingErrorNotification(
                 supplierEmail = emailAddress,
-                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
+                fileName = file.name,
                 errorMessage = errorMessage
             )
             throw IllegalArgumentException(errorMessage)
@@ -110,17 +115,14 @@ class StockService(
         emailSenderService.sendStockProcessingStartNotification(
             supplierEmail = supplier.contact.itemsEmail,
             supplierName = "${supplier.name} - ${supplier.cnpj}",
-            fileName = file.originalFilename ?: DEFAULT_FILE_NAME
+            fileName = file.name
         )
 
-        val tempDir = Files.createTempDirectory("pecas-")
-        val tempFile = saveTempFile(file, tempDir)
-
         try {
-            val newStockItems = getFileValuesOptimized(tempFile)
+            val newStockItems = getFileValuesOptimized(file)
             logger.info { "Total de itens válidos no arquivo: ${newStockItems.size}" }
 
-            // 1) Extrai todos os itens do arquivo (sem categoria) e processa em lote (batch)
+            // 1) Extrai todos os itens do arquivo e processa em lote (batch)
             val allItemsFromFile = newStockItems.map { it.item }
             val processedItemsMap = processAllItems(allItemsFromFile)
 
@@ -143,17 +145,15 @@ class StockService(
                         val updatedStock = existingStock.copy(quantity = stockLine.quantity)
                         updatedStocks.add(updatedStock)
                     }
-
                     else -> newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
                 }
-                logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, " + "item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
+                logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
             }
 
             if (updatedStocks.isNotEmpty()) {
                 val batchSize = 10_000
-
-                updatedStocks.chunked(batchSize).forEachIndexed { index, _ ->
-                    val savedUpdated = stockRepository.saveAll(updatedStocks)
+                updatedStocks.chunked(batchSize).forEachIndexed { index, batch ->
+                    val savedUpdated = stockRepository.saveAll(batch)
                     savedUpdated.mapNotNull { it.id }.let { updatedIds.addAll(it) }
 
                     logger.info { "Lote: $index -> Foram atualizados ${savedUpdated.size} registros de estoque para o fornecedor ID=${supplier.id}" }
@@ -166,7 +166,6 @@ class StockService(
 
                 newStocks.chunked(batchSize).forEach { batch ->
                     val savedBatch = stockRepository.saveAll(batch)
-
                     savedBatch.mapNotNull { it.id }.let { savedIds.addAll(it) }
                     logger.info { "Vai salvar ${savedBatch.size} no banco." }
                 }
@@ -178,15 +177,14 @@ class StockService(
             emailSenderService.sendStockProcessingCompletionNotification(
                 supplierEmail = supplier.contact.itemsEmail,
                 supplierName = "${supplier.name} - ${supplier.cnpj}",
-                fileName = file.originalFilename ?: DEFAULT_FILE_NAME,
+                fileName = file.name,
                 updatedItemCount = updatedIds.size
             )
 
             logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $cnpj" }
         } finally {
-            Files.deleteIfExists(tempFile)
-
-            logger.info { "Arquivo temporário removido: ${tempFile.pathString}" }
+            file.delete()
+            logger.info { "Arquivo temporário removido: ${file.path}" }
         }
     }
 
@@ -234,14 +232,15 @@ class StockService(
             Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING)
         }
 
-    private fun getFileValuesOptimized(tempFile: Path): List<Stock> =
-        Files.lines(tempFile).use { lines ->
+    private fun getFileValuesOptimized(file: File): List<Stock> =
+        Files.lines(file.toPath()).use { lines ->
             lines.asSequence()
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
                 .mapNotNull { parseStockLine(it) }
                 .toList()
         }
+
 
     private fun parseStockLine(line: String): Stock? {
         val columns = line.split(whitespaceRegex, 4).filter { it.isNotEmpty() }

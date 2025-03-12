@@ -1,7 +1,6 @@
 package org.pecasonline.features.stock.service
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -30,7 +29,6 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.nio.file.Files
 import java.util.*
 
 @ExtendWith(SpringExtension::class)
@@ -59,7 +57,7 @@ class StockServiceTest {
     @BeforeEach
     fun setup() {
         sampleCategory = Category(id = 1, name = "Electronics")
-        sampleItem = Item(id = 1, hash = "sampleHash", description = "Test Item", category = sampleCategory, code = "CODE")
+        sampleItem = Item(id = 1, hash = "sampleHash", description = "Test Item", code = "CODE")
         sampleStock = Stock(id = 1, item = sampleItem, quantity = 100)
     }
 
@@ -129,17 +127,5 @@ class StockServiceTest {
         assertThrows<NotFoundException> {
             stockService.createStock(mockFile, token = null)
         }
-    }
-
-    @Test
-    fun `processItem should assign category and save item if not exists`() {
-        `when`(itemRepository.findByHash("sampleHash")).thenReturn(null)
-        `when`(categoryService.findByNameIgnoreCase(anyOrNull())).thenReturn(sampleCategory)
-        `when`(itemRepository.save(any(Item::class.java))).thenReturn(sampleItem)
-
-        val result = stockService.processItem(sampleItem)
-
-        assertEquals(sampleItem, result)
-        verify(itemRepository).save(any(Item::class.java))
     }
 }

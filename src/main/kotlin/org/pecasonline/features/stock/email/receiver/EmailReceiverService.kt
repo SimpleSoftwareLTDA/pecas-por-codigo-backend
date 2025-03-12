@@ -115,7 +115,7 @@ class EmailReceiverService(
 
                                     runCatching {
                                         stockService.createStock(
-                                            file = streamToMultipartFile(inputStream, fileName),
+                                            file = streamToFile(inputStream, fileName),
                                             emailAddress = senderEmail
                                         )
                                     }.onFailure { ex ->
@@ -211,15 +211,13 @@ fun stringToMultipartFile(content: String, fileName: String): MultipartFile = Cu
     content = content.toByteArray(StandardCharsets.UTF_8)
 )
 
-fun streamToMultipartFile(inputStream: InputStream, fileName: String): MultipartFile {
-    val content = inputStream.readBytes()
+fun streamToFile(inputStream: InputStream, fileName: String): File {
+    val tempFile = File.createTempFile("upload-", "-$fileName")
 
-    return CustomMultipartFile(
-        name = fileName,
-        originalFilename = fileName,
-        contentType = TEXT_PLAIN_VALUE,
-        content = content
-    )
+    tempFile.outputStream().use { output ->
+        inputStream.copyTo(output)
+    }
+    return tempFile
 }
 
 fun extractEmailAddress(input: String): String? {
