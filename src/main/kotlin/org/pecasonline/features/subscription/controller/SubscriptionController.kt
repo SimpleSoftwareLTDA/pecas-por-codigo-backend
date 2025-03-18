@@ -47,7 +47,11 @@ class SubscriptionController(
     @Cacheable("banners")
     fun getBannerUrl(): String? {
         when {
-            bannerUrls.isEmpty() -> bannerUrls.addAll(subscriptionService.getBigBannerUrls())
+            bannerUrls.isEmpty() -> bannerUrls.addAll(subscriptionService.getBigBannerUrls().map { url ->
+                val defaultBannerUrl = "https://pub-6506d3d953f94560b493b69d4b68f549.r2.dev/Pe%C3%A7as%20Online%20X%20-%20Template%20Para%20Banner.png"
+
+                url.ifBlank { defaultBannerUrl }
+            })
         }
 
         when {
