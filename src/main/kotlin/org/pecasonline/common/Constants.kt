@@ -10,6 +10,8 @@ object Constants {
     const val INVALID_CNPJ = "CNPJ inválido"
     const val DEFAULT_FILE_NAME = "Arquivo de estoque"
     const val CONTACT_EMAIL = "contato@pecasonlinex.com.br"
+    const val DEFAULT_BANNER_URL = "https://banners.pecasonlinex.com.br/Pe%C3%A7as%20Online%20X%20-%20Template%20Para%20Banner.png"
+
 }
 
 object SecureRandomSingleton {

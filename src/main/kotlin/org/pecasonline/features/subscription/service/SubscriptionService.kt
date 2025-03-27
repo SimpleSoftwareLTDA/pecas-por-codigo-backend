@@ -104,7 +104,37 @@ class SubscriptionService(
         }
     }
 
+    fun checkIfSubscriptionIsVipOrThrow(
+        supplier: Supplier,
+        cnpj: String
+    ) {
+        when {
+            supplier.subscription?.status != SubscriptionStatus.ACTIVE && supplier.subscription?.plan?.name == SubscriptionPlan.VIP.name -> {
+                logger.info { supplier.subscription?.status }
+
+                val errorMessage = "Fornecedor com CNPJ: $cnpj não tem uma assinatura ativa."
+
+                logger.info { errorMessage }
+
+                error(errorMessage)
+            }
+        }
+    }
+
     fun getBigBannerUrls(): List<String> = subscriptionRepository.findBigBannerUrls().filterNotNull()
+
+    fun setBigBannerUrlForSupplier(cnpj: String, newBannerUrl: String) {
+        val supplier = supplierRepository.findSupplierByCnpj(cnpj)
+
+        checkIfSubscriptionIsActiveOrThrow(supplier = supplier, cnpj = cnpj)
+
+        checkIfSubscriptionIsVipOrThrow(supplier = supplier, cnpj = cnpj)
+
+        subscriptionRepository.updateBigBannerUrlByCnpj(
+            cnpj = cnpj,
+            bigBannerUrl = newBannerUrl
+        )
+    }
 }
 
 fun String.toSubscriptionStatus(): SubscriptionStatus = when (this) {

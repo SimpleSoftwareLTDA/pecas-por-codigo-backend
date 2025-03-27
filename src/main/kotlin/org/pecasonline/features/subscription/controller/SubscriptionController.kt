@@ -1,18 +1,27 @@
 package org.pecasonline.features.subscription.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.hibernate.validator.constraints.br.CNPJ
+import org.pecasonline.common.Constants.DEFAULT_BANNER_URL
 import org.pecasonline.common.httpclients.dto.CreateClientRequest
 import org.pecasonline.common.httpclients.dto.CreateClientResponse
+import org.pecasonline.common.upload.UploaderService
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.subscription.dto.AsaasWebhook
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
 import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
@@ -35,7 +44,6 @@ class SubscriptionController(
 
         val asaasCustomerId = payload.payment.customer
 
-
         subscriptionService.updateSubscriptionStatusByWebhook(asaasCustomerId, payload.event)
 
         return ResponseEntity.status(HttpStatus.OK).body("Webhook recebido com sucesso!")
@@ -44,18 +52,16 @@ class SubscriptionController(
     private val bannerUrls = mutableListOf<String>()
 
     @GetMapping("/api/v1/banner")
-    @Cacheable("banners")
     fun getBannerUrl(): String? {
+
         when {
             bannerUrls.isEmpty() -> bannerUrls.addAll(subscriptionService.getBigBannerUrls().map { url ->
-                val defaultBannerUrl = "https://pub-6506d3d953f94560b493b69d4b68f549.r2.dev/Pe%C3%A7as%20Online%20X%20-%20Template%20Para%20Banner.png"
-
-                url.ifBlank { defaultBannerUrl }
+                url.ifBlank { DEFAULT_BANNER_URL }
             })
         }
 
         when {
-            bannerUrls.isEmpty() -> return null
+            bannerUrls.isEmpty() -> return DEFAULT_BANNER_URL
 
             else -> {
                 val randomIndex = ThreadLocalRandom.current().nextInt(bannerUrls.size)
@@ -63,5 +69,11 @@ class SubscriptionController(
                 return bannerUrls[randomIndex]
             }
         }
+    }
+
+    @PostMapping("/api/v1/banner")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    fun setBannerUrl(@RequestParam("novo-banner") newBannerUrl: String, @RequestParam("cnpj") @CNPJ cnpj: String) {
+        subscriptionService.setBigBannerUrlForSupplier(newBannerUrl = newBannerUrl, cnpj = cnpj)
     }
 }
