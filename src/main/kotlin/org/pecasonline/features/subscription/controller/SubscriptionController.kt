@@ -46,23 +46,12 @@ class SubscriptionController(
     private val bannerUrls = mutableListOf<String>()
 
     @GetMapping("/api/v1/banner")
-    fun getBannerUrl(): String? {
+    fun getBannerUrl(): String {
+        val bannerUrls = subscriptionService.getBigBannerUrls().filter { it.isNotBlank() }
+        val availableBanners = bannerUrls + DEFAULT_BANNER_URL
 
-        when {
-            bannerUrls.isEmpty() -> bannerUrls.addAll(subscriptionService.getBigBannerUrls().map { url ->
-                url.ifBlank { DEFAULT_BANNER_URL }
-            })
-        }
-
-        when {
-            bannerUrls.isEmpty() -> return DEFAULT_BANNER_URL
-
-            else -> {
-                val randomIndex = ThreadLocalRandom.current().nextInt(bannerUrls.size)
-
-                return bannerUrls[randomIndex]
-            }
-        }
+        val randomIndex = ThreadLocalRandom.current().nextInt(availableBanners.size)
+        return availableBanners[randomIndex]
     }
 
     @PostMapping("/api/v1/banner")
