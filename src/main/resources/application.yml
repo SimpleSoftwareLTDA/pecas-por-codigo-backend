@@ -23,3 +23,5 @@ spring:
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://www.pecasonlinex.com.br}
+
+

@@ -12,7 +12,8 @@ object Constants {
     const val CONTACT_EMAIL = "contato@pecasonlinex.com.br"
     val DEFAULT_BANNER_URL = listOf(
         "https://banners.pecasonlinex.com.br/Teste.png",
-        "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png"
+        "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png",
+        "https://i.postimg.cc/KvN28mP2/efetuou-o-cadastro-j.png"
     )
 }
 
