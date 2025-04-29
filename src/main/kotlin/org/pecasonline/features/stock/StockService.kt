@@ -60,17 +60,25 @@ class StockService(
     override fun findStockByItemCode(code: String, page: Int?, size: Int?): Page<Stock> {
         val pageable = PageRequest.of(page ?: 0, size ?: 10)
 
+        logger.info { "Buscando estoque pelo código do item: $code, página: $page, tamanho: $size" }
+
         val stockPage = stockRepository.findByItemCode(code, pageable)
+        logger.info { "Estoque encontrado no banco de dados: ${stockPage.content.size} itens" }
 
         val html = pecaService.buscarPeca(partNumber = code)
+        logger.info { "Resultado da busca no site antigo: ${html.length} caracteres" }
 
         val dtos = parseResultadoPesquisa(html)
+        logger.info { "DTOs encontrados no site antigo: ${dtos.size} itens" }
 
-        if (dtos.isEmpty()) return PageImpl(emptyList(), pageable, 0)
+        if (dtos.isEmpty()) {
+            logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco." }
+            return PageImpl(stockPage.content, pageable, stockPage.totalElements)
+        }
 
         val stocksFromHtml = getPecasFromOldSite(dtos)
-
-        return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, stocksFromHtml.size.toLong())
+        logger.info { "Estoque encontrado no site antigo: ${stocksFromHtml.size} itens" }
+        return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, (stocksFromHtml.size + stockPage.totalElements))
     }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
@@ -346,4 +354,3 @@ private fun getItemWithPriceInCents(dto: PecaDTO): Item {
     )
     return item
 }
-
