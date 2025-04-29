@@ -1,7 +1,6 @@
 package org.pecasonline.features.stock
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.pecasonline.common.Constants.DEFAULT_FILE_NAME
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.common.httpclients.PecaDTO
 import org.pecasonline.common.httpclients.PecaService
@@ -29,7 +28,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.pathString
 import kotlin.streams.asSequence
 
 private val logger = KotlinLogging.logger {}
@@ -42,7 +40,7 @@ class StockService(
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
     private val subscriptionService: SubscriptionService,
-    private val pecaService: PecaService
+    private val oldPecasService: PecaService
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -65,7 +63,7 @@ class StockService(
         val stockPage = stockRepository.findByItemCode(code, pageable)
         logger.info { "Estoque encontrado no banco de dados: ${stockPage.content.size} itens" }
 
-        val html = pecaService.buscarPeca(partNumber = code)
+        val html = oldPecasService.buscarPeca(partNumber = code)
         logger.info { "Resultado da busca no site antigo: ${html.length} caracteres" }
 
         val dtos = parseResultadoPesquisa(html)

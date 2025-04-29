@@ -1,14 +1,12 @@
 package org.pecasonline.common.httpclients
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jsoup.Jsoup
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import kotlin.collections.*
 
-/**
- * 1) Definição do cliente Feign para chamar a URL do site
- */
 @FeignClient(name = "pecasOnlineClient", url = "http://www.pecas-on-line.com.br")
 interface PecasOnlineFeignClient {
 
@@ -22,15 +20,21 @@ interface PecasOnlineFeignClient {
     ): String
 }
 
-/**
- * 2) Serviço que usa o FeignClient para obter o HTML
- */
+private val logger = KotlinLogging.logger {}
+
 @Service
 class PecaService(
     private val pecasOnlineFeignClient: PecasOnlineFeignClient
 ) {
     fun buscarPeca(partNumber: String): String {
-        return pecasOnlineFeignClient.consultarPeca(partNumber = partNumber)
+        return runCatching {
+            pecasOnlineFeignClient.consultarPeca(partNumber = partNumber)
+        }.onSuccess {
+            logger.info { "Successfully fetched part $partNumber" }
+        }.onFailure {
+            logger.error(it) { "Failed to fetch part $partNumber" }
+        }.getOrThrow()
+
     }
 }
 
@@ -108,19 +112,4 @@ fun parseResultadoPesquisa(html: String): List<PecaDTO> {
     }
 
     return listaDTO
-}
-
-/**
- * 5) Controller que expõe um endpoint para consumir essa lógica
- */
-@RestController
-@RequestMapping("v1/api/old")
-class OldController(private val service: PecaService) {
-
-    @GetMapping("/{code}")
-    fun getOldCatalog(@PathVariable code: String): List<PecaDTO> {
-        val html = service.buscarPeca(partNumber = code)
-
-        return parseResultadoPesquisa(html)
-    }
 }
