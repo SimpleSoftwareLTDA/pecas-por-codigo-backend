@@ -71,7 +71,7 @@ class StockService(
 
         if (dtos.isEmpty()) {
             logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco." }
-            return PageImpl(stockPage.content, pageable, stockPage.totalElements)
+            return PageImpl(stockPage.content.distinctBy { it.item.hash }, pageable, stockPage.totalElements)
         }
 
         val stocksFromHtml = getPecasFromOldSite(dtos)
