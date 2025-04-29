@@ -33,7 +33,7 @@ class PecaService(
             logger.info { "Successfully fetched part $partNumber" }
         }.onFailure {
             logger.error(it) { "Failed to fetch part $partNumber" }
-        }.getOrThrow()
+        }.getOrElse { "" }
 
     }
 }
