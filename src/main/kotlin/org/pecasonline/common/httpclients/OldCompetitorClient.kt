@@ -1,13 +1,17 @@
 package org.pecasonline.common.httpclients
 
+import feign.RequestInterceptor
+import feign.RequestTemplate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jsoup.Jsoup
 import org.springframework.cloud.openfeign.FeignClient
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import kotlin.collections.*
 
-@FeignClient(name = "pecasOnlineClient", url = "http://www.pecas-on-line.com.br")
+@FeignClient(name = "pecasOnlineClient", url = "http://www.pecas-on-line.com.br", configuration = [PecasOnlineFeignClientConfig::class])
 interface PecasOnlineFeignClient {
 
     @GetMapping("/consultacod.php4")
@@ -18,6 +22,20 @@ interface PecasOnlineFeignClient {
         @RequestParam("Ordem") ordem: String = "Cidade",
         @RequestParam("Pesquisar") pesquisar: String = "Pesquisar"
     ): String
+}
+
+@Configuration
+class PecasOnlineFeignClientConfig {
+
+    @Bean
+    fun chromeUserAgentInterceptor(): RequestInterceptor {
+        return RequestInterceptor { template: RequestTemplate ->
+            template.header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+    }
 }
 
 private val logger = KotlinLogging.logger {}
