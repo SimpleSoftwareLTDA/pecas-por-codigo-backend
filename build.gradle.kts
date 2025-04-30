@@ -64,6 +64,9 @@ dependencies {
 
     implementation("io.github.openfeign:feign-okhttp")
 
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
     // Documentation dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 

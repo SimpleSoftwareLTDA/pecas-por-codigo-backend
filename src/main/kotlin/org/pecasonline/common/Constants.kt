@@ -6,15 +6,16 @@ import java.util.HexFormat
 
 object Constants {
     const val BASE_ENDPOINT = "/api/v1"
-    const val DEFAULT_GROUP_NAME = "Novo Peças Online"
-    const val INVALID_CNPJ = "CNPJ inválido"
-    const val DEFAULT_FILE_NAME = "Arquivo de estoque"
     const val CONTACT_EMAIL = "contato@pecasonlinex.com.br"
+    const val DEFAULT_GROUP_NAME = "Novo Peças Online"
     val DEFAULT_BANNER_URL = listOf(
         "https://banners.pecasonlinex.com.br/Teste.png",
         "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png",
         "https://i.postimg.cc/KvN28mP2/efetuou-o-cadastro-j.png"
     )
+    const val DEFAULT_FILE_NAME = "Arquivo de estoque"
+    const val OLD_COMPETITOR_URL = "http://www.pecas-on-line.com.br"
+    const val INVALID_CNPJ = "CNPJ inválido"
 }
 
 object SecureRandomSingleton {
