@@ -1,6 +1,6 @@
 package org.pecasonline.common.httpclients
 
-import org.pecasonline.common.httpclients.config.FeignConfig
+import org.pecasonline.common.httpclients.config.AsaasHeadersConfig
 import org.pecasonline.common.httpclients.dto.CreateClientRequest
 import org.pecasonline.common.httpclients.dto.CreateClientResponse
 import org.pecasonline.common.httpclients.dto.CreateSubscriptionRequest
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-@FeignClient(name = "asaasClient", url = "\${asaas.api.base-url}", configuration = [FeignConfig::class])
+@FeignClient(name = "asaasClient", url = "\${asaas.api.base-url}", configuration = [AsaasHeadersConfig::class])
 interface AsaasClient {
 
     @PostMapping("/customers")
