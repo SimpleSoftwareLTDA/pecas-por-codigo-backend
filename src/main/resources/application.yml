@@ -20,6 +20,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  data:
+    redis:
+      host: backend.pecasonlinex.com.br
+      port: 6379
+      password: ${REDIS_PASSWORD:Backtalk1-Anyplace5-Magnolia8-Refute6-Coke7}
+      time-to-live: 60000
+
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://www.pecasonlinex.com.br}
@@ -28,5 +35,5 @@ decodo:
   proxy:
     host: br.decodo.com
     port: 10001
-    username: spee0c0nv1
-    password: "b=9Bv5atx3GNWfqt4u"
+    username: ${DECODO_USER:user-spee0c0nv1-sessionduration-60}
+    password: ${DECODO_PASS:b=9Bv5atx3GNWfqt4u}
