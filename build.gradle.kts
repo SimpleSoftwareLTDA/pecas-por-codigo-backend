@@ -62,6 +62,8 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.18.3")
 
+    implementation("io.github.openfeign:feign-okhttp")
+
     // Documentation dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 

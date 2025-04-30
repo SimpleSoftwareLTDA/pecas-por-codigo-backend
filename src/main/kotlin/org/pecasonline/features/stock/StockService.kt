@@ -2,10 +2,10 @@ package org.pecasonline.features.stock
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pecasonline.common.exceptions.NotFoundException
-import org.pecasonline.common.httpclients.PecaDTO
-import org.pecasonline.common.httpclients.PecaService
-import org.pecasonline.common.httpclients.parseResultadoPesquisa
+import org.pecasonline.common.httpclients.dto.PecaDTO
 import org.pecasonline.common.isInvalidColumnSize
+import org.pecasonline.common.parseResultadoPesquisa
+import org.pecasonline.common.service.OldPecasService
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.category.Category
@@ -40,7 +40,7 @@ class StockService(
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
     private val subscriptionService: SubscriptionService,
-    private val oldPecasService: PecaService
+    private val oldPecasService: OldPecasService
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -63,7 +63,7 @@ class StockService(
         val stockPage = stockRepository.findByItemCode(code, pageable)
         logger.info { "Estoque encontrado no banco de dados: ${stockPage.content.size} itens" }
 
-        val html = oldPecasService.buscarPeca(partNumber = code)
+        val html = oldPecasService.buscarPecasNoAntigo(partNumber = code)
         logger.info { "Resultado da busca no site antigo: ${html.length} caracteres" }
 
         val dtos = parseResultadoPesquisa(html)
@@ -71,11 +71,13 @@ class StockService(
 
         if (dtos.isEmpty()) {
             logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco." }
+
             return PageImpl(stockPage.content.distinctBy { it.item.hash }, pageable, stockPage.totalElements)
         }
 
         val stocksFromHtml = getPecasFromOldSite(dtos)
         logger.info { "Estoque encontrado no site antigo: ${stocksFromHtml.size} itens" }
+
         return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, (stocksFromHtml.size + stockPage.totalElements))
     }
 
@@ -142,7 +144,8 @@ class StockService(
             val updatedIds = mutableSetOf<Long>()
 
             newStockItems.forEachIndexed { index, stockLine ->
-                val itemProcessed = processedItemsMap[stockLine.item.hash] ?: error("Item com hash=${stockLine.item.hash} não foi processado corretamente")
+                val itemProcessed = processedItemsMap[stockLine.item.hash]
+                    ?: error("Item com hash=${stockLine.item.hash} não foi processado corretamente")
 
                 val existingStock = existingStocksMap[itemProcessed.code]
 
@@ -151,6 +154,7 @@ class StockService(
                         val updatedStock = existingStock.copy(quantity = stockLine.quantity)
                         updatedStocks.add(updatedStock)
                     }
+
                     else -> newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
                 }
                 logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
