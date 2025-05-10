@@ -59,4 +59,9 @@ class SubscriptionController(
     fun setBannerUrl(@RequestParam("novo-banner") newBannerUrl: String, @RequestParam("cnpj") @CNPJ cnpj: String) {
         subscriptionService.setBigBannerUrlForSupplier(newBannerUrl = newBannerUrl, cnpj = cnpj)
     }
+
+    @GetMapping("/api/v1/banner/all")
+    fun getAllBannerUrls(): List<String> {
+        return subscriptionService.getBigBannerUrls()
+    }
 }
