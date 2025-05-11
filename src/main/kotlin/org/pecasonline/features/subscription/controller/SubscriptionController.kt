@@ -62,6 +62,6 @@ class SubscriptionController(
 
     @GetMapping("/api/v1/banner/all")
     fun getAllBannerUrls(): List<String> {
-        return subscriptionService.getBigBannerUrls()
+        return subscriptionService.getBigBannerUrls().filter { it.isNotBlank() }
     }
 }
