@@ -11,12 +11,17 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.subscription.dto.CreateSubscription
 import org.pecasonline.features.subscription.entities.Subscription
+import org.pecasonline.features.subscription.entities.SubscriptionStatus
 import org.pecasonline.features.subscription.repository.SubscriptionRepository
 import org.pecasonline.features.supplier.domain.Supplier
+import org.pecasonline.features.supplier.repository.SupplierRepository
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class SubscriptionServiceTest {
 
@@ -25,6 +30,12 @@ class SubscriptionServiceTest {
 
     @Mock
     private lateinit var subscriptionRepository: SubscriptionRepository
+
+    @Mock
+    private lateinit var bankingService: BankingService
+
+    @Mock
+    private lateinit var supplierRepository: SupplierRepository
 
     @InjectMocks
     private lateinit var subscriptionService: SubscriptionService
@@ -65,23 +76,30 @@ class SubscriptionServiceTest {
         )
 
         whenever(planService.getPlanById(subscriptionDto.planId)).thenReturn(plan)
-        whenever(subscriptionRepository.save(any())).thenReturn(
-            Subscription(
-                id = 1,
-                paymentDay = subscriptionDto.paymentDay,
-                supplier = supplier,
-                plan = plan,
-                bigBannerUrl = subscriptionDto.bigBannerUrl,
-                smallBannerUrl = subscriptionDto.smallBannerUrl
-            )
-        )
+        whenever(subscriptionRepository.save(any())).thenAnswer { invocation ->
+            invocation.getArgument<Subscription>(0)
+        }
 
         val subscription = subscriptionService.createSubscription(subscriptionDto, supplier)
 
         assertEquals(subscription.paymentDay, subscriptionDto.paymentDay)
         assertEquals(subscription.plan, plan)
         assertEquals(subscription.supplier, supplier)
+        assertEquals(org.pecasonline.features.subscription.entities.SubscriptionStatus.ACTIVE, subscription.status)
         verify(subscriptionRepository).save(any())
+    }
+
+    @Test
+    fun `calculateNextDueDate should return date 30 days from now`() {
+        // Arrange
+        val paymentDay = 15 // This should be ignored in our implementation
+        val expectedDate = LocalDate.now().plusDays(30).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+        // Act
+        val result = subscriptionService.calculateNextDueDate(paymentDay)
+
+        // Assert
+        assertEquals(expectedDate, result)
     }
 
     @Test

@@ -45,6 +45,7 @@ class SubscriptionService(
         bankingService.createSubscription(subscriptionRequest)
 
         val subscription = subscriptionDto.toSubscription(supplier, chosenPlan)
+        subscription.status = SubscriptionStatus.ACTIVE
 
         return subscriptionRepository.save(subscription)
     }

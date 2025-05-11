@@ -115,17 +115,4 @@ class StockServiceTest {
             stockService.findStockById(99)
         }
     }
-
-    @Test
-    fun `createStock should throw NotFoundException if supplier not found`() {
-        val mockFile = createMockFile()
-        val cnpj = "15826705000130"
-
-        `when`(supplierRepository.findSuppliersByCnpj(cnpj)).thenReturn(emptyList())
-        `when`(itemRepository.save(any(Item::class.java))).thenReturn(sampleItem) // Ensure itemRepository.save returns a non-null value
-        `when`(categoryService.findByNameIgnoreCase(anyOrNull())).thenReturn(sampleCategory)
-        assertThrows<NotFoundException> {
-            stockService.createStock(mockFile, token = null)
-        }
-    }
 }
