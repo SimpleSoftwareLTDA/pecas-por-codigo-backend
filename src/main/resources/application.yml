@@ -25,7 +25,7 @@ spring:
       host: backend.pecasonlinex.com.br
       port: 6379
       password: ${REDIS_PASSWORD:Backtalk1-Anyplace5-Magnolia8-Refute6-Coke7}
-      time-to-live: 60000
+      time-to-live: 120000
 
 app:
   url: ${CURRENT_URL:}
