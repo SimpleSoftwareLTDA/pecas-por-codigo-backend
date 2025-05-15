@@ -63,7 +63,7 @@ class StockService(
         val stockPage = stockRepository.findByItemCode(code, pageable)
         logger.info { "Estoque encontrado no banco de dados: ${stockPage.content.size} itens" }
 
-        val html = oldPecasService.buscarPecasNoAntigo(partNumber = code)
+        val html = oldPecasService.buscarPecasNoAntigo(code = code)
         logger.info { "Resultado da busca no site antigo: ${html.length} caracteres" }
 
         val dtos = parseResultadoPesquisa(html)
