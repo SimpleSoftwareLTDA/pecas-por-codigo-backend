@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger {}
 @Service
 class OldPecasService(val blah: OkHttpClient) {
 
-    @Cacheable(value = ["ReCaptchaV2"], key = "#code")
+//    @Cacheable(value = ["ReCaptchaV2"], key = "#code")
     fun buscarPecasNoAntigo(code: String): String {
         return runCatching {
             val captchaTokenResult = ReCaptchaV2(blah).capSolver(code)
