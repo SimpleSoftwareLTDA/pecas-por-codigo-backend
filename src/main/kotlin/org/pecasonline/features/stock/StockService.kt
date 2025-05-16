@@ -70,7 +70,7 @@ class StockService(
         logger.info { "DTOs encontrados no site antigo: ${dtos.size} itens" }
 
         if (dtos.isEmpty()) {
-            logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco." }
+            logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco. ${stockPage.size}" }
 
             return PageImpl(stockPage.content.distinctBy { it.item.hash }, pageable, stockPage.totalElements)
         }
