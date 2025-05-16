@@ -11,9 +11,9 @@ private val logger = KotlinLogging.logger {}
 @Service
 class OldPecasService(val blah: OkHttpClient) {
 
-//    @Cacheable(value = ["ReCaptchaV2"], key = "#code")
-    fun buscarPecasNoAntigo(code: String): String {
-        return runCatching {
+    @Cacheable(value = ["ReCaptchaV2"], key = "#code")
+    fun buscarPecasNoAntigo(code: String): String =
+        runCatching {
             val captchaTokenResult = ReCaptchaV2(blah).capSolver(code)
 
             when {
@@ -21,6 +21,7 @@ class OldPecasService(val blah: OkHttpClient) {
                     logger.warn { "Failed to obtain reCAPTCHA token." }
                     return ""
                 }
+
                 else -> {
                     val searchResult = ReCaptchaV2(blah).performSearch(recaptchaToken = captchaTokenResult, code = code)
                     searchResult
@@ -31,5 +32,4 @@ class OldPecasService(val blah: OkHttpClient) {
         }.onFailure {
             logger.error(it) { "Failed to fetch part $code" }
         }.getOrElse { "" }
-    }
 }
