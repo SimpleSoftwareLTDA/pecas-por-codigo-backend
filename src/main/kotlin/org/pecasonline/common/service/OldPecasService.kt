@@ -1,20 +1,20 @@
 package org.pecasonline.common.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.pecasonline.common.httpclients.ReCaptchaV2.capSolver
-import org.pecasonline.common.httpclients.ReCaptchaV2.performSearch
+import okhttp3.OkHttpClient
+import org.pecasonline.common.httpclients.ReCaptchaV2
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 private val logger = KotlinLogging.logger {}
 
 @Service
-class OldPecasService {
+class OldPecasService(val blah: OkHttpClient) {
 
     @Cacheable(value = ["ReCaptchaV2"], key = "#code")
     fun buscarPecasNoAntigo(code: String): String {
         return runCatching {
-            val captchaTokenResult = capSolver(code)
+            val captchaTokenResult = ReCaptchaV2(blah).capSolver(code)
 
             when {
                 captchaTokenResult.isBlank() -> {
@@ -22,7 +22,7 @@ class OldPecasService {
                     return ""
                 }
                 else -> {
-                    val searchResult = performSearch(recaptchaToken = captchaTokenResult, code = code)
+                    val searchResult = ReCaptchaV2(blah).performSearch(recaptchaToken = captchaTokenResult, code = code)
                     searchResult
                 }
             }
