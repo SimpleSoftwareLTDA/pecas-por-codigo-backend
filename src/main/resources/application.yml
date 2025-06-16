@@ -29,7 +29,7 @@ spring:
 
 app:
   url: ${CURRENT_URL:}
-  site_url: ${SITE_URL:https://www.pecasonlinex.com.br}
+  site_url: ${SITE_URL:https://www.pecasporcodigo.com.br}
 
 decodo:
   proxy:
