@@ -97,14 +97,14 @@ class EmailSenderService(
     fun sendMagicLink(supplierEmail: String, supplierName: String, token: String) {
         validateIfEmailIsEnabled()
 
-        val subject = "O seu link para acesso ao Peças Online X"
+        val subject = "O seu link para acesso ao Peças Por Código"
         val magicLink = "${siteUrl}/auth/$token"
 
         val htmlContent = """
             <html>
             <body>
                 <p>Olá $supplierName,</p>
-                <p>Você requisitou acesso ao sistema Peças Online X. Use o link abaixo para realizar o login de forma segura:</p>
+                <p>Você requisitou acesso ao sistema Peças Por Código. Use o link abaixo para realizar o login de forma segura:</p>
                 <p><a href='$magicLink' target='_blank'>Clique aqui para acessar</a></p>
                 <p>Este link é válido por tempo limitado. Caso você não tenha solicitado este acesso, por favor, ignore este e-mail.</p>
                 <p>Atenciosamente,<br>Equipe de Suporte</p>

@@ -84,4 +84,24 @@ class StockController(
             }
         }
     }
+
+    @PostMapping(path = ["/estoque-by-cnpj"], consumes = ["multipart/form-data"])
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    fun createItemStockByCNPJ(
+        @RequestPart file: MultipartFile,
+        @RequestParam cnpj: String
+    ) {
+        MDC.putCloseable("token", cnpj).use {
+            MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
+                val tempDir = System.getProperty("java.io.tmpdir")
+
+                val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+                val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
+
+                file.transferTo(tempFile)
+
+                stockService.createStock(file = tempFile, cnpj = cnpj)
+            }
+        }
+    }
 }

@@ -88,10 +88,10 @@ class StockService(
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
     @Async
-    override fun createStock(file: File, emailAddress: String, token: String?) {
+    override fun createStock(file: File, emailAddress: String, token: String?, cnpj: String?) {
         val cnpj = token?.let {
             getSupplierByToken(token)
-        } ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
+        } ?: cnpj ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
 
         if (cnpj == null) {
             throw IllegalArgumentException("CNPJ não encontrado para o token ou email fornecido.")

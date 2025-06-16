@@ -1,3 +1,3 @@
-Backend para o Novo Peças Online X
+Backend para o Novo Peças Por Código
 
-[Site do Novo Peças Online](https://www.pecasonlinex.com.br/)
+[Site Peças Por Código](https://www.pecasporcodigo.com.br/)
