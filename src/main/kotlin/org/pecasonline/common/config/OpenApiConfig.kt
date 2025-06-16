@@ -17,7 +17,7 @@ class OpenApiConfig {
     fun customOpenAPI(): OpenAPI {
         return OpenAPI()
             .info(
-                Info().title("Novo Pecas Online API")
+                Info().title("Peças Por Código API")
                     .description("API de Catalogo de peças automotivas e seus fornecedores.")
                     .version("1.0")
             )
