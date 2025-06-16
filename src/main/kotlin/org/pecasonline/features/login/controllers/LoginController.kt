@@ -18,7 +18,7 @@ class LoginController(
     fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         val token = magicLinkService.sendLoginLinkWithToken(request.email)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse("https://www.pecasonlinex.com.br/auth/${token}"))
+        return ResponseEntity.status(HttpStatus.CREATED).body(TokenResponse("https://www.pecasporcodigo.com.br/auth/${token}"))
     }
 
     @GetMapping("/login/verify")

@@ -6,10 +6,9 @@ import java.util.HexFormat
 
 object Constants {
     const val BASE_ENDPOINT = "/api/v1"
-    const val CONTACT_EMAIL = "contato@pecasonlinex.com.br"
+    const val CONTACT_EMAIL = "contato@pecasporcodigo.com.br"
     const val DEFAULT_GROUP_NAME = "Peças Por Código"
     val DEFAULT_BANNER_URL = listOf(
-        "https://banners.pecasonlinex.com.br/Teste.png",
         "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png",
         "https://i.postimg.cc/KvN28mP2/efetuou-o-cadastro-j.png"
     )
