@@ -9,8 +9,7 @@ object Constants {
     const val CONTACT_EMAIL = "contato@pecasporcodigo.com.br"
     const val DEFAULT_GROUP_NAME = "Peças Por Código"
     val DEFAULT_BANNER_URL = listOf(
-        "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png",
-        "https://i.postimg.cc/KvN28mP2/efetuou-o-cadastro-j.png"
+        "https://i.postimg.cc/mDWSpSh2/Memorial-Pe-as-a-escolha-de-quem-busca-excel-ncia-em-cada-detalhe-Entendemos-a-paix-o-do-brasileiro.png"
     )
     const val DEFAULT_FILE_NAME = "Arquivo de estoque"
     const val OLD_COMPETITOR_URL = "http://www.pecas-on-line.com.br"
