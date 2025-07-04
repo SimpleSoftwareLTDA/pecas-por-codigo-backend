@@ -135,7 +135,7 @@ class EmailReceiverService(
 
         reader.useLines { lines ->
             for (line in lines) {
-                val fields = line.trim().split("\\s+".toRegex())
+                val fields = line.trim().split(RegexPatterns.whitespaceRegex)
 
                 when {
                     fields.size != 4 ||
@@ -175,7 +175,7 @@ object RegexPatterns {
     val quantityRegex = Pattern.compile("\\d+")
     val costRegex = Pattern.compile("\\d+\\.\\d{2}")
     val emailRegex = Pattern.compile("<(.*?)>|([\\w.-]+@[\\w.-]+\\.[\\w]{2,})").matcher("")
-    val whitespaceRegex = Pattern.compile("\\s+")
+    val whitespaceRegex = Pattern.compile("[\\s,;]+")
 }
 
 class CustomMultipartFile(
