@@ -64,21 +64,9 @@ class StockService(
         val stockPage = stockRepository.findByItemCode(code, pageable)
         logger.info { "Estoque encontrado no banco de dados: ${stockPage.content.size} itens" }
 
-//        val html = oldPecasService.buscarPecasNoAntigo(code = code)
-//        logger.info { "Resultado da busca no site antigo: ${Document.OutputSettings.Syntax.html.length} caracteres" }
-
-//        val dtos = parseResultadoPesquisa(Document.OutputSettings.Syntax.html)
-//        logger.info { "DTOs encontrados no site antigo: ${dtos.size} itens" }
-
-
         logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco. ${stockPage.size}" }
 
         return PageImpl(stockPage.content.distinctBy { it.item.hash }, pageable, stockPage.totalElements)
-
-//        val stocksFromHtml = getPecasFromOldSite(dtos)
-//        logger.info { "Estoque encontrado no site antigo: ${stocksFromHtml.size} itens" }
-//
-//        return PageImpl((stocksFromHtml + stockPage.distinctBy { it.item.hash }).distinctBy { it.supplier?.name }, pageable, (stocksFromHtml.size + stockPage.totalElements))
     }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
