@@ -159,3 +159,5 @@ class EmailSenderService(
         if (!isEmailEnabled) warnWithoutStacktrace(EMAIL_NOT_ENABLED_MESSAGE)
     }
 }
+// Um e-mail seja usado para alimentar N estoques, ou seja, um e-mail reprenta uma matriz que tem N filiais.
+// Nesse caso, com um único email é possível atualizar/criar o estoque de outros CNPJs
