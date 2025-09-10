@@ -78,7 +78,9 @@ class StockController(
                 val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
                 val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
 
-                file.transferTo(tempFile)
+                // Convert uploaded content to UTF-8 to avoid issues with ANSI encodings
+                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+                tempFile.outputStream().use { it.write(utf8Bytes) }
 
                 stockService.createStock(file = tempFile, token = token)
             }
@@ -98,7 +100,9 @@ class StockController(
                 val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
                 val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
 
-                file.transferTo(tempFile)
+                // Convert uploaded content to UTF-8 to avoid issues with ANSI encodings
+                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+                tempFile.outputStream().use { it.write(utf8Bytes) }
 
                 stockService.createStock(file = tempFile, cnpj = cnpj)
             }

@@ -16,7 +16,11 @@ class ItemService(
     }
 
     override fun findItemById(id: Int): Item {
-        return itemRepository.findById(id).orElseThrow { NotFoundException("Peça não encontrada") }
+        return itemRepository
+            .findById(id)
+            .orElseThrow {
+                NotFoundException("Peça não encontrada")
+            }
     }
 
     override fun findItemByDescription(descricao: String, page: Int?, size: Int?): Page<Item> {
