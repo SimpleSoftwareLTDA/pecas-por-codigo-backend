@@ -107,15 +107,23 @@ class EmailReceiverService(
                             if (fileName.endsWith(".txt")) {
                                 logger.info { "Arquivo .txt: $fileName encontrado no e-mail, verificando se a estrutura dele é válida..." }
 
-                                val inputStream = bodyPart.inputStream
-                                val bufferedReader = BufferedReader(InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                                // Read attachment once and convert to UTF-8 if needed (handles ANSI/Windows-1252)
+                                val originalBytes = bodyPart.inputStream.use { it.readBytes() }
+                                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(originalBytes)
+                                val utf8Text = String(utf8Bytes, StandardCharsets.UTF_8)
 
-                                if (isValidFileStructure(BufferedReader(bufferedReader))) {
+                                val bufferedReader = BufferedReader(StringReader(utf8Text))
+
+                                if (isValidFileStructure(bufferedReader)) {
                                     logger.info { "Estrutura do arquivo válida. Processando..." }
 
                                     runCatching {
+                                        // Persist UTF-8 content to a temp file for processing
+                                        val tempFile = File.createTempFile("upload-", "-$fileName")
+                                        tempFile.outputStream().use { it.write(utf8Bytes) }
+
                                         stockService.createStock(
-                                            file = streamToFile(inputStream, fileName),
+                                            file = tempFile,
                                             emailAddress = senderEmail
                                         )
                                     }.onFailure { ex ->
@@ -135,7 +143,7 @@ class EmailReceiverService(
 
         reader.useLines { lines ->
             for (line in lines) {
-                val fields = line.trim().split(RegexPatterns.whitespaceRegex)
+                val fields = line.trim().split(RegexPatterns.whitespaceRegex, 4)
 
                 when {
                     fields.size != 4 ||
@@ -173,9 +181,12 @@ class EmailController(
 object RegexPatterns {
     val productCodeRegex = Pattern.compile("[a-zA-Z0-9]+")
     val quantityRegex = Pattern.compile("\\d+")
-    val costRegex = Pattern.compile("\\d+\\.\\d{2}")
+    // Allow prices with optional thousand separators and either ',' or '.' as decimal separator
+    // Examples: 89,427.27 | 1.005,47 | 999.86 | 999,86 | 1000
+    val costRegex = Pattern.compile("\\d[\\d.,]*(?:[.,]\\d{2})?")
     val emailRegex = Pattern.compile("<(.*?)>|([\\w.-]+@[\\w.-]+\\.[\\w]{2,})").matcher("")
-    val whitespaceRegex = Pattern.compile("[\\s,;]+")
+    // Split fields only by tab or semicolon as per specification
+    val whitespaceRegex = Pattern.compile("[\\t;]+")
 }
 
 class CustomMultipartFile(

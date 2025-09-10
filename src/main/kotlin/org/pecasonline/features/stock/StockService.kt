@@ -1,14 +1,10 @@
 package org.pecasonline.features.stock
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jsoup.nodes.Document
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.common.httpclients.dto.PecaDTO
 import org.pecasonline.common.isInvalidColumnSize
-import org.pecasonline.common.parseResultadoPesquisa
 import org.pecasonline.common.service.OldPecasService
-import org.pecasonline.features.address.domain.Address
-import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
@@ -16,8 +12,6 @@ import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.service.SubscriptionService
-import org.pecasonline.features.supplier.domain.Contact
-import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -241,13 +235,14 @@ class StockService(
 
 
     private fun parseStockLine(line: String): Stock? {
-        val columns = line.split(whitespaceRegex, 4).filter { it.isNotEmpty() }
+        // Split by tab (\t) or semicolon (;) only — not spaces — to preserve prices like "89,427.27"
+        val columns = line.split(Regex("[\\t;]+"), 4).filter { it.isNotEmpty() }
 
         if (columns.isInvalidColumnSize()) return null
 
         val (code, quantityStr, priceStr, description) = columns
         val quantity = quantityStr.toIntOrNull() ?: 0
-        val priceInCents = ((priceStr.toDoubleOrNull() ?: 0.0) * 100).toLong()
+        val priceInCents = parseMonetaryToCents(priceStr)
 
         val item = Item.buildFromMinimalProperties(
             code = code,
@@ -256,6 +251,54 @@ class StockService(
         )
 
         return Stock(quantity = quantity, item = item)
+    }
+
+    /**
+     * Parses monetary values with thousand/decimal separators in either style:
+     * - "1,005.47" (US style)
+     * - "1.005,47" (BR/EU style)
+     * - "999.86", "999,86", "1000", "1.000"
+     * Returns the value in cents as Long, using robust, locale-agnostic rules:
+     * - Consider the last separator ('.' or ',') a decimal separator only if it has exactly 2 digits after it.
+     * - Otherwise, treat all separators as thousands separators (no decimals) and multiply by 100.
+     */
+    private fun parseMonetaryToCents(raw: String): Long {
+        if (raw.isBlank()) return 0L
+
+        // Keep only digits and separators to simplify handling; remove currency symbols and spaces
+        val cleaned = raw.trim()
+            .replace("\u00A0", "") // non-breaking space
+            .filter { it.isDigit() || it == ',' || it == '.' }
+
+        if (cleaned.isEmpty()) return 0L
+
+        // Find the last separator and decide if it's a decimal separator (exactly 2 digits after it)
+        var lastSepIndex = -1
+        var lastSepChar = '\u0000'
+        for (i in cleaned.length - 1 downTo 0) {
+            val ch = cleaned[i]
+            if (ch == ',' || ch == '.') {
+                lastSepIndex = i
+                lastSepChar = ch
+                break
+            }
+        }
+
+        val hasDecimal = if (lastSepIndex != -1) {
+            val digitsAfter = cleaned.substring(lastSepIndex + 1).count { it.isDigit() }
+            digitsAfter == 2
+        } else false
+
+        val digitsOnly = cleaned.filter { it.isDigit() }
+        if (digitsOnly.isEmpty()) return 0L
+
+        return try {
+            val base = digitsOnly.toLong()
+            if (hasDecimal) base else base * 100
+        } catch (e: NumberFormatException) {
+            // In case the number is too large for Long (unlikely for prices), fall back to 0
+            0L
+        }
     }
 }
 
@@ -279,54 +322,6 @@ fun parseFornecedor(descricao: String): Triple<String, String, String> {
         // ou tratamos de outra forma
         Triple(descricao, "", "")
     }
-}
-
-private fun getPecasFromOldSite(dtos: List<PecaDTO>): List<Stock> {
-    val stocksFromHtml = dtos.map { dto ->
-        val (nomeFornecedor, cidadeUf, phoneNumber) = parseFornecedor(dto.fornecedor)
-
-        val lastDashIndex = cidadeUf.lastIndexOf("-")
-        val (city, uf) = (if (lastDashIndex >= 0) {
-            val cityPart = cidadeUf.substring(0, lastDashIndex).trim()
-            val ufPart = cidadeUf.substring(lastDashIndex + 1).trim()
-
-            cityPart to ufPart
-        } else cidadeUf to "SP")
-
-        val dynamicState = BrazilianState(
-            stateCode = uf,
-            stateName = city
-        )
-
-        val address = Address(
-            street = "Consulte por telefone",
-            city = city,
-            state = dynamicState,
-            cep = "01000-000",
-            country = "Brasil"
-        )
-
-        val supplier = Supplier(
-            name = nomeFornecedor,
-            socialName = nomeFornecedor,
-            cnpj = "",
-            address = address,
-            contact = Contact(
-                sellerName = phoneNumber,
-                itemsEmail = phoneNumber,
-                itemsPhone = phoneNumber,
-                whatsapp = phoneNumber,
-                itemsWhatsapp = phoneNumber
-            )
-        )
-
-        Stock(
-            quantity = dto.qtd,
-            supplier = supplier,
-            item = getItemWithPriceInCents(dto)
-        )
-    }
-    return stocksFromHtml
 }
 
 private fun getItemWithPriceInCents(dto: PecaDTO): Item {
