@@ -115,12 +115,8 @@ class StockService(
         )
 
         try {
-            val (newStockItems, unprocessedLines) = getFileValuesWithDiagnostics(file)
+            val newStockItems = getFileValuesOptimized(file)
             logger.info { "Total de itens válidos no arquivo: ${newStockItems.size}" }
-            if (unprocessedLines.isNotEmpty()) {
-                val report = writeUnprocessedCsv(unprocessedLines, file.name)
-                logger.warn { "${unprocessedLines.size} linha(s) não puderam ser processadas. Relatório: ${report?.absolutePath}" }
-            }
 
             // 1) Extrai todos os itens do arquivo e processa em lote (batch)
             val allItemsFromFile = newStockItems.map { it.item }
@@ -234,120 +230,24 @@ class StockService(
             Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING)
         }
 
-    private data class UnprocessedLine(val lineNumber: Int, val reason: String, val rawLine: String)
-
-    private fun getFileValuesWithDiagnostics(file: File): Pair<List<Stock>, List<UnprocessedLine>> =
+    private fun getFileValuesOptimized(file: File): List<Stock> =
         Files.lines(file.toPath()).use { lines ->
-            val successes = mutableListOf<Stock>()
-            val failures = mutableListOf<UnprocessedLine>()
-            lines.asSequence().forEachIndexed { idx, raw ->
-                val lineNumber = idx + 1
-                val trimmed = raw.trim()
-                if (trimmed.isEmpty()) return@forEachIndexed
-                val result = runCatching { parseStockLine(trimmed) }
-                result.onFailure { ex ->
-                    failures.add(UnprocessedLine(lineNumber, "exception: ${ex.message}", raw))
-                }
-                result.onSuccess { parsed ->
-                    if (parsed == null) {
-                        failures.add(UnprocessedLine(lineNumber, "unsupported/empty columns", raw))
-                    } else {
-                        successes.add(parsed)
-                    }
-                }
-            }
-            successes to failures
+            lines.asSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .mapNotNull { parseStockLine(it) }
+                .toList()
         }
-
-    private fun writeUnprocessedCsv(unprocessed: List<UnprocessedLine>, originalName: String): File? {
-        if (unprocessed.isEmpty()) return null
-        val uploadsDir = File("uploads")
-        if (!uploadsDir.exists()) uploadsDir.mkdirs()
-        val timestamp = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(java.time.LocalDateTime.now())
-        val safeName = originalName.replace(Regex("[^A-Za-z0-9._-]"), "_")
-        val outFile = File(uploadsDir, "${safeName.removeSuffix(".csv")}-unprocessed-${timestamp}.csv")
-        val header = "lineNumber;reason;rawLine"
-        val rows = unprocessed.joinToString(System.lineSeparator()) { rec ->
-            val reason = rec.reason.replace("\r", " ").replace("\n", " ")
-            val rawEscaped = rec.rawLine.replace("\r", " ").replace("\n", " ")
-            "${rec.lineNumber};${reason};${rawEscaped}"
-        }
-        outFile.writeText(header + System.lineSeparator() + rows, Charsets.UTF_8)
-        return outFile
-    }
 
 
     private fun parseStockLine(line: String): Stock? {
-        val rawColumns = when {
-            line.contains(";") -> {
-                // Preserve empty fields when semicolon-delimited (e.g., code;qty;;description)
-                line.split(";").map { it.trim() }
-            }
-            line.contains("\t") -> {
-                // Preserve empty fields for tab-delimited files
-                line.split("\t").map { it.trim() }
-            }
-            !line.contains(";") && !line.contains("\t") && line.contains(",") -> {
-                // Preserve empty fields for comma-delimited files
-                // Note: In files where comma is used as decimal separator, semicolon is typically used as delimiter.
-                // We only treat comma as delimiter when there are no semicolons or tabs.
-                line.split(",").map { it.trim() }
-            }
-            else -> {
-                // For whitespace-delimited, drop empties
-                line.split(whitespaceRegex).map { it.trim() }.filter { it.isNotEmpty() }
-            }
-        }
+        val columns = line.split(whitespaceRegex, 4).filter { it.isNotEmpty() }
 
-        if (rawColumns.isEmpty()) return null
+        if (columns.isInvalidColumnSize()) return null
 
-        val code = rawColumns[0]
-        val second = rawColumns.getOrNull(1)
-        val third = rawColumns.getOrNull(2)
-
-        fun String.toIntFromFlexible(): Int? {
-            val cleaned = this.trim()
-            // Accept formats like 96,00 or 96.00 or 96
-            val normalized = cleaned.replace(" ", "").replace(".", "").replace(",", ".")
-            val asDouble = normalized.toDoubleOrNull() ?: return null
-            val rounded = asDouble.toLong()
-            return if (kotlin.math.abs(asDouble - rounded.toDouble()) < 1e-9) rounded.toInt() else null
-        }
-        fun String.isQtyLike(): Boolean = this.toIntFromFlexible() != null
-        fun String.normalizePrice(): String = this
-            .replace("R$", "", ignoreCase = true)
-            .replace(" ", "")
-            .replace(".", "") // remove thousands separators like 1.234,56
-            .replace(",", ".")
-        fun String.isPriceLike(): Boolean {
-            val norm = this.normalizePrice()
-            return norm.toDoubleOrNull() != null
-        }
-
-        // Determine description now that helpers are available
-        val description = when {
-            rawColumns.size >= 4 -> rawColumns.drop(3).joinToString(" ").trim()
-            rawColumns.size == 2 && !(second?.let { it.isQtyLike() || it.isPriceLike() } ?: false) -> second?.trim() ?: ""
-            rawColumns.size == 3 && !((second?.let { it.isQtyLike() || it.isPriceLike() } ?: false) || (third?.let { it.isQtyLike() || it.isPriceLike() } ?: false)) -> listOfNotNull(second, third).joinToString(" ").trim()
-            else -> ""
-        }
-
-        // Detect which column is quantity and which is price
-        val (quantityStr, priceStr) = when {
-            second?.isQtyLike() == true && third?.isPriceLike() == true -> second to third
-            second?.isPriceLike() == true && third?.isQtyLike() == true -> third to second
-            // If only one numeric field exists, assign accordingly
-            second?.isQtyLike() == true && third == null -> second to null
-            second?.isPriceLike() == true && third == null -> null to second
-            third?.isQtyLike() == true && second == null -> third to null
-            third?.isPriceLike() == true && second == null -> null to third
-            // Fallbacks: interpret second as qty, third as price (may be null)
-            else -> second to third
-        }
-
-        val quantity = quantityStr?.toIntFromFlexible() ?: 0
-        val priceDouble = priceStr?.normalizePrice()?.toDoubleOrNull() ?: 0.0
-        val priceInCents = (priceDouble * 100).toLong()
+        val (code, quantityStr, priceStr, description) = columns
+        val quantity = quantityStr.toIntOrNull() ?: 0
+        val priceInCents = ((priceStr.toDoubleOrNull() ?: 0.0) * 100).toLong()
 
         val item = Item.buildFromMinimalProperties(
             code = code,
