@@ -18,6 +18,7 @@ interface StockRepository : JpaRepository<Stock, Int> {
     fun findStockBySupplierNameContainsIgnoreCase(name: String, pageable: Pageable): Page<Stock>
     fun findStockBySupplierIdAndItemId(supplierId: Int, itemId: Int): List<Stock>
 
+    @EntityGraph(attributePaths = ["item"])
     @Query(
         value = """
         SELECT s FROM Stock s 

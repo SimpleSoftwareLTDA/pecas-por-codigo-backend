@@ -60,7 +60,7 @@ class StockService(
 
         logger.info { "Nenhum DTO encontrado no site antigo. Retornando apenas os dados do banco. ${stockPage.size}" }
 
-        return PageImpl(stockPage.content.distinctBy { it.item.hash }, pageable, stockPage.totalElements)
+        return PageImpl(stockPage.content.distinctBy { it.supplier?.id }, pageable, stockPage.totalElements)
     }
 
     override fun findStockBySupplierId(id: Int, page: Int?, size: Int?): Page<Stock> =
@@ -113,11 +113,13 @@ class StockService(
             logger.info { "Total de itens válidos no arquivo: ${newStockItems.size}" }
 
             // 1) Extrai todos os itens do arquivo e processa em lote (batch)
-            val allItemsFromFile = newStockItems.map { it.item }
+            val allItemsFromFile = newStockItems.parallelStream().map { it.item }.toList()
             val processedItemsMap = processAllItems(allItemsFromFile)
 
             // 2) Busca os estoques existentes para este fornecedor
+            logger.info { "Buscando estoques existentes para supplierId=${supplier.id}..." }
             val existingStocks = stockRepository.findStocksBySupplierId(supplier.id!!)
+            logger.info { "Encontrados ${existingStocks.size} estoques existentes para supplierId=${supplier.id}" }
             val existingStocksMap = existingStocks.associateBy { it.item.code }
 
             // 3) Separa as listas de atualização e criação
@@ -139,7 +141,7 @@ class StockService(
 
                     else -> newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
                 }
-                logger.debug { "Processando linha ${index + 1} de ${newStockItems.size}, item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
+                logger.info { "Processando linha ${index + 1} de ${newStockItems.size}, item code=${stockLine.item.code}, hash=${stockLine.item.hash}" }
             }
 
             if (updatedStocks.isNotEmpty()) {
@@ -184,18 +186,55 @@ class StockService(
         val itemsByHash = allItems.associateBy { it.hash }
         val allHashes = itemsByHash.keys
 
-        val existing = itemRepository.findAllByHashIn(allHashes)
+        if (allHashes.isEmpty()) return emptyMap()
 
-        val existingMap = existing.associateBy { it.hash }
-
-        val newHashes = allHashes - existingMap.keys
-
-        val newItems = newHashes.mapNotNull { hash ->
-            itemsByHash[hash]
+        // Fetch existing items in batches to avoid huge IN() queries that can hang or be very slow
+        val fetchBatchSize = 1000
+        val existingList = mutableListOf<Item>()
+        allHashes.chunked(fetchBatchSize).forEachIndexed { idx, chunk ->
+            val fetched = itemRepository.findAllByHashIn(chunk)
+            existingList += fetched
+            if (idx % 10 == 0) {
+                logger.info { "processAllItems: fetched batch ${idx + 1}, size=${chunk.size}, accumulatedExisting=${existingList.size}" }
+            }
         }
 
-        val savedNewItems = itemRepository.saveAll(newItems)
-        val savedNewMap = savedNewItems.associateBy { it.hash }
+        // Build map defensively to avoid crashes if legacy rows have null/blank hashes
+        val existingMap = mutableMapOf<String, Item>()
+        var skippedNullOrBlank = 0
+
+        existingList.forEach { itm ->
+            try {
+                val h = itm.hash
+                if (h.isNotBlank()) {
+                    existingMap[h] = itm
+                } else {
+                    skippedNullOrBlank++
+                }
+            } catch (e: NullPointerException) {
+                // Some legacy records may have null hash despite Kotlin non-null type
+                skippedNullOrBlank++
+            }
+        }
+
+        if (skippedNullOrBlank > 0) {
+            logger.info { "processAllItems: skipped $skippedNullOrBlank item(s) with null/blank hash from existingList" }
+        }
+
+        val newHashes = allHashes - existingMap.keys
+        if (newHashes.isEmpty()) return existingMap
+
+        val newItems = newHashes.mapNotNull { hash -> itemsByHash[hash] }
+        if (newItems.isEmpty()) return existingMap
+
+        // Save new items in smaller batches to reduce persistence overhead
+        val saveBatchSize = 500
+        val savedNewMap = mutableMapOf<String, Item>()
+        newItems.chunked(saveBatchSize).forEachIndexed { idx, chunk ->
+            val saved = itemRepository.saveAll(chunk)
+            saved.forEach { savedNewMap[it.hash] = it }
+            logger.debug { "processAllItems: saved batch ${idx + 1}, size=${chunk.size}, accumulatedSaved=${savedNewMap.size}" }
+        }
 
         return existingMap + savedNewMap
     }
