@@ -12,7 +12,7 @@ spring:
     port: 587
     username: pecas.online.agora@gmail.com
     # Use a app password gerada no Gmail
-    password: qkts eacj hcek zxwh
+    password: bcpr ewik xxze ufgu
     properties:
       mail:
         smtp:
