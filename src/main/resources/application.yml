@@ -1,3 +1,12 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
 spring:
   application:
     name: novo-pecas-online

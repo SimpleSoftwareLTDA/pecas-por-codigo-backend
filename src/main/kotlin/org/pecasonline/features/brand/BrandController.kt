@@ -1,5 +1,6 @@
 package org.pecasonline.features.brand
 
+import io.micrometer.core.annotation.Timed
 import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.brand.swagger.BrandSwaggerSpec
 import org.springframework.http.HttpStatus
@@ -14,6 +15,7 @@ class BrandController(
     private val brand: IBrandService
 ): BrandSwaggerSpec {
 
+    @Timed(value = "brands.get", description = "Time taken to return all brands")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     override fun getBrands(): List<Brand> = brand.getAvailableBrands()
