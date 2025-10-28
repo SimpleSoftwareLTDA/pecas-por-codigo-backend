@@ -1,4 +1,22 @@
 services:
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
   novo-pecas-online-db:
     image: postgres:17-alpine
     container_name: novo-pecas-online-db
@@ -23,3 +41,4 @@ services:
 
 volumes:
   postgres_data:
+  grafana_data:

@@ -1,5 +1,7 @@
 package org.pecasonline.features.items
 
+import io.micrometer.core.annotation.Timed
+import io.micrometer.core.instrument.MeterRegistry
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.items.swagger.ItemSwaggerSpec
@@ -9,32 +11,45 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("$BASE_ENDPOINT/pecas")
 class ItemsController(
-    private val itemsService: IIitemService
+    private val itemsService: IIitemService,
+    private val meterRegistry: MeterRegistry
 ) : ItemSwaggerSpec {
 
+    @Timed(value = "items.getAll", description = "Time taken to return all items")
     @GetMapping
     override fun items(
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = itemsService.getAllItems(page, size)
+    ) = itemsService.getAllItems(page, size).also {
+        meterRegistry.counter("custom.items.requests", "endpoint", "getAll", "method", "GET").increment()
+    }
 
+    @Timed(value = "items.getById", description = "Time taken to return an item by id")
     @GetMapping("/{id}")
     override fun findItemById(
         @PathVariable("id") id: Int
-    ) = itemsService.findItemById(id)
+    ) = itemsService.findItemById(id).also {
+        meterRegistry.counter("custom.items.requests", "endpoint", "getById", "method", "GET").increment()
+    }
 
+    @Timed(value = "items.getByDescription", description = "Time taken to return an item by description")
     @GetMapping("/descricao")
     override fun findItemByDescription(
         @RequestParam("descricao") descricao: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = itemsService.findItemByDescription(descricao, page, size)
+    ) = itemsService.findItemByDescription(descricao, page, size).also {
+        meterRegistry.counter("custom.items.requests", "endpoint", "getByDescription", "method", "GET").increment()
+    }
 
+    @Timed(value = "items.getByCode", description = "Time taken to return an item by code")
     @GetMapping("/codigo/{codigo}")
     override fun findItemByCode(
         @PathVariable("codigo") codigo: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = itemsService.findItemByCode(codigo, page, size)
+    ) = itemsService.findItemByCode(codigo, page, size).also {
+        meterRegistry.counter("custom.items.requests", "endpoint", "getByCode", "method", "GET").increment()
+    }
 
 }

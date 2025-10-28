@@ -1,5 +1,6 @@
 package org.pecasonline.features.stock
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.stock.swagger.StockSwaggerSpec
@@ -16,7 +17,8 @@ import java.util.*
 @RequestMapping("$BASE_ENDPOINT/estoque")
 @Tag(name = "Estoque", description = "Operações relacionadas ao estoque")
 class StockController(
-    val stockService: IStockService
+    val stockService: IStockService,
+    private val meterRegistry: MeterRegistry
 ) : StockSwaggerSpec {
 
     @GetMapping
@@ -49,7 +51,9 @@ class StockController(
         @PathVariable("codigo") code: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.findStockByItemCode(code, page, size)
+    ) = stockService.findStockByItemCode(code, page, size).also {
+        meterRegistry.counter("custom.code.requests", "endpoint", "stock.getByItemCode", "method", "GET").increment()
+    }
 
     @GetMapping("/fornecedor/{id}")
     override fun findStockBySupplierId(
