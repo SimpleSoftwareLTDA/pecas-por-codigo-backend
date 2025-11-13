@@ -49,7 +49,12 @@ class ItemsController(
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
     ) = itemsService.findItemByCode(codigo, page, size).also {
-        meterRegistry.counter("custom.items.requests", "endpoint", "getByCode", "method", "GET").increment()
+        meterRegistry.counter(
+            "custom.items.requests",
+            "endpoint", "getByCode",
+            "method", "GET",
+            "codigo", codigo
+        ).increment()
     }
 
 }

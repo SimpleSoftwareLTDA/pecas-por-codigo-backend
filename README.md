@@ -1,3 +1,5 @@
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SimpleSoftwareLTDA/pecas-por-codigo-backend?utm_source=oss&utm_medium=github&utm_campaign=SimpleSoftwareLTDA%2Fpecas-por-codigo-backend&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 Backend para o Novo Peças Por Código
 
 [Site Peças Por Código](https://www.pecasporcodigo.com.br/)
