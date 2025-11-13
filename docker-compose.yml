@@ -1,4 +1,17 @@
 services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.107.0
+    container_name: otel-collector
+    restart: unless-stopped
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8889:8889" # Prometheus exporter
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel/config.yml
+    depends_on:
+      - novo-pecas-online-backend
+
   prometheus:
     image: prom/prometheus:v2.53.1
     container_name: prometheus
@@ -7,6 +20,8 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - otel-collector
 
   grafana:
     image: grafana/grafana:11.1.0
@@ -16,6 +31,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
   novo-pecas-online-db:
     image: postgres:17-alpine
@@ -38,6 +55,8 @@ services:
       SPRING_PROFILES_ACTIVE: prod
     ports:
       - "8080:8080"
+    depends_on:
+      - novo-pecas-online-db
 
 volumes:
   postgres_data:

@@ -55,3 +55,24 @@ asaas:
   api:
     api-key: ${ASAAS_API_KEY:REDACTED_ASAAS_KEY}
     base-url: https://api.asaas.com/v3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        url: http://otel-collector:4318/v1/metrics
+        step: 15s
+    tracing:
+      endpoint: http://otel-collector:4318/v1/traces
+
+otel:
+  resource:
+    attributes:
+      service.name: ${spring.application.name}
