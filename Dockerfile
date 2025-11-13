@@ -1,4 +1,4 @@
-FROM amazoncorretto:25-alpine AS build
+FROM amazoncorretto:21-alpine AS build
 
 # Set the working directory inside the container
 WORKDIR /app
