@@ -61,3 +61,32 @@ asaas:
   api:
     api-key: ${ASAAS_API_KEY:$aact_MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmVhY2UzOTA2LTg3ZmYtNDcyMy1hNmViLWY3MGM2MTlmY2E0NTo6JGFhY2hfMWUzZjcwMmYtYzU5Yi00OTAyLTk1NjMtNmQ1OTYwMGE4NTYy}
     base-url: https://sandbox.asaas.com/api/v3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus,metrics"
+      base-path: /actuator
+
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      show-details: always
+    metrics:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:pecasonline}
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/metrics
+        step: 15s
+    tracing:
+      endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/traces
