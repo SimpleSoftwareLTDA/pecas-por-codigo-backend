@@ -3,12 +3,11 @@ services:
     image: otel/opentelemetry-collector-contrib:0.107.0
     container_name: otel-collector
     restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
     ports:
-      - "4317:4317" # OTLP gRPC
-      - "4318:4318" # OTLP HTTP
-      - "8889:8889" # Prometheus exporter
+      - "4318:4318"
     volumes:
-      - ./otel-collector-config.yml:/etc/otel/config.yml
+      - ./monitoring/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     depends_on:
       - novo-pecas-online-backend
 
@@ -19,7 +18,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - otel-collector
 
@@ -52,7 +51,7 @@ services:
     container_name: novo-pecas-online-backend
     restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: local
     ports:
       - "8080:8080"
     depends_on:

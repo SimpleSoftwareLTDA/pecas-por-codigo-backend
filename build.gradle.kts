@@ -75,11 +75,9 @@ dependencies {
 
     // Micrometer dependencies
     implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.opentelemetry:opentelemetry-api:1.40.0")
-    implementation("io.opentelemetry:opentelemetry-sdk:1.40.0")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.40.0")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:2.6.0")
 
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

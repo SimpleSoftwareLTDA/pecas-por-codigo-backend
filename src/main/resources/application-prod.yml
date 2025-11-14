@@ -60,19 +60,27 @@ management:
   endpoints:
     web:
       exposure:
-        include: "prometheus"
+        include: "health,prometheus,metrics"
+      base-path: /actuator
+
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      show-details: always
+    metrics:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:pecasonline}
   tracing:
     sampling:
       probability: 1.0
   otlp:
     metrics:
       export:
-        url: http://otel-collector:4318/v1/metrics
+        url: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/metrics
         step: 15s
     tracing:
-      endpoint: http://otel-collector:4318/v1/traces
-
-otel:
-  resource:
-    attributes:
-      service.name: ${spring.application.name}
+      endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/traces
