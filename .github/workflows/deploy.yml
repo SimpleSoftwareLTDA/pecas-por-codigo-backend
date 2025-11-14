@@ -1,0 +1,45 @@
+name: Deploy to OCI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            randintn/novo-pecas-online:${{ github.ref_name }}
+            randintn/novo-pecas-online:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to OCI Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/
+            export IMAGE_TAG=${{ github.ref_name }}
+            docker-compose pull
+            docker-compose up -d
