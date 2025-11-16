@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
+    url: ${DB_HOST}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
