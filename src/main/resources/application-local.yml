@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:postgresql://backend.pecasonlinex.com.br:5432/meubanco
     driver-class-name: org.postgresql.Driver
-    username: usuario
-    password: senha
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
   logging:
     level:
       pecasonline: DEBUG
@@ -22,9 +22,9 @@ spring:
     enabled: false
     host: smtp.gmail.com
     port: 587
-    username: pecas.online.agora@gmail.com
+    username: ${MAIL_USERNAME:}
     # Use a app password gerada no Gmail
-    password: bcpr ewik xxze ufgu
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -59,5 +59,5 @@ app:
 
 asaas:
   api:
-    api-key: ${ASAAS_API_KEY:REDACTED_ASAAS_KEY}
+    api-key: ${ASAAS_API_KEY:}
     base-url: https://sandbox.asaas.com/api/v3
