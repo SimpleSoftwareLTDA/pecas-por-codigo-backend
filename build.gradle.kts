@@ -25,6 +25,7 @@ repositories {
 }
 
 dependencies {
+    implementation("io.sentry:sentry-opentelemetry-agent:8.26.0")
 
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")

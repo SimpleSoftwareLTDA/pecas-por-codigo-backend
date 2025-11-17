@@ -2,8 +2,8 @@ spring:
   datasource:
     url: ${DB_HOST}
     driver-class-name: org.postgresql.Driver
-    username: ${DB_USERNAME:}
-    password: ${DB_PASSWORD:}
+    username: ${POSTGRES_USER:}
+    password: ${POSTGRES_PASSWORD:}
   logging:
     level:
       pecasonline: DEBUG
