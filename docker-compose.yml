@@ -34,9 +34,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   novo-pecas-online-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: randintn/novo-pecas-online:8b0a114
     env_file:
       - .env
     container_name: novo-pecas-online-backend
