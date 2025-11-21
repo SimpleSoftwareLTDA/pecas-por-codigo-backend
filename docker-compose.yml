@@ -1,4 +1,47 @@
 services:
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  novo-pecas-online-db:
+    image: postgres:17-alpine
+    env_file:
+      - .env
+    container_name: novo-pecas-online-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: ${DB_HOST}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  novo-pecas-online-backend:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - .env
+    container_name: novo-pecas-online-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      ASAAS_API_KEY:
+    ports:
+      - "8080:8080"
+    depends_on:
+      - novo-pecas-online-db
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.107.0
     container_name: otel-collector
@@ -22,53 +65,12 @@ services:
     depends_on:
       - otel-collector
 
-  grafana:
-    image: grafana/grafana:11.1.0
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-
-  novo-pecas-online-db:
-    image: postgres:17-alpine
-    env_file:
-      - .env
-    container_name: novo-pecas-online-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      DB_HOST: ${DB_HOST}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  novo-pecas-online-backend:
-    image: randintn/novo-pecas-online:8b0a114
-    env_file:
-      - .env
-    container_name: novo-pecas-online-backend
-    restart: unless-stopped
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      ASAAS_API_KEY:
-    ports:
-      - "8080:8080"
-    depends_on:
-      - novo-pecas-online-db
 
 volumes:
   postgres_data:
