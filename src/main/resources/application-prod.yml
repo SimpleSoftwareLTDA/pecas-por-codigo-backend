@@ -2,17 +2,17 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: jdbc:postgresql://novo-pecas-online-db:5432/meubanco
+    url: ${DB_HOST}
     driver-class-name: org.postgresql.Driver
-    username: usuario
-    password: senha
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   mail:
     enabled: true
     host: smtp.gmail.com
     port: 587
-    username: pecas.online.agora@gmail.com
+    username: ${MAIL_USERNAME}
     # Use a app password gerada no Gmail
-    password: bcpr ewik xxze ufgu
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -53,7 +53,7 @@ app:
 
 asaas:
   api:
-    api-key: ${ASAAS_API_KEY:$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojc1MWQ0NjkzLTJhMTctNDhkNi1hNDNlLTc3MGM5ZjkzNTg5Yjo6JGFhY2hfNTU4ZmE1TjItODQ0Yy00YjQ3LWJhYjItNmE2MmY5ODI4M2M1}
+    api-key: ${ASAAS_API_KEY}
     base-url: https://api.asaas.com/v3
 
 management:
