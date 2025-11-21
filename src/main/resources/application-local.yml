@@ -59,21 +59,6 @@ management:
 
   endpoint:
     prometheus:
-      enabled: true
-    health:
-      enabled: true
-      show-details: always
-    metrics:
-      enabled: true
-  health:
-    redis:
-      enabled: false
-  metrics:
-    tags:
-      application: ${spring.application.name:pecasonline}
-  tracing:
-    sampling:
-      probability: 1.0
   otlp:
     metrics:
       export:
