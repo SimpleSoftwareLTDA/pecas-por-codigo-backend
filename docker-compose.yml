@@ -33,6 +33,13 @@ services:
     depends_on:
       - prometheus
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
   novo-pecas-online-db:
     image: postgres:17-alpine
     env_file:
