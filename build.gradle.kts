@@ -8,7 +8,7 @@ plugins {
     kotlin("plugin.jpa") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.gorylenko.gradle-git-properties") version "2.4.1"
+    id("com.gorylenko.gradle-git-properties") version "2.5.3"
 
     id("io.spring.dependency-management") version "1.1.6"
     id("io.sentry.jvm.gradle") version "5.12.2"
