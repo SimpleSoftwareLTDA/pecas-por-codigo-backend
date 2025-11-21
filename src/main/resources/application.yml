@@ -44,7 +44,7 @@ spring:
       enabled: true
   data:
     redis:
-      host: backend.pecasonlinex.com.br
+      host: backend.pecasporcodigo.com.br
       port: 6379
       password: ${REDIS_PASSWORD:}
       time-to-live: 120000
