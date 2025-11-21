@@ -5,11 +5,16 @@ plugins {
     var kotlinVersion = "2.1.20"
 
     kotlin("jvm") version kotlinVersion
-    kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+
+    id("com.gorylenko.gradle-git-properties") version "2.4.1"
+
+    id("io.spring.dependency-management") version "1.1.6"
     id("io.sentry.jvm.gradle") version "5.12.2"
+
+    id("org.springframework.boot") version "3.3.5"
+
 }
 
 sentry {
@@ -37,8 +42,6 @@ repositories {
 }
 
 dependencies {
-    implementation("io.sentry:sentry-spring-boot-starter:8.22.0")
-
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")

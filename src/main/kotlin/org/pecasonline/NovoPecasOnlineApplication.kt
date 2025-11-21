@@ -22,7 +22,7 @@ class NovoPecasOnlineApplication {
     fun sentryTest(): CommandLineRunner {
         return CommandLineRunner {
             try {
-                throw Exception("This is a test.")
+                throw Exception("Oi Meu chapa")
             } catch (e: Exception) {
                 Sentry.captureException(e)
             }
