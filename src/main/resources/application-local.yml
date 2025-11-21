@@ -1,15 +1,3 @@
-spring:
-  datasource:
-    url: ${DB_HOST}
-    driver-class-name: org.postgresql.Driver
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-  logging:
-    level:
-      pecasonline: DEBUG
-      org.pecasonline: DEBUG
-      root: DEBUG
-  h2:
     console:
       enabled: false
   jpa:
@@ -77,6 +65,9 @@ management:
       show-details: always
     metrics:
       enabled: true
+  health:
+    redis:
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name:pecasonline}
