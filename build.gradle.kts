@@ -25,11 +25,14 @@ repositories {
 }
 
 dependencies {
+    implementation("io.sentry:sentry-opentelemetry-agent:8.26.0")
 
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     // Security
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -72,14 +75,6 @@ dependencies {
 
     // Documentation dependencies
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
-
-    // Micrometer dependencies
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.opentelemetry:opentelemetry-api:1.40.0")
-    implementation("io.opentelemetry:opentelemetry-sdk:1.40.0")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.40.0")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:2.6.0")
 
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

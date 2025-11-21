@@ -1,4 +1,5 @@
-FROM amazoncorretto:21-alpine AS build
+FROM amazoncorretto:21 AS build
+# Not alpine, for performace.
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -16,7 +17,8 @@ COPY . .
 RUN ./gradlew --no-daemon --parallel --build-cache clean bootJar
 
 # Production stage: use a minimal JRE image for running the app
-FROM amazoncorretto:25-alpine AS runtime
+FROM amazoncorretto:25 AS runtime
+# Not alpine, for performace.
 
 # Set working directory and copy over the built JAR file
 WORKDIR /app

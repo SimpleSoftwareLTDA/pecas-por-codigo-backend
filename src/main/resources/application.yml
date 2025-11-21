@@ -7,6 +7,19 @@ management:
     tags:
       application: ${spring.application.name}
 
+sentry:
+  dsn: https://a38bb9accdec0016b8cb6ec8be911d89@o4510377647931392.ingest.us.sentry.io/4510377659269121
+  # Add data like request headers and IP for users,
+  # see https://docs.sentry.io/platforms/java/guides/spring-boot/data-management/data-collected/ for more info
+  send-default-pii: true
+  # Enable sending logs to Sentry
+  logs:
+    enabled: true
+  # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing.
+  # We recommend adjusting this value in production.
+  traces-sample-rate: 1.0
+
+
 spring:
   application:
     name: novo-pecas-online
@@ -33,7 +46,7 @@ spring:
     redis:
       host: backend.pecasonlinex.com.br
       port: 6379
-      password: ${REDIS_PASSWORD:Backtalk1-Anyplace5-Magnolia8-Refute6-Coke7}
+      password: ${REDIS_PASSWORD:}
       time-to-live: 120000
 
 app:
@@ -44,5 +57,5 @@ decodo:
   proxy:
     host: br.decodo.com
     port: 10007
-    username: ${DECODO_USER:user-spee0c0nv1-sessionduration-1}
-    password: ${DECODO_PASS:b=9Bv5atx3GNWfqt4u}
+    username: ${DECODO_USER:}
+    password: ${DECODO_PASS:}
