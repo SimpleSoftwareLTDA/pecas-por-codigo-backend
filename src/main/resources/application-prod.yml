@@ -80,7 +80,7 @@ management:
   otlp:
     metrics:
       export:
-        url: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/metrics
+        url: ${OTEL_EXPORTER_ENDPOINT}
         step: 15s
     tracing:
-      endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/traces
+      endpoint: ${OTEL_EXPORTER_ENDPOINT}
