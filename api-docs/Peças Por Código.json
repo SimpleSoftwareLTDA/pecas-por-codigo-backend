@@ -1,0 +1,2629 @@
+{
+    "info": {
+        "name": "Novo Peças Online",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "subscription-controller",
+            "description": "",
+            "item": [
+                {
+                    "name": "setBannerUrl",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/banner",
+                            "path": [
+                                "api",
+                                "v1",
+                                "banner"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "novo-banner",
+                                    "value": "https://pub-6506d3d953f94560b493b69d4b68f549.r2.dev/Pe%C3%A7as%20Online%20X%20-%20Template%20Para%20Banner.png",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "cnpj",
+                                    "value": "57.103.166/0001-50",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/banner",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "banner"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "uploadBanner",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "PUT",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "value": "cmMtdXBsb2FkLTE3NDI5Mzg2NzA4OTgtNw==/SejaPremium.png",
+                                    "type": "file",
+                                    "disabled": false
+                                }
+                            ]
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/upload",
+                            "path": [
+                                "api",
+                                "v1",
+                                "upload"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "PUT",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/upload",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "upload"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "handleWebhook",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/api/payments/status",
+                            "path": [
+                                "v1",
+                                "api",
+                                "payments",
+                                "status"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/v1/api/payments/status",
+                                    "path": [
+                                        "v1",
+                                        "api",
+                                        "payments",
+                                        "status"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "createCustomer",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/customers",
+                            "path": [
+                                "customers"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/customers",
+                                    "path": [
+                                        "customers"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "getBannerUrl",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/banner",
+                            "path": [
+                                "api",
+                                "v1",
+                                "banner"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/banner",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "banner"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "contact-controller",
+            "description": "",
+            "item": [
+                {
+                    "name": "processAndSendContactForm",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/api/contact-form",
+                            "path": [
+                                "v1",
+                                "api",
+                                "contact-form"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/v1/api/contact-form",
+                                    "path": [
+                                        "v1",
+                                        "api",
+                                        "contact-form"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "login-controller",
+            "description": "",
+            "item": [
+                {
+                    "name": "login",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/login",
+                            "path": [
+                                "api",
+                                "v1",
+                                "login"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/login",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "login"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "verifyToken",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/login/verify",
+                            "path": [
+                                "api",
+                                "v1",
+                                "login",
+                                "verify"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/login/verify",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "login",
+                                        "verify"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "token",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Fornecedores",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todos os fornecedores com paginação",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Criar fornecedor",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"empresa\": \"Fornecedor Exemplo\",\n    \"linkFornecedorOriginal\": \"https://example.com\",\n    \"razaoSocial\": \"Fornecedor Exemplo LTDA\",\n    \"cnpj\": \"15826705000130\",\n    \"inscricao\": \"12345678\",\n    \"idPlano\": 3,\n    \"assinatura\": {\n        \"diaPagamento\": 15,\n        \"idPlano\": 3,\n        \"bigBannerUrl\": \"https://example.com/banner-big.jpg\",\n        \"smallBannerUrl\": \"https://example.com/banner-small.jpg\"\n    },\n    \"contato\": {\n        \"vendedores\": \"João Silva\",\n        \"emailPecas\": \"pecas@example.com\",\n        \"fonePecas\": \"1234567890\",\n        \"whatsappGeral\": \"1234567890\",\n        \"whatsappPecas\": \"0987654321\",\n        \"emailEstoque\": \"estoque@example.com\",\n        \"emailContasPagar\": \"contaspagar@example.com\",\n        \"emailNotaFiscal\": \"notafiscal@example.com\",\n        \"website\": \"https://fornecedorexemplo.com\"\n    },\n    \"endereco\": {\n        \"endereco\": \"Rua Exemplo\",\n        \"cidade\": \"Cidade Exemplo\",\n        \"cep\": \"12345678\",\n        \"pais\": \"Brasil\",\n        \"idEstado\": 1\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"empresa\": \"Fornecedor Exemplo\",\n    \"linkFornecedorOriginal\": \"https://example.com\",\n    \"razaoSocial\": \"Fornecedor Exemplo LTDA\",\n    \"cnpj\": \"15826705000130\",\n    \"inscricao\": \"12345678\",\n    \"idPlano\": 3,\n    \"assinatura\": {\n        \"diaPagamento\": 15,\n        \"idPlano\": 3,\n        \"bigBannerUrl\": \"https://example.com/banner-big.jpg\",\n        \"smallBannerUrl\": \"https://example.com/banner-small.jpg\"\n    },\n    \"contato\": {\n        \"vendedores\": \"João Silva\",\n        \"emailPecas\": \"pecas@example.com\",\n        \"fonePecas\": \"1234567890\",\n        \"whatsappGeral\": \"1234567890\",\n        \"whatsappPecas\": \"0987654321\",\n        \"emailEstoque\": \"estoque@example.com\",\n        \"emailContasPagar\": \"contaspagar@example.com\",\n        \"emailNotaFiscal\": \"notafiscal@example.com\",\n        \"website\": \"https://fornecedorexemplo.com\"\n    },\n    \"endereco\": {\n        \"endereco\": \"Rua Exemplo\",\n        \"cidade\": \"Cidade Exemplo\",\n        \"cep\": \"12345678\",\n        \"pais\": \"Brasil\",\n        \"idEstado\": 1\n    }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Buscar fornecedor por ID",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Buscar fornecedor por CNPJ",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores/cnpj",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores",
+                                "cnpj"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cnpj",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores/cnpj",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores",
+                                        "cnpj"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "cnpj",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Estoque",
+            "description": "",
+            "item": [
+                {
+                    "name": "Retorna todos os estoques paginado",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Cria um estoque",
+                    "description": "Recebe um arquivo tablado com os dados do estoque, sugiro nao esperar pela resposta pois demora bastante processar arquivos",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "POST",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "token",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "value": "",
+                                            "type": "text",
+                                            "disabled": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pelo ID",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pela descrição do item",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/item",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                "item"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "descricao",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/item",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        "item"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "descricao",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pela id do item",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/item/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                "item",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/item/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        "item",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pelo nome do fornecedor",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/fornecedor",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                "fornecedor"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nome",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/fornecedor",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        "fornecedor"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "nome",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pelo ID do fornecedor",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/fornecedor/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                "fornecedor",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/fornecedor/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        "fornecedor",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna um estoque pelo código do item",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estoque/codigo/:codigo",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estoque",
+                                "codigo",
+                                ":codigo"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "codigo",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estoque/codigo/:codigo",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estoque",
+                                        "codigo",
+                                        ":codigo"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "codigo",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "email-controller",
+            "description": "",
+            "item": [
+                {
+                    "name": "receiveEmails",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/email/receive",
+                            "path": [
+                                "email",
+                                "receive"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/email/receive",
+                                    "path": [
+                                        "email",
+                                        "receive"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Planos",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todas descrições",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/planos",
+                            "path": [
+                                "api",
+                                "v1",
+                                "planos"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/planos",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "planos"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Peças",
+            "description": "",
+            "item": [
+                {
+                    "name": "Retorna todas as peças",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/pecas",
+                            "path": [
+                                "api",
+                                "v1",
+                                "pecas"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/pecas",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "pecas"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna uma peça pelo ID",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/pecas/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "pecas",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/pecas/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "pecas",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna uma peça pela descrição",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/pecas/descricao",
+                            "path": [
+                                "api",
+                                "v1",
+                                "pecas",
+                                "descricao"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "descricao",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/pecas/descricao",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "pecas",
+                                        "descricao"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "descricao",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Retorna uma peça pelo código",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/pecas/codigo/:codigo",
+                            "path": [
+                                "api",
+                                "v1",
+                                "pecas",
+                                "codigo",
+                                ":codigo"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "codigo",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/pecas/codigo/:codigo",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "pecas",
+                                        "codigo",
+                                        ":codigo"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "codigo",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Marcas",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todas as marcas",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/marcas",
+                            "path": [
+                                "api",
+                                "v1",
+                                "marcas"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/marcas",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "marcas"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Endereços",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todas as marcas",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/estados",
+                            "path": [
+                                "api",
+                                "v1",
+                                "estados"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/estados",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "estados"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Descrições",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todas descrições",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/descricoes",
+                            "path": [
+                                "api",
+                                "v1",
+                                "descricoes"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/descricoes",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "descricoes"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        },
+        {
+            "name": "Categoria",
+            "description": "",
+            "item": [
+                {
+                    "name": "Buscar todas categorias",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categorias",
+                            "path": [
+                                "api",
+                                "v1",
+                                "categorias"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categorias",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categorias"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Buscar categoria por id",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categorias/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "categorias",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categorias/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categorias",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Buscar categoria por nome",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categorias/search",
+                            "path": [
+                                "api",
+                                "v1",
+                                "categorias",
+                                "search"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "page",
+                                    "description": "",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "size",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categorias/search",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categorias",
+                                        "search"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "name",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "page",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "size",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "body": {}
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        }
+    ],
+    "variable": [],
+    "event": [],
+    "auth": {}
+}
