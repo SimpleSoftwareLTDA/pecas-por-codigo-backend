@@ -57,5 +57,5 @@ decodo:
   proxy:
     host: br.decodo.com
     port: 10007
-    username: ${DECODO_USER:}
-    password: ${DECODO_PASS:}
+    username: ${DECODO_USER}
+    password: ${DECODO_PASS}

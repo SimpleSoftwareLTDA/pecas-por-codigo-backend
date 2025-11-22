@@ -10,13 +10,15 @@ import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.items.ItemService
+import org.pecasonline.features.items.ItemsMetricsService
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 
 class ItemServiceTest {
 
     private val itemRepository: ItemRepository = mock()
-    private val itemService = ItemService(itemRepository)
+    private val metrics: ItemsMetricsService = mock()
+    private val itemService = ItemService(itemRepository, metrics = metrics)
 
     @Test
     fun `should return paginated list of all items`() {
