@@ -95,7 +95,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
 
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
