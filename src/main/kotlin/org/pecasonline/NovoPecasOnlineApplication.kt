@@ -16,19 +16,7 @@ import org.springframework.context.annotation.Bean
 @EnableScheduling
 @EnableCaching
 @EnableAsync
-class NovoPecasOnlineApplication {
-
-    @Bean
-    fun sentryTest(): CommandLineRunner {
-        return CommandLineRunner {
-            try {
-                throw Exception("This is a test.")
-            } catch (e: Exception) {
-                Sentry.captureException(e)
-            }
-        }
-    }
-}
+class NovoPecasOnlineApplication
 
 fun main(args: Array<String>) {
     runApplication<NovoPecasOnlineApplication>(*args)
