@@ -27,9 +27,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   novo-pecas-online-backend:
-    build:
-      dockerfile: Dockerfile
-      context: .
+    image: randintn/novo-pecas-online:c22c981
     env_file:
       - .env
     container_name: novo-pecas-online-backend
@@ -37,10 +35,17 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: local
       ASAAS_API_KEY:
+      # Ensure the application exports OTEL data to the collector service instead of localhost
+      OTEL_EXPORTER_ENDPOINT: http://otel-collector:4318
+      # Point Spring Data Redis to the Redis service on the Docker network
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     ports:
       - "8080:8080"
     depends_on:
       - novo-pecas-online-db
+      - otel-collector
+      - redis
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.107.0
@@ -51,8 +56,6 @@ services:
       - "4318:4318"
     volumes:
       - ./monitoring/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
-    depends_on:
-      - novo-pecas-online-backend
 
   prometheus:
     image: prom/prometheus:v2.53.1
