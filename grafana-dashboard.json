@@ -217,7 +217,7 @@
             "uid": "prometheus"
           },
           "editorMode": "builder",
-          "expr": "sum(rate(custom_items_requests_total{endpoint=\\"getByCode\\"}[5m])) by (codigo)",
+          "expr": "sum(rate(custom_items_requests_total{endpoint=\"getByCode\"}[5m])) by (codigo)",
           "legendFormat": "{{codigo}}",
           "range": true,
           "refId": "A"
