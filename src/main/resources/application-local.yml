@@ -94,3 +94,10 @@ management:
         step: 15s
     tracing:
       endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/traces
+
+unleash:
+  api-url: ${UNLEASH_API_URL}
+  api-token: ${UNLEASH_API_TOKEN}
+  app-name: ${spring.application.name:pecas-por-codigo-unleash}
+  instance-id: ${HOSTNAME:${random.uuid}}
+  environment: ${SPRING_PROFILES_ACTIVE:local}

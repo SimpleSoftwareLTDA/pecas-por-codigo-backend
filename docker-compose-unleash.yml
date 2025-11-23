@@ -1,50 +1,50 @@
-services:
-  # Serviço de Banco de Dados
-  db:
-    image: postgres:15
-    container_name: simple-unleash-db  # Nome descritivo e fixo
-    environment:
-      POSTGRES_DB: unleash
-      POSTGRES_USER: unleash_user
-      POSTGRES_PASSWORD: password123
-    volumes:
-      - unleash_db_data:/var/lib/postgresql/data
-    healthcheck:
-      # Verifica se o PG está pronto para aceitar conexões antes de subir a app
-      test: ["CMD-SHELL", "pg_isready -U unleash_user -d unleash"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - simple-unleash-net
-
-  # Serviço da Aplicação Unleash
-  web:
-    image: unleashorg/unleash-server:latest
-    container_name: simple-unleash-server # Nome descritivo e fixo
-    ports:
-      - "4242:4242"
-    environment:
-      # Conexão com o banco usando o nome do serviço 'db'
-      DATABASE_URL: postgres://unleash_user:password123@db/unleash
-      DATABASE_SSL: "false"
-      LOG_LEVEL: warn
-      # IMPORTANTE: Troque isso em produção
-      UNLEASH_SECRET: "simple-software-secret-key-change-me"
-      # Configurações opcionais para evitar uso excessivo de memória em dev
-      NODE_ENV: production
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - simple-unleash-net
-    # REMOVIDO: command: ["node", "index.js"]
-    # Deixamos a imagem usar seu entrypoint padrão docker-entrypoint.sh
-
-volumes:
-  unleash_db_data:
-    name: simple-unleash-data # Nome descritivo para o volume também
-
-networks:
-  simple-unleash-net:
-    name: simple-unleash-network
+#services:
+#  # Serviço de Banco de Dados
+#  db:
+#    image: postgres:15
+#    container_name: simple-unleash-db  # Nome descritivo e fixo
+#    environment:
+#      POSTGRES_DB: unleash
+#      POSTGRES_USER: unleash_user
+#      POSTGRES_PASSWORD: password123
+#    volumes:
+#      - unleash_db_data:/var/lib/postgresql/data
+#    healthcheck:
+#      # Verifica se o PG está pronto para aceitar conexões antes de subir a app
+#      test: ["CMD-SHELL", "pg_isready -U unleash_user -d unleash"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - simple-unleash-net
+#
+#  # Serviço da Aplicação Unleash
+#  web:
+#    image: unleashorg/unleash-server:latest
+#    container_name: simple-unleash-server # Nome descritivo e fixo
+#    ports:
+#      - "4242:4242"
+#    environment:
+#      # Conexão com o banco usando o nome do serviço 'db'
+#      DATABASE_URL: postgres://unleash_user:password123@db/unleash
+#      DATABASE_SSL: "false"
+#      LOG_LEVEL: warn
+#      # IMPORTANTE: Troque isso em produção
+#      UNLEASH_SECRET: "simple-software-secret-key-change-me"
+#      # Configurações opcionais para evitar uso excessivo de memória em dev
+#      NODE_ENV: production
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#    networks:
+#      - simple-unleash-net
+#    # REMOVIDO: command: ["node", "index.js"]
+#    # Deixamos a imagem usar seu entrypoint padrão docker-entrypoint.sh
+#
+#volumes:
+#  unleash_db_data:
+#    name: simple-unleash-data # Nome descritivo para o volume também
+#
+#networks:
+#  simple-unleash-net:
+#    name: simple-unleash-network

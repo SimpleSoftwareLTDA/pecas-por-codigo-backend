@@ -27,7 +27,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   novo-pecas-online-backend:
-    image: randintn/novo-pecas-online:c22c981
+    build:
+      dockerfile: Dockerfile
+      context: .
     env_file:
       - .env
     container_name: novo-pecas-online-backend
@@ -40,18 +42,23 @@ services:
       # Point Spring Data Redis to the Redis service on the Docker network
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      UNLEASH_API_URL: ${UNLEASH_API_URL}
+      UNLEASH_API_TOKEN: ${UNLEASH_API_TOKEN}
+      UNLEASH_APP_NAME: ${UNLEASH_APP_NAME}
+      UNLEASH_INSTANCE_ID: ${UNLEASH_INSTANCE_ID}
     ports:
       - "8080:8080"
     depends_on:
       - novo-pecas-online-db
       - otel-collector
       - redis
+      - unleash-web
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.107.0
     container_name: otel-collector
     restart: unless-stopped
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
     ports:
       - "4318:4318"
     volumes:
@@ -74,7 +81,36 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+  unleash-db:
+    image: postgres:15
+    container_name: unleash-db
+    environment:
+      POSTGRES_DB: unleash
+      POSTGRES_USER: unleash_user
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - unleash_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash_user -d unleash" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  unleash-web:
+    image: unleashorg/unleash-server:latest
+    container_name: unleash-server
+    ports:
+      - "4242:4242"
+    environment:
+      DATABASE_URL: postgres://unleash_user:password123@unleash-db/unleash
+      DATABASE_SSL: "false"
+      LOG_LEVEL: warn
+      UNLEASH_SECRET: "simple-software-secret-key-change-me"
+      INIT_CLIENT_API_TOKENS: "default:development.unleash-insecure-api-token"
+    depends_on:
+      - unleash-db
 
 volumes:
   postgres_data:
   grafana_data:
+  unleash_db_data:
