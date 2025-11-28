@@ -9,6 +9,9 @@ import org.pecasonline.features.description.IDescriptionService
 import org.pecasonline.features.subscription.service.ISubscriptionService
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
+import org.pecasonline.features.supplier.dto.UpdateContactDTO
+import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
+import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
@@ -84,5 +87,54 @@ class SupplierService(
         subscriptionService.createSubscription(supplier.subscription!!, savedSupplier)
 
         return savedSupplier
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override fun updateSupplier(id: Int, supplier: UpdateSupplierDTO): Supplier {
+        val existingSupplier = findSupplierById(id)
+
+        val updatedContact = supplier.contact?.let {
+            updateContact(existingSupplier.contact, it)
+        } ?: existingSupplier.contact
+
+        val updatedAddress = supplier.address?.let {
+            addressService.update(existingSupplier.address, it)
+        } ?: existingSupplier.address
+
+        val updatedDescription = supplier.descriptionId?.let {
+            descriptionService.findDescriptionById(it)
+        } ?: existingSupplier.description
+
+        val updatedSupplier = existingSupplier.copy(
+            name = supplier.name ?: existingSupplier.name,
+            socialName = supplier.socialName ?: existingSupplier.socialName,
+            description = updatedDescription,
+            contact = updatedContact,
+            address = updatedAddress
+        )
+
+        return supplierRepository.save(updatedSupplier)
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override fun deleteSupplier(id: Int) {
+        val existingSupplier = findSupplierById(id)
+        supplierRepository.deleteById(existingSupplier.id!!)
+    }
+
+    private fun updateContact(existingContact: Contact, updatedContact: UpdateContactDTO): Contact {
+        val contactToPersist = existingContact.copy(
+            sellerName = updatedContact.sellerName ?: existingContact.sellerName,
+            itemsEmail = updatedContact.itemsEmail ?: existingContact.itemsEmail,
+            itemsPhone = updatedContact.itemsPhone ?: existingContact.itemsPhone,
+            whatsapp = updatedContact.whatsapp ?: existingContact.whatsapp,
+            itemsWhatsapp = updatedContact.itemsWhatsapp ?: existingContact.itemsWhatsapp,
+            stockEmail = updatedContact.stockEmail ?: existingContact.stockEmail,
+            billingEmail = updatedContact.billingEmail ?: existingContact.billingEmail,
+            nfEmail = updatedContact.nfEmail ?: existingContact.nfEmail,
+            site = updatedContact.site ?: existingContact.site
+        )
+
+        return contactRepository.save(contactToPersist)
     }
 }

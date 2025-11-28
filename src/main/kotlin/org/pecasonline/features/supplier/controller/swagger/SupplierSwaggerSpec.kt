@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
+import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
 import org.springframework.data.domain.Page
 
 @Tag(name = "Fornecedores", description = "Recursos relacionados a fornecedores")
@@ -118,4 +119,63 @@ interface SupplierSwaggerSpec {
     fun createSupplier(
         supplier: CreateSupplierDTO
     ): Supplier
+
+    @Operation(summary = "Atualizar fornecedor")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Fornecedor atualizado", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.GET_SUPPLIER_BY_ID)
+                ])
+        ]),
+        ApiResponse(responseCode = "404", description = "Fornecedor nÇœo encontrado", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)
+                ])
+        ]),
+        ApiResponse(responseCode = "400", description = "RequisiÇõÇœo invÇ­lida", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.BAD_REQUEST)
+                ])
+        ]),
+        ApiResponse(responseCode = "500", description = "Erro interno", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
+                ])
+        ])
+    ])
+    @RequestBody(
+        content = [Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = UpdateSupplierDTO::class),
+            examples = [ExampleObject(value = SupplierExamples.UPDATE_SUPPLIER_REQUEST)]
+        )]
+    )
+    fun updateSupplier(
+        id: Int,
+        supplier: UpdateSupplierDTO
+    ): Supplier
+
+    @Operation(summary = "Remover fornecedor")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "Fornecedor removido"),
+        ApiResponse(responseCode = "404", description = "Fornecedor nÇœo encontrado", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)
+                ])
+        ]),
+        ApiResponse(responseCode = "500", description = "Erro interno", content = [
+            Content(mediaType = "application/json",
+                examples = [
+                    ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
+                ])
+        ])
+    ])
+    fun deleteSupplier(
+        id: Int
+    )
 }
