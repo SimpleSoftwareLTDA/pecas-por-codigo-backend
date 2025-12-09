@@ -18,6 +18,11 @@ exporters:
     const_labels:
       environment: "production"
 
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
   logging:
     loglevel: debug
     sampling_initial: 5
@@ -33,7 +38,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging]
+      exporters: [otlp, logging]
 
   telemetry:
     logs:
