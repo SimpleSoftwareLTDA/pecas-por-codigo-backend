@@ -23,7 +23,8 @@ private val logger = KotlinLogging.logger {}
 @RestController
 class SubscriptionController(
     private val bankingService: BankingService,
-    private val subscriptionService: SubscriptionService
+    private val subscriptionService: SubscriptionService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ) {
 
     @PostMapping("/customers")
@@ -39,6 +40,7 @@ class SubscriptionController(
         val asaasCustomerId = payload.payment.customer
 
         subscriptionService.updateSubscriptionStatusByWebhook(asaasCustomerId, payload.event)
+        meterRegistry.counter("subscription.webhook", "event", payload.event.toString()).increment()
 
         return ResponseEntity.status(HttpStatus.OK).body("Webhook recebido com sucesso!")
     }
@@ -58,6 +60,7 @@ class SubscriptionController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun setBannerUrl(@RequestParam("novo-banner") newBannerUrl: String, @RequestParam("cnpj") @CNPJ cnpj: String) {
         subscriptionService.setBigBannerUrlForSupplier(newBannerUrl = newBannerUrl, cnpj = cnpj)
+        meterRegistry.counter("banner.update", "cnpj", cnpj).increment()
     }
 
     @GetMapping("/api/v1/banner/all")
