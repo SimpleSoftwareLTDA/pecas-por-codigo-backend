@@ -54,7 +54,7 @@ class StockController(
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
     ) = stockService.findStockByItemCode(code, page, size).also {
-        meterRegistry.counter("custom.code.requests", "endpoint", "stock.getByItemCode", "method", "GET").increment()
+        meterRegistry.counter("stock.search.code", "code", code).increment()
     }
 
     @GetMapping("/fornecedor/{id}")
