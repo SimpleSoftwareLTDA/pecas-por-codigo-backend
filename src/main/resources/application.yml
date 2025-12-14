@@ -24,7 +24,7 @@ spring:
   application:
     name: novo-pecas-online
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
   servlet:
     multipart:
       max-file-size: 10MB
