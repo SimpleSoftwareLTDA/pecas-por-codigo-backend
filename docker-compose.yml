@@ -48,9 +48,10 @@ services:
     container_name: novo-pecas-online-backend
     restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: local
+      SPRING_PROFILES_ACTIVE: prod
       ASAAS_API_KEY:
       MANAGEMENT_OTLP_TRACING_ENDPOINT: ${OTEL_ENDPOINT_TRACES}
+      OTEL_EXPORTER_ENDPOINT: http://otel-collector:4318
     ports:
       - "8080:8080"
     depends_on:
