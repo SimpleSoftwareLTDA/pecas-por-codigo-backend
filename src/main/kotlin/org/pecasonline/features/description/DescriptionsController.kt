@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("$BASE_ENDPOINT/descricoes")
 class DescriptionsController(
-    private val descriptionService: IDescriptionService
+    private val descriptionService: IDescriptionService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ): DescriptionSwaggerSpec {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    override fun getDescriptions(): List<Description> = descriptionService.getAvailableDescriptions()
+    override fun getDescriptions(): List<Description> = descriptionService.getAvailableDescriptions().also {
+        meterRegistry.counter("description.list").increment()
+    }
 
 }
