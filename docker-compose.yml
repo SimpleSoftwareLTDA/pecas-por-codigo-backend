@@ -3,6 +3,12 @@ services:
     image: grafana/grafana:11.1.0
     container_name: grafana
     restart: unless-stopped
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SERVER_ROOT_URL=https://obs.pecasporcodigo.com.br
+      - GF_SERVER_DOMAIN=obs.pecasporcodigo.com.br
     ports:
       - "3000:3000"
     volumes:
@@ -15,9 +21,9 @@ services:
   tempo:
     image: grafana/tempo:2.2.0
     container_name: tempo
-    command: [ "-config.file=/etc/tempo.yaml" ]
+    command: [ "-config.file=/etc/tempo.yml" ]
     volumes:
-      - ./monitoring/tempo.yaml:/etc/tempo.yaml
+      - ./monitoring/tempo.yml:/etc/tempo.yml
     ports:
       - "3200:3200"   # Tempo
       - "4317"        # OTLP gRPC
@@ -62,11 +68,11 @@ services:
     image: otel/opentelemetry-collector-contrib:0.107.0
     container_name: otel-collector
     restart: unless-stopped
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    command: ["--config=/etc/otelcol-contrib/config.yml"]
     ports:
       - "4318:4318"
     volumes:
-      - ./monitoring/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
+      - ./monitoring/otel-collector-config.yml:/etc/otelcol-contrib/config.yml
 
   prometheus:
     image: prom/prometheus:v2.53.1
