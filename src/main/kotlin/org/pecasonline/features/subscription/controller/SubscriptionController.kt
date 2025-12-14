@@ -40,12 +40,10 @@ class SubscriptionController(
         val asaasCustomerId = payload.payment.customer
 
         subscriptionService.updateSubscriptionStatusByWebhook(asaasCustomerId, payload.event)
-        meterRegistry.counter("subscription.webhook", "event", payload.event.toString()).increment()
+        meterRegistry.counter("subscription.webhook", "event", payload.event).increment()
 
         return ResponseEntity.status(HttpStatus.OK).body("Webhook recebido com sucesso!")
     }
-
-    private val bannerUrls = mutableListOf<String>()
 
     @GetMapping("/api/v1/banner")
     fun getBannerUrl(): String {
