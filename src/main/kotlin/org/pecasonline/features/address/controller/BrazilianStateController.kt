@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("$BASE_ENDPOINT/estados")
 class BrazilianStateController(
-    private val stateService: IStateService
+    private val stateService: IStateService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ) : AddressSwaggerSpec {
 
     @GetMapping
-    override fun getBrazilianStates(): List<BrazilianState> = stateService.getAvailableStates()
+    override fun getBrazilianStates(): List<BrazilianState> = stateService.getAvailableStates().also {
+        meterRegistry.counter("state.list").increment()
+    }
 }

@@ -1,6 +1,7 @@
 package org.pecasonline.features.items.controller
 
 import org.junit.jupiter.api.Test
+import org.mockito.Answers
 import org.mockito.kotlin.*
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.items.IIitemService
@@ -20,6 +21,9 @@ class ItemsControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @MockBean
     private lateinit var itemsService: IIitemService
+
+    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+    private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
     @Test
     fun `should return paginated list of all items`() {

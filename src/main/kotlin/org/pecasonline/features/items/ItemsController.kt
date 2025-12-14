@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("$BASE_ENDPOINT/pecas")
 class ItemsController(
     private val itemsService: IIitemService,
+    private val meterRegistry: MeterRegistry
 ) : ItemSwaggerSpec {
 
     @Timed(value = "items.getAll", description = "Time taken to return all items")
@@ -33,7 +34,9 @@ class ItemsController(
         @RequestParam("descricao") descricao: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = itemsService.findItemByDescription(descricao, page, size)
+    ) = itemsService.findItemByDescription(descricao, page, size).also {
+        meterRegistry.counter("item.search.description", "description", descricao).increment()
+    }
 
     @Timed(value = "items.getByCode", description = "Time taken to return an item by code")
     @GetMapping("/codigo/{codigo}")
@@ -41,6 +44,8 @@ class ItemsController(
         @PathVariable("codigo") codigo: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = itemsService.findItemByCode(codigo, page, size)
+    ) = itemsService.findItemByCode(codigo, page, size).also {
+        meterRegistry.counter("item.search.code", "code", codigo).increment()
+    }
     
 }
