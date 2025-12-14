@@ -141,17 +141,6 @@
       ]
     },
     {
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
-      "id": 24,
-      "title": "Search Analysis",
-      "type": "row"
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -160,13 +149,41 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
           }
         }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 2
+      },
+      "id": 30,
+      "title": "Contact Form Submissions",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(increase(contact_form_total[$__range]))",
+          "legendFormat": "Submissions",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 24,
+      "title": "Item Search Analysis",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 8,
@@ -179,10 +196,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(item_search_code_total[5m])) by (code)",
           "legendFormat": "{{code}}",
           "refId": "A"
@@ -216,18 +229,6 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -239,10 +240,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(item_search_description_total[5m])) by (description)",
           "legendFormat": "{{description}}",
           "refId": "A"
@@ -287,21 +284,9 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 28
       },
@@ -310,10 +295,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(stock_search_code_total[5m])) by (code)",
           "legendFormat": "{{code}}",
           "refId": "A"
@@ -325,22 +306,10 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 28
       },
       "id": 9,
@@ -348,10 +317,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(stock_search_supplierName_total[5m])) by (name)",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -363,17 +328,27 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "id": 12,
+      "title": "Supplier CNPJ Search Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(supplier_search_cnpj_total[5m])) by (cnpj)",
+          "legendFormat": "{{cnpj}}",
+          "refId": "A"
         }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 8,
@@ -381,18 +356,41 @@
         "x": 0,
         "y": 36
       },
-      "id": 12,
-      "title": "Supplier CNPJ Search Rate",
+      "id": 31,
+      "title": "Top Searched Suppliers (Stock)",
+      "type": "table",
+      "targets": [
+        {
+          "expr": "topk(10, round(sum(increase(stock_search_supplierName_total[$__range])) by (name)))",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "id": 32,
+      "title": "Stack Search by Desc & ID (Combined Rate)",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum(rate(supplier_search_cnpj_total[5m])) by (cnpj)",
-          "legendFormat": "{{cnpj}}",
+          "expr": "sum(rate(stock_search_description_total[5m]))",
+          "legendFormat": "By Description",
           "refId": "A"
+        },
+        {
+          "expr": "sum(rate(stock_search_supplierId_total[5m]))",
+          "legendFormat": "By Supplier ID",
+          "refId": "B"
         }
       ]
     },
@@ -404,7 +402,7 @@
         "y": 44
       },
       "id": 28,
-      "title": "System & Security",
+      "title": "System, Security & Reference Data",
       "type": "row"
     },
     {
@@ -412,21 +410,9 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 46
       },
@@ -435,10 +421,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(login_attempt_total[5m]))",
           "legendFormat": "Attempts",
           "refId": "A"
@@ -450,22 +432,10 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 46
       },
       "id": 15,
@@ -473,10 +443,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "expr": "sum(rate(subscription_webhook_total[5m])) by (event)",
           "legendFormat": "{{event}}",
           "refId": "A"
@@ -488,37 +454,56 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "showPoints": "auto"
-          }
-        }
-      },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 46
       },
-      "id": 2,
-      "title": "Total HTTP Requests",
+      "id": 33,
+      "title": "Reference Data Access (Rate)",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "http_server_requests_seconds_count",
-          "legendFormat": "__auto",
-          "range": true,
+          "expr": "sum(rate(brand_list_total[5m]))",
+          "legendFormat": "Brands",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(state_list_total[5m]))",
+          "legendFormat": "States",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(plan_list_total[5m]))",
+          "legendFormat": "Plans",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(rate(category_search_name_total[5m]))",
+          "legendFormat": "Cat Search",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 46
+      },
+      "id": 34,
+      "title": "Contact Forms (by Subject)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(increase(contact_form_total[$__range])) by (subject)",
+          "legendFormat": "{{subject}}",
           "refId": "A"
         }
       ]
