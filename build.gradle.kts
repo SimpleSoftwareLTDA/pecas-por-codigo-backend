@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    var kotlinVersion = "2.1.20"
+    var kotlinVersion = "2.3.0"
 
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
@@ -33,7 +33,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
