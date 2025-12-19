@@ -9,6 +9,8 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_SERVER_ROOT_URL=https://obs.pecasporcodigo.com.br
       - GF_SERVER_DOMAIN=obs.pecasporcodigo.com.br
+      - GF_SECURITY_COOKIE_SAMESITE=none
+      - GF_SECURITY_COOKIE_SECURE=true
     ports:
       - "3000:3000"
     volumes:
