@@ -50,7 +50,7 @@
         "y": 0
       },
       "id": 20,
-      "title": "Global Stats",
+      "title": "Estatísticas Globais",
       "type": "row"
     },
     {
@@ -72,7 +72,7 @@
         "y": 2
       },
       "id": 21,
-      "title": "Total Item Searches (Period)",
+      "title": "Total de Buscas de Itens (Período)",
       "type": "stat",
       "targets": [
         {
@@ -101,7 +101,7 @@
         "y": 2
       },
       "id": 22,
-      "title": "Total Stock Searches (Period)",
+      "title": "Total de Buscas de Estoque (Período)",
       "type": "stat",
       "targets": [
         {
@@ -130,7 +130,7 @@
         "y": 2
       },
       "id": 23,
-      "title": "Login Attempts (Period)",
+      "title": "Tentativas de Login (Período)",
       "type": "stat",
       "targets": [
         {
@@ -159,7 +159,7 @@
         "y": 2
       },
       "id": 30,
-      "title": "Contact Form Submissions",
+      "title": "Envios de Formulário de Contato",
       "type": "stat",
       "targets": [
         {
@@ -177,7 +177,7 @@
         "y": 8
       },
       "id": 24,
-      "title": "Item Search Analysis",
+      "title": "Análise de Busca de Itens",
       "type": "row"
     },
     {
@@ -192,7 +192,7 @@
         "y": 10
       },
       "id": 4,
-      "title": "Searches by Product Code (Rate)",
+      "title": "Buscas por Código de Produto (Taxa)",
       "type": "timeseries",
       "targets": [
         {
@@ -214,7 +214,7 @@
         "y": 10
       },
       "id": 25,
-      "title": "Top Searched Codes (Total in Period)",
+      "title": "Códigos Mais Buscados (Total no Período)",
       "type": "table",
       "targets": [
         {
@@ -236,7 +236,7 @@
         "y": 18
       },
       "id": 5,
-      "title": "Searches by Description (Rate)",
+      "title": "Buscas por Descrição (Taxa)",
       "type": "timeseries",
       "targets": [
         {
@@ -258,7 +258,7 @@
         "y": 18
       },
       "id": 26,
-      "title": "Top Searched Descriptions (Total in Period)",
+      "title": "Descrições Mais Buscadas (Total no Período)",
       "type": "table",
       "targets": [
         {
@@ -276,7 +276,7 @@
         "y": 26
       },
       "id": 27,
-      "title": "Stock & Suppliers",
+      "title": "Estoque e Fornecedores",
       "type": "row"
     },
     {
@@ -291,7 +291,7 @@
         "y": 28
       },
       "id": 6,
-      "title": "Stock Search Rate (Code)",
+      "title": "Taxa de Busca de Estoque (Código)",
       "type": "timeseries",
       "targets": [
         {
@@ -313,7 +313,7 @@
         "y": 28
       },
       "id": 9,
-      "title": "Stock Search Rate (Supplier Name)",
+      "title": "Taxa de Busca de Estoque (Nome do Fornecedor)",
       "type": "timeseries",
       "targets": [
         {
@@ -335,7 +335,7 @@
         "y": 28
       },
       "id": 12,
-      "title": "Supplier CNPJ Search Rate",
+      "title": "Taxa de Busca de CNPJ de Fornecedor",
       "type": "timeseries",
       "targets": [
         {
@@ -357,7 +357,7 @@
         "y": 36
       },
       "id": 31,
-      "title": "Top Searched Suppliers (Stock)",
+      "title": "Fornecedores Mais Buscados (Estoque)",
       "type": "table",
       "targets": [
         {
@@ -379,7 +379,7 @@
         "y": 36
       },
       "id": 32,
-      "title": "Stack Search by Desc & ID (Combined Rate)",
+      "title": "Busca de Estoque por Desc. e ID (Taxa Combinada)",
       "type": "timeseries",
       "targets": [
         {
@@ -402,7 +402,7 @@
         "y": 44
       },
       "id": 28,
-      "title": "System, Security & Reference Data",
+      "title": "Dados de Sistema, Segurança e Referência",
       "type": "row"
     },
     {
@@ -417,7 +417,7 @@
         "y": 46
       },
       "id": 13,
-      "title": "Login Attempts (Rate)",
+      "title": "Tentativas de Login (Taxa)",
       "type": "timeseries",
       "targets": [
         {
@@ -439,7 +439,7 @@
         "y": 46
       },
       "id": 15,
-      "title": "Subscription Webhooks",
+      "title": "Webhooks de Assinatura",
       "type": "timeseries",
       "targets": [
         {
@@ -461,7 +461,7 @@
         "y": 46
       },
       "id": 33,
-      "title": "Reference Data Access (Rate)",
+      "title": "Acesso a Dados de Referência (Taxa)",
       "type": "timeseries",
       "targets": [
         {
@@ -498,7 +498,7 @@
         "y": 46
       },
       "id": 34,
-      "title": "Contact Forms (by Subject)",
+      "title": "Formulários de Contato (por Assunto)",
       "type": "timeseries",
       "targets": [
         {
@@ -521,7 +521,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "API Metrics",
+  "title": "Métricas da API",
   "uid": "e1g5z6a7k",
   "version": 2,
   "weekStart": ""
