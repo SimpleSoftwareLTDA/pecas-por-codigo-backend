@@ -1,0 +1,223 @@
+
+    Diretório:
+    C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonline
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                features
+d-----        14/12/2025     14:41                observability
+-a----        13/11/2025     15:15            315 NovoPecasOnlineApplicationTes
+                                                  ts.kt
+    Diretório:
+    C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonline\features
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                address
+d-----        13/11/2025     15:15                brand
+d-----        13/11/2025     15:15                category
+d-----        13/11/2025     15:15                description
+d-----        13/11/2025     15:15                items
+d-----        13/11/2025     15:15                plan
+d-----        13/11/2025     15:15                stock
+d-----        13/11/2025     15:15                subscription
+d-----        13/11/2025     15:15                supplier
+d-----        13/11/2025     15:15                vendor
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\address
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\address\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           1658 BrazilianStateControllerTest.
+                                                  kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\address\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           3117 AddressRepositoryTest.kt
+-a----        13/11/2025     15:15           1868 BrazilianStatesRepositoryTest
+                                                  .kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\address\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           3195 AddressServiceTest.kt
+-a----        13/11/2025     15:15           1932 StateServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\brand
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\brand\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           1472 BrandControllerTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\brand\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           1765 BrandRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\brand\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2039 BrandServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\category
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           3719 CategoryControllerTest.kt
+-a----        13/11/2025     15:15           2131 CategoryRepositoryTest.kt
+-a----        13/11/2025     15:15           5459 CategoryServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\description
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\description\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2112 DescriptionsControllerTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\description\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2168 DescriptionRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\description\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2347 DescriptionServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\items
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        14/12/2025     11:21                controller
+d-----        13/11/2025     15:15                repository
+d-----        14/12/2025     09:54                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\items\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        14/12/2025     11:21           4444 ItemsControllerTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\items\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2571 ItemRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\items\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        14/12/2025     09:54           4063 ItemServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\plan
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\plan\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           1631 PlanControllerTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\plan\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2811 PlanRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\plan\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2268 PlanServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\stock
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\stock\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           5925 StockControllerTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\stock\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           6429 StockRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\stock\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           4320 StockServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\subscription
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                controller
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\subscription\controller
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           3003 SubscriptionControllerBannerT
+                                                  est.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\subscription\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           4514 SubscriptionRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\subscription\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           4758 SubscriptionServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\supplier
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\supplier\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           2067 ContactRepositoryTest.kt
+-a----        13/11/2025     15:15           3518 SupplierRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\supplier\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15           3849 SupplierServiceTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\vendor
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        13/11/2025     15:15                repository
+d-----        13/11/2025     15:15                service
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\vendor\repository
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15              0 ContactRepositoryTest.kt
+-a----        13/11/2025     15:15              0 SupplierRepositoryTest.kt
+    Diretório: C:\Coding\pecas-por-codigo-backend\src\test\kotlin\org\pecasonli
+    ne\features\vendor\service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        13/11/2025     15:15              0 SupplierServiceTest.kt

@@ -106,14 +106,7 @@ class ExceptionsAdvisor {
         return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
     }
 
-    @ExceptionHandler(RuntimeException::class)
-    fun handleGeneralException(ex: Exception): ResponseEntity<Map<String, Any>> {
-        val response = mapOf(
-            "status" to 500,
-            "message" to "Ocorreu um erro interno no servidor."
-        )
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
-    }
+
 
 
     private final fun getJsonAliasesWithJackson(clazz: KClass<*>, objectMapper: ObjectMapper = jacksonObjectMapper()): Map<String, String> {
