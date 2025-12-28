@@ -1,0 +1,16 @@
+{
+    "name": "pecas-por-codigo-backend-worker",
+    "version": "1.0.0",
+    "description": "Cloudflare Worker proxy for containerized Kotlin backend",
+    "main": "worker/index.ts",
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20241218.0",
+        "wrangler": "^3.91.0",
+        "typescript": "^5.7.2"
+    },
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "build": "wrangler build"
+    }
+}

@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    var kotlinVersion = "2.1.20"
+    var kotlinVersion = "2.3.0"
 
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
@@ -11,21 +11,9 @@ plugins {
     id("com.gorylenko.gradle-git-properties") version "2.5.3"
 
     id("io.spring.dependency-management") version "1.1.6"
-    id("io.sentry.jvm.gradle") version "5.12.2"
 
-    id("org.springframework.boot") version "3.3.5"
+    id("org.springframework.boot") version "3.5.9"
 
-}
-
-sentry {
-    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-    // This enables source context, allowing you to see your source
-    // code as part of your stack traces in Sentry.
-    includeSourceContext.set(true)
-
-    org.set("simple-software-q0")
-    projectName.set("java-spring-boot")
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
 }
 
 group = "org"
@@ -33,7 +21,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -50,7 +38,7 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     // Security
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    // implementation("org.springframework.boot:spring-boot-starter-security")
 
     implementation("org.springframework.boot:spring-boot-starter-batch")
 
@@ -89,7 +77,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // Documentation dependencies
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
     // Micrometer dependencies
     implementation("io.micrometer:micrometer-registry-prometheus")
@@ -110,7 +98,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.4")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.1")
     }
 }
 
@@ -118,7 +106,7 @@ dependencyManagement {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 

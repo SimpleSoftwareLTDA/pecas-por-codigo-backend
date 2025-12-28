@@ -40,3 +40,12 @@ out/
 .kotlin
 
 .env
+
+run_log_*.txt
+
+build_log*
+deps.txt
+run_log.txt
+
+.gemini/
+gha-creds-*.json

@@ -1,10 +1,11 @@
-FROM amazoncorretto:21 AS build
-# Not alpine, for performace.
+# Build stage: Cache dependencies and build the JAR
+FROM amazoncorretto:25-alpine AS build
 
-# Set the working directory inside the container
+RUN apk add --no-cache findutils
+
 WORKDIR /app
 
-# Copy Gradle wrapper and build files
+# Copy Gradle wrapper and build files first to cache dependencies
 COPY gradlew ./
 COPY gradle gradle
 COPY build.gradle.kts gradle.properties settings.gradle.kts ./
@@ -12,19 +13,36 @@ COPY build.gradle.kts gradle.properties settings.gradle.kts ./
 # Ensure Gradle wrapper is executable
 RUN chmod +x ./gradlew
 
-# Copy the entire project and build the application
-COPY . .
-RUN ./gradlew --no-daemon --parallel --build-cache clean bootJar
+# Pre-download dependencies (improves build speed on subsequent runs)
+RUN ./gradlew dependencies --no-daemon
 
-# Production stage: use a minimal JRE image for running the app
-FROM amazoncorretto:25 AS runtime
-# Not alpine, for performace.
+# Copy source code and build
+COPY src src
+RUN ./gradlew bootJar --no-daemon --parallel --build-cache -x generateGitProperties
 
-# Set working directory and copy over the built JAR file
+# Extract layers for efficient Docker caching
+RUN mkdir -p build/extracted && \
+    java -Djarmode=layertools -jar build/libs/*.jar extract --destination build/extracted
+
+# Production stage
+FROM amazoncorretto:25-alpine AS runtime
+
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
 
-# Expose the application port
+# Copy extracted layers from build stage
+COPY --from=build /app/build/extracted/dependencies/ ./
+COPY --from=build /app/build/extracted/spring-boot-loader/ ./
+COPY --from=build /app/build/extracted/snapshot-dependencies/ ./
+COPY --from=build /app/build/extracted/application/ ./
+
+# Expose port
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseStringDeduplication", "-Xms512m", "-Xmx750m", "-jar", "/app/app.jar"]
+# Optimized ENTRYPOINT for Spring Boot Layers
+ENTRYPOINT ["java", \
+    "-Xms1g", \
+    "-Xmx1g", \
+    "-XX:+UseContainerSupport", \
+    "-XX:+UseStringDeduplication", \
+    "-XX:+ExitOnOutOfMemoryError", \
+    "org.springframework.boot.loader.launch.JarLauncher"]

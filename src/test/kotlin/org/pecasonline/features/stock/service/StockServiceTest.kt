@@ -33,6 +33,7 @@ import java.util.*
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
+@org.springframework.test.context.ActiveProfiles("test")
 class StockServiceTest {
 
     @MockBean
@@ -48,7 +49,7 @@ class StockServiceTest {
     private lateinit var categoryService: ICategoryService
 
     @Autowired
-    private lateinit var stockService: StockService
+    private lateinit var stockService: org.pecasonline.features.stock.IStockService
 
     private lateinit var sampleCategory: Category
     private lateinit var sampleItem: Item

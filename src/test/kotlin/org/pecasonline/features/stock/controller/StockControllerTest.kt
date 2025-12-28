@@ -24,7 +24,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(StockController::class)
+@org.springframework.test.context.ActiveProfiles("test")
 class StockControllerTest(@Autowired val mockMvc: MockMvc) {
+
+    @MockkBean(relaxed = true)
+    private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
+
 
     @MockkBean
     private lateinit var stockService: IStockService

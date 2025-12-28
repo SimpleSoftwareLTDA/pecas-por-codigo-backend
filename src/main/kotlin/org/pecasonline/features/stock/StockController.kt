@@ -37,7 +37,9 @@ class StockController(
         @RequestParam("descricao") descricao: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.findStockByItemDescription(descricao, page, size)
+    ) = stockService.findStockByItemDescription(descricao, page, size).also {
+        meterRegistry.counter("stock.search.description", "description", descricao).increment()
+    }
 
     @GetMapping("/item/{id}")
     override fun findStockByItemId(
@@ -52,7 +54,7 @@ class StockController(
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
     ) = stockService.findStockByItemCode(code, page, size).also {
-        meterRegistry.counter("custom.code.requests", "endpoint", "stock.getByItemCode", "method", "GET").increment()
+        meterRegistry.counter("stock.search.code", "code", code).increment()
     }
 
     @GetMapping("/fornecedor/{id}")
@@ -60,14 +62,18 @@ class StockController(
         @PathVariable("id") id: Int,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.findStockBySupplierId(id, page, size)
+    ) = stockService.findStockBySupplierId(id, page, size).also {
+        meterRegistry.counter("stock.search.supplierId", "id", id.toString()).increment()
+    }
 
     @GetMapping("/fornecedor")
     override fun findStockBySupplierName(
         @RequestParam("nome") name: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ) = stockService.findStockBySupplierName(name, page, size)
+    ) = stockService.findStockBySupplierName(name, page, size).also {
+        meterRegistry.counter("stock.search.supplierName", "name", name).increment()
+    }
 
     @PostMapping(consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.ACCEPTED)

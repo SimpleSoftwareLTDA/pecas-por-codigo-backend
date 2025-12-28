@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1")
 class ContactController(
-    val emailSenderService: EmailSenderService
+    val emailSenderService: EmailSenderService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ) {
 
     @PostMapping("/contact-form")
     fun processAndSendContactForm(@Valid @RequestBody contactForm: ContactForm) {
         val (name, email, subject, message) = contactForm
         emailSenderService.processAndSendContactForm(name, email, subject, message)
+        meterRegistry.counter("contact.form", "subject", subject).increment()
     }
 }
 

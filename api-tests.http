@@ -1,0 +1,22 @@
+### Health Check
+GET http://localhost:8080/actuator/health
+
+### Get All Parts (Paginated)
+GET http://localhost:8080/api/v1/pecas/codigo/3040250?page=0&size=10
+
+### Search by Description
+GET http://localhost:8080/api/v1/pecas/descricao?descricao=INTERRUPTOR&page=0&size=10
+
+### List Brands
+GET http://localhost:8080/api/v1/marcas
+
+### List Plans
+GET http://localhost:8080/api/v1/planos
+
+### Login Attempt
+POST http://localhost:8080/api/v1/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class SupplierController(
     private val supplierService: ISupplierService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ): SupplierSwaggerSpec {
 
     @GetMapping
@@ -37,7 +38,9 @@ class SupplierController(
         @RequestParam("cnpj") cnpj: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ): Page<Supplier> = supplierService.findSupplierByCnpj(cnpj)
+    ): Page<Supplier> = supplierService.findSupplierByCnpj(cnpj).also {
+        meterRegistry.counter("supplier.search.cnpj", "cnpj", cnpj).increment()
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

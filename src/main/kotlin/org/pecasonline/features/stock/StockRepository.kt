@@ -27,5 +27,9 @@ interface StockRepository : JpaRepository<Stock, Int> {
     )
     fun findStocksBySupplierId(@Param("supplierId") supplierId: Int): List<Stock>
 
+    @EntityGraph(attributePaths = ["item"])
+    fun findBySupplierIdAndItemCodeIn(supplierId: Int, codes: Collection<String>): List<Stock>
+
+
 
 }

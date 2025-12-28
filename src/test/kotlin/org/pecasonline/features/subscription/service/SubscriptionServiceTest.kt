@@ -55,7 +55,8 @@ class SubscriptionServiceTest {
             cnpj = "15826705000130",
             stateSubscription = "123456789",
             address = mock(),
-            contact = mock()
+            contact = mock(),
+            asaasId = "some-id"
         )
 
         val plan = Plan(
@@ -92,8 +93,12 @@ class SubscriptionServiceTest {
     @Test
     fun `calculateNextDueDate should return date 30 days from now`() {
         // Arrange
-        val paymentDay = 15 // This should be ignored in our implementation
-        val expectedDate = LocalDate.now().plusDays(30).format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val paymentDay = 15
+        val currentDate = LocalDate.now()
+        val expectedNextDate = currentDate.withDayOfMonth(paymentDay).let {
+            if (it.isBefore(currentDate)) it.plusMonths(1) else it
+        }
+        val expectedDate = expectedNextDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
 
         // Act
         val result = subscriptionService.calculateNextDueDate(paymentDay)
@@ -112,7 +117,8 @@ class SubscriptionServiceTest {
             cnpj = "15826705000130",
             stateSubscription = "123456789",
             address = mock(),
-            contact = mock()
+            contact = mock(),
+            asaasId = "some-id"
         )
 
         val subscriptionDto = CreateSubscription(

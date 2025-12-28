@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("$BASE_ENDPOINT/marcas")
 class BrandController(
-    private val brand: IBrandService
+    private val brand: IBrandService,
+    private val meterRegistry: io.micrometer.core.instrument.MeterRegistry
 ): BrandSwaggerSpec {
 
     @Timed(value = "brands.get", description = "Time taken to return all brands")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    override fun getBrands(): List<Brand> = brand.getAvailableBrands()
+    override fun getBrands(): List<Brand> = brand.getAvailableBrands().also {
+        meterRegistry.counter("brand.list").increment()
+    }
 
 }

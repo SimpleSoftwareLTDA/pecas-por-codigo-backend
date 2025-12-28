@@ -17,6 +17,7 @@ import java.util.*
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
+@org.springframework.test.context.ActiveProfiles("test")
 class CategoryServiceTest @Autowired constructor(
     private val categoryService: CategoryService
 ) {

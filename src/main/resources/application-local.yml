@@ -1,13 +1,4 @@
 spring:
-  datasource:
-    url: ${DB_HOST}
-    driver-class-name: org.postgresql.Driver
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-  data:
-    redis:
-      host: localhost
-      port: 6379
   logging:
     level:
       pecasonline: DEBUG
@@ -27,7 +18,6 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME:}
-    # Use a app password gerada no Gmail
     password: ${MAIL_PASSWORD:}
     properties:
       mail:
@@ -81,6 +71,9 @@ management:
       show-details: always
     metrics:
       enabled: true
+  health:
+    mail:
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name:pecasonline}

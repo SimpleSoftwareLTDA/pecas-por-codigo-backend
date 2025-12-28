@@ -16,7 +16,6 @@ import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.address.repository.AddressRepository
 import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 class AddressServiceTest {
 
     private val addressRepository: AddressRepository = mock()
