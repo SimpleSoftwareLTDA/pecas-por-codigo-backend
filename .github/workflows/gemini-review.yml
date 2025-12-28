@@ -46,6 +46,9 @@ jobs:
         id: 'gemini_pr_review'
         env:
           GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          GITHUB_OWNER: '${{ github.repository_owner }}'
+          GITHUB_REPOSITORY_NAME: '${{ github.event.repository.name }}'
+          GITHUB_PR_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
           ISSUE_TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
           ISSUE_BODY: '${{ github.event.pull_request.body || github.event.issue.body }}'
           PULL_REQUEST_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
@@ -94,7 +97,10 @@ jobs:
                   ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
-                    "GITHUB_REPOSITORY": "${REPOSITORY}"
+                    "GITHUB_REPOSITORY": "${REPOSITORY}",
+                    "GITHUB_OWNER": "${GITHUB_OWNER}",
+                    "GITHUB_REPOSITORY_NAME": "${GITHUB_REPOSITORY_NAME}",
+                    "GITHUB_PR_NUMBER": "${GITHUB_PR_NUMBER}"
                   }
                 }
               },
