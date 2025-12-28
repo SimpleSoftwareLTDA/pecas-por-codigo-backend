@@ -38,7 +38,7 @@ class SupplierController(
         @RequestParam("cnpj") cnpj: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ): Page<SupplierResponseDTO> = supplierService.findSupplierByCnpj(cnpj).also {
+    ): Page<SupplierResponseDTO> = supplierService.findSupplierByCnpj(cnpj, page, size).also {
         meterRegistry.counter("supplier.search.cnpj", "cnpj", cnpj).increment()
     }
 
