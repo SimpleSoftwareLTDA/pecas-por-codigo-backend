@@ -61,6 +61,11 @@ class ExceptionsAdvisor {
         return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException::class)
+    fun handleHandlerMethodValidationException(ex: org.springframework.web.method.annotation.HandlerMethodValidationException): ResponseEntity<Pair<String, String?>> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error" to "Validation failure")
+    }
+
     @ExceptionHandler(InvalidTokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<JsonNode> {

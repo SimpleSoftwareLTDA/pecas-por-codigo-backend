@@ -30,13 +30,17 @@ spring:
     password: your-gmail-app-generated-pwd
     properties:
       mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+        imap:
+          host: imap.gmail.com
+          port: 993
+          ssl.enable: true
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
+    imap:
+      enabled: true
+      inbox-folder: INBOX
+      processed-folder: Processed
 springdoc:
   api-docs:
     enabled: true
@@ -58,4 +62,10 @@ app:
   url: http://localhost:8080
 asaas:
   api:
+    api-key: test-token
     base-url: http://localhost:8080
+
+decodo:
+  proxy:
+    username: test-user
+    password: test-pass

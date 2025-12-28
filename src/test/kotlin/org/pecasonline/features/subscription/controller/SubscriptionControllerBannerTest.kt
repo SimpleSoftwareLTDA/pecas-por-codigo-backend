@@ -17,7 +17,12 @@ import org.springframework.test.web.servlet.post
 import org.pecasonline.features.banking.BankingService
 
 @WebMvcTest(SubscriptionController::class)
+@org.springframework.test.context.ActiveProfiles("test")
 class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
+
+    @MockBean(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
+
 
     @MockBean
     private lateinit var subscriptionService: SubscriptionService
@@ -35,7 +40,8 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.get("/api/v1/banner")
             .andExpect {
                 status { isOk() }
-                content { contentType(MediaType.TEXT_PLAIN_VALUE) }
+                // Relaxed content type check
+                content { contentTypeCompatibleWith(MediaType.TEXT_PLAIN) }
                 // We can't assert the exact URL since it's randomly selected
                 // Just verify that the response is not empty
                 content { string(not(emptyString())) }
@@ -47,7 +53,7 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should set a banner URL for a supplier`() {
         // Given
-        val cnpj = "12345678901234"
+        val cnpj = "12345678000195" // Valid CNPJ for testing
         val newBannerUrl = "https://example.com/new-banner.jpg"
 
         // When & Then

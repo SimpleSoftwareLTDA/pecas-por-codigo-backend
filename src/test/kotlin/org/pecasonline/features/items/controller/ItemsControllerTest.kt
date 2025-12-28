@@ -17,7 +17,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
 @WebMvcTest(ItemsController::class)
-class ItemsControllerTest(@Autowired val mockMvc: MockMvc) {
+@org.springframework.test.context.ActiveProfiles("test")
+class ItemsControllerTest @Autowired constructor(private val mockMvc: MockMvc) {
 
     @MockBean
     private lateinit var itemsService: IIitemService

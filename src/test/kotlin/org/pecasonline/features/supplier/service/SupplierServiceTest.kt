@@ -43,6 +43,9 @@ class SupplierServiceTest {
     @Mock
     private lateinit var contactRepository: ContactRepository
 
+    @Mock
+    private lateinit var bankingService: org.pecasonline.features.banking.BankingService
+
     @InjectMocks
     private lateinit var supplierService: SupplierService
 

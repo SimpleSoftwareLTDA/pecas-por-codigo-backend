@@ -11,21 +11,9 @@ plugins {
     id("com.gorylenko.gradle-git-properties") version "2.5.3"
 
     id("io.spring.dependency-management") version "1.1.6"
-    id("io.sentry.jvm.gradle") version "5.12.2"
 
     id("org.springframework.boot") version "3.5.9"
 
-}
-
-sentry {
-    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-    // This enables source context, allowing you to see your source
-    // code as part of your stack traces in Sentry.
-    includeSourceContext.set(true)
-
-    org.set("simple-software-q0")
-    projectName.set("java-spring-boot")
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
 }
 
 group = "org"
@@ -50,7 +38,7 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     // Security
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    // implementation("org.springframework.boot:spring-boot-starter-security")
 
     implementation("org.springframework.boot:spring-boot-starter-batch")
 

@@ -7,24 +7,12 @@ management:
     tags:
       application: ${spring.application.name}
 
-sentry:
-  dsn: https://a38bb9accdec0016b8cb6ec8be911d89@o4510377647931392.ingest.us.sentry.io/4510377659269121
-  # Add data like request headers and IP for users,
-  # see https://docs.sentry.io/platforms/java/guides/spring-boot/data-management/data-collected/ for more info
-  send-default-pii: true
-  # Enable sending logs to Sentry
-  logs:
-    enabled: true
-  # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing.
-  # We recommend adjusting this value in production.
-  traces-sample-rate: 1.0
-
 
 spring:
   application:
     name: novo-pecas-online
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
+    active: ${SPRING_PROFILES_ACTIVE:local}
   servlet:
     multipart:
       max-file-size: 10MB
@@ -57,5 +45,5 @@ decodo:
   proxy:
     host: br.decodo.com
     port: 10007
-    username: ${DECODO_USER}
-    password: ${DECODO_PASS}
+    username: ${DECODO_USER:}
+    password: ${DECODO_PASS:}
