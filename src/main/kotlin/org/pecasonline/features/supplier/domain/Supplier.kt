@@ -34,6 +34,7 @@ data class Supplier(
     @JsonProperty("marca")
     val brand: Brand? = null,
 
+    @Column(unique = true)
     val cnpj: String,
 
     @JsonProperty("inscricaoEstadual")

@@ -1,10 +1,10 @@
 package org.pecasonline.features.supplier.controller
-
+ 
 import jakarta.validation.Valid
 import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.supplier.controller.swagger.SupplierSwaggerSpec
-import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
+import org.pecasonline.features.supplier.dto.SupplierResponseDTO
 import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
 import org.pecasonline.features.supplier.service.ISupplierService
 import org.springframework.data.domain.Page
@@ -23,13 +23,13 @@ class SupplierController(
     override fun suppliers(
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ): Page<Supplier> = supplierService.findSuppliers(page, size)
+    ): Page<SupplierResponseDTO> = supplierService.findSuppliers(page, size)
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     override fun findSupplierById(
         @PathVariable("id") id: Int
-    ): Supplier = supplierService.findSupplierById(id)
+    ): SupplierResponseDTO = supplierService.findSupplierById(id)
 
 
     @GetMapping("/cnpj")
@@ -38,7 +38,7 @@ class SupplierController(
         @RequestParam("cnpj") cnpj: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ): Page<Supplier> = supplierService.findSupplierByCnpj(cnpj).also {
+    ): Page<SupplierResponseDTO> = supplierService.findSupplierByCnpj(cnpj).also {
         meterRegistry.counter("supplier.search.cnpj", "cnpj", cnpj).increment()
     }
 
@@ -46,14 +46,14 @@ class SupplierController(
     @ResponseStatus(HttpStatus.CREATED)
     override fun createSupplier(
         @RequestBody @Valid supplier: CreateSupplierDTO
-    ): Supplier = supplierService.createSupplier(supplier)
+    ): SupplierResponseDTO = supplierService.createSupplier(supplier)
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     override fun updateSupplier(
         @PathVariable("id") id: Int,
         @RequestBody @Valid supplier: UpdateSupplierDTO
-    ): Supplier = supplierService.updateSupplier(id, supplier)
+    ): SupplierResponseDTO = supplierService.updateSupplier(id, supplier)
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
