@@ -1,0 +1,20 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "pecas-por-codigo-backend",
+    "main": "worker/index.ts",
+    "compatibility_date": "2024-12-01",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "containers": [
+        {
+            "name": "BACKEND",
+            "image": {
+                "dockerfile": "Dockerfile"
+            }
+        }
+    ],
+    "observability": {
+        "enabled": true
+    }
+}
