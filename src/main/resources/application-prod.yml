@@ -2,7 +2,7 @@ spring:
   application:
     name: novo-pecas-online
   datasource:
-    url: ${DB_HOST}
+    url: ${SPRING_DATASOURCE_URL:${DB_HOST}}
     driver-class-name: org.postgresql.Driver
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}

@@ -27,4 +27,4 @@ COPY --from=build /app/build/libs/*.jar app.jar
 # Expose the application port
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseStringDeduplication", "-Xms512m", "-Xmx750m", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:+UseStringDeduplication", "-Xms512m", "-Xmx1g", "-jar", "/app/app.jar"]
