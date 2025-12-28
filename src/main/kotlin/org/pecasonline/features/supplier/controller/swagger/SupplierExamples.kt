@@ -202,6 +202,32 @@ object SupplierExamples {
             }
         """
 
+    const val UPDATE_SUPPLIER_REQUEST = """
+            {
+              "empresa": "Fornecedor Atualizado",
+              "razaoSocial": "Fornecedor Atualizado LTDA",
+              "idDescricao": 2,
+              "contato": {
+                "vendedores": "Maria Souza",
+                "emailPecas": "maria.souza@example.com",
+                "fonePecas": "11999999999",
+                "whatsappGeral": "11988888888",
+                "whatsappPecas": "11977777777",
+                "emailEstoque": "estoque.atualizado@example.com",
+                "emailContasPagar": "financeiro@example.com",
+                "emailNotaFiscal": "notas@example.com",
+                "website": "https://fornecedor-atualizado.com"
+              },
+              "endereco": {
+                "endereco": "Rua Nova, 123",
+                "cidade": "São Paulo",
+                "cep": "04567000",
+                "pais": "Brasil",
+                "idEstado": 25
+              }
+            }
+        """
+
     const val CREATE_SUPPLIER_ANSWER = """
             {
                 "id": 301,

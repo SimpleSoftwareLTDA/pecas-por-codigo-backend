@@ -5,6 +5,7 @@ import org.pecasonline.common.Constants.BASE_ENDPOINT
 import org.pecasonline.features.supplier.controller.swagger.SupplierSwaggerSpec
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
+import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
 import org.pecasonline.features.supplier.service.ISupplierService
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
@@ -47,5 +48,18 @@ class SupplierController(
         @RequestBody @Valid supplier: CreateSupplierDTO
     ): Supplier = supplierService.createSupplier(supplier)
 
+    @PutMapping("{id}")
+    @ResponseStatus(HttpStatus.OK)
+    override fun updateSupplier(
+        @PathVariable("id") id: Int,
+        @RequestBody @Valid supplier: UpdateSupplierDTO
+    ): Supplier = supplierService.updateSupplier(id, supplier)
 
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun deleteSupplier(
+        @PathVariable("id") id: Int
+    ) {
+        supplierService.deleteSupplier(id)
+    }
 }

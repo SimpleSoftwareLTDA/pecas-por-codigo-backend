@@ -2,6 +2,7 @@ package org.pecasonline.features.supplier.repository
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.pecasonline.features.address.domain.Address
@@ -90,5 +91,111 @@ class SupplierRepositoryTest {
         assertEquals(supplier.cnpj, retrievedSupplier?.cnpj)
         assertEquals(savedAddress, retrievedSupplier?.address)
         assertEquals(contact, retrievedSupplier?.contact)
+    }
+
+    @Test
+    fun `should update supplier data`() {
+        val state = BrazilianState(
+            stateName = "Sǜo Paulo",
+            stateCode = "SP"
+        )
+        val savedState = stateRepository.save(state)
+
+        val address = Address(
+            street = "123 Main St",
+            city = "Sample City",
+            state = savedState,
+            country = "Brazil",
+            cep = "12345-678"
+        )
+        val savedAddress = addressRepository.save(address)
+
+        val brand = Brand(brandName = "Brand X")
+        val savedBrand = brandRepository.save(brand)
+
+        val description = Description(description = "Electronics Supplier")
+        val savedDescription = descriptionRepository.save(description)
+
+        val contact = Contact(
+            sellerName = "John Doe",
+            itemsEmail = "items@example.com",
+            itemsPhone = "1234567890"
+        )
+
+        val supplier = Supplier(
+            name = "Test Supplier",
+            supplierOriginalLink = "http://supplierlink.com",
+            socialName = "Test Social Name",
+            cnpj = "15826705000130",
+            stateSubscription = "123456789",
+            address = savedAddress,
+            contact = contact,
+            description = savedDescription,
+            brand = savedBrand
+        )
+
+        val savedSupplier = supplierRepository.save(supplier)
+
+        val updatedSupplier = savedSupplier.copy(
+            name = "Fornecedor Atualizado",
+            socialName = "Razão Social Atualizada",
+            contact = savedSupplier.contact.copy(itemsEmail = "novo-email@example.com")
+        )
+
+        supplierRepository.save(updatedSupplier)
+
+        val reloadedSupplier = supplierRepository.findById(savedSupplier.id!!).orElse(null)
+        assertEquals("Fornecedor Atualizado", reloadedSupplier?.name)
+        assertEquals("Razão Social Atualizada", reloadedSupplier?.socialName)
+        assertEquals("novo-email@example.com", reloadedSupplier?.contact?.itemsEmail)
+    }
+
+    @Test
+    fun `should delete supplier`() {
+        val state = BrazilianState(
+            stateName = "Sǜo Paulo",
+            stateCode = "SP"
+        )
+        val savedState = stateRepository.save(state)
+
+        val address = Address(
+            street = "123 Main St",
+            city = "Sample City",
+            state = savedState,
+            country = "Brazil",
+            cep = "12345-678"
+        )
+        val savedAddress = addressRepository.save(address)
+
+        val brand = Brand(brandName = "Brand X")
+        val savedBrand = brandRepository.save(brand)
+
+        val description = Description(description = "Electronics Supplier")
+        val savedDescription = descriptionRepository.save(description)
+
+        val contact = Contact(
+            sellerName = "John Doe",
+            itemsEmail = "items@example.com",
+            itemsPhone = "1234567890"
+        )
+
+        val supplier = Supplier(
+            name = "Test Supplier",
+            supplierOriginalLink = "http://supplierlink.com",
+            socialName = "Test Social Name",
+            cnpj = "15826705000130",
+            stateSubscription = "123456789",
+            address = savedAddress,
+            contact = contact,
+            description = savedDescription,
+            brand = savedBrand
+        )
+
+        val savedSupplier = supplierRepository.save(supplier)
+
+        supplierRepository.deleteById(savedSupplier.id!!)
+
+        val deletedSupplier = supplierRepository.findById(savedSupplier.id!!).orElse(null)
+        assertNull(deletedSupplier)
     }
 }

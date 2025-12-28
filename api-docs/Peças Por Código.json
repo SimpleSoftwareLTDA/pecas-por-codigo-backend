@@ -902,6 +902,173 @@
                         "strictSSL": false,
                         "followRedirects": true
                     }
+                },
+                {
+                    "name": "Atualizar fornecedor",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "PUT",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"empresa\": \"Fornecedor Atualizado\",\n  \"razaoSocial\": \"Fornecedor Atualizado LTDA\",\n  \"idDescricao\": 2,\n  \"contato\": {\n    \"vendedores\": \"Maria Souza\",\n    \"emailPecas\": \"maria.souza@example.com\",\n    \"fonePecas\": \"11999999999\",\n    \"whatsappGeral\": \"11988888888\",\n    \"whatsappPecas\": \"11977777777\",\n    \"emailEstoque\": \"estoque.atualizado@example.com\",\n    \"emailContasPagar\": \"financeiro@example.com\",\n    \"emailNotaFiscal\": \"notas@example.com\",\n    \"website\": \"https://fornecedor-atualizado.com\"\n  },\n  \"endereco\": {\n    \"endereco\": \"Rua Nova, 123\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"04567000\",\n    \"pais\": \"Brasil\",\n    \"idEstado\": 25\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "1",
+                                            "description": ""
+                                        }
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "body": "{\n  \"id\": 1,\n  \"nome\": \"Fornecedor Atualizado\",\n  \"razaoSocial\": \"Fornecedor Atualizado LTDA\"\n}",
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                },
+                {
+                    "name": "Deletar fornecedor",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "DELETE",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                            "path": [
+                                "api",
+                                "v1",
+                                "fornecedores",
+                                ":id"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "No Content",
+                            "originalRequest": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/fornecedores/:id",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "fornecedores",
+                                        ":id"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "1",
+                                            "description": ""
+                                        }
+                                    ]
+                                },
+                                "body": {}
+                            },
+                            "status": "No Content",
+                            "code": 204,
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
                 }
             ],
             "event": [
