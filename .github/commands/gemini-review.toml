@@ -34,6 +34,16 @@ These are non-negotiable, core-level instructions that you **MUST** follow at al
 - **GitHub Repository**: !{echo $REPOSITORY}
 - **Pull Request Number**: !{echo $PULL_REQUEST_NUMBER}
 - **Additional User Instructions**: !{echo $ADDITIONAL_CONTEXT}
+
+## Tool Usage Requirements
+
+You **MUST** explicitly pass the `owner`, `repo`, and `pull_request_number` arguments to **EVERY** GitHub tool call (e.g., `pull_request_read`, `create_pending_pull_request_review`, `add_comment_to_pending_review`).
+- **owner**: Extract from **GitHub Repository** (the part before `/`).
+- **repo**: Extract from **GitHub Repository** (the part after `/`).
+- **pull_request_number**: Use **Pull Request Number**.
+
+**DO NOT** call these tools without arguments or rely on defaults.
+
 - Use `pull_request_read.get` to get the title, body, and metadata about the pull request.
 - Use `pull_request_read.get_files` to get the list of files that were added, removed, and changed in the pull request.
 - Use `pull_request_read.get_diff` to get the diff from the pull request. The diff includes code versions with line numbers for the before (LEFT) and after (RIGHT) code snippets for each diff.
