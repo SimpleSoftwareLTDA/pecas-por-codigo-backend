@@ -34,6 +34,7 @@ data class Supplier(
     @JsonProperty("marca")
     val brand: Brand? = null,
 
+    @Column(unique = true)
     val cnpj: String,
 
     @JsonProperty("inscricaoEstadual")
@@ -41,12 +42,12 @@ data class Supplier(
     val stateSubscription: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "address_id", nullable = true)
+    @JoinColumn(name = "address_id", nullable = false)
     @JsonProperty("endereco")
     val address: Address,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "contact_id", nullable = true)
+    @JoinColumn(name = "contact_id", nullable = false)
     @JsonProperty("contato")
     val contact: Contact,
 

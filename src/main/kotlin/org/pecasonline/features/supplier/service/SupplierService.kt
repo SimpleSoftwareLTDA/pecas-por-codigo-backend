@@ -9,10 +9,8 @@ import org.pecasonline.features.description.IDescriptionService
 import org.pecasonline.features.subscription.service.ISubscriptionService
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
-import org.pecasonline.features.supplier.dto.UpdateContactDTO
+import org.pecasonline.features.supplier.dto.SupplierResponseDTO
 import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
-import org.pecasonline.features.supplier.domain.Contact
-import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -26,46 +24,42 @@ class SupplierService(
     private val descriptionService: IDescriptionService,
     private val brandService: IBrandService,
     private val subscriptionService: ISubscriptionService,
-    private val contactRepository: ContactRepository,
+    private val contactService: IContactService,
     private val bankingService: BankingService
 ): ISupplierService {
-    override fun findSuppliers(page: Int?, size: Int?): Page<Supplier> {
-        val pageable = PageRequest.of(page!!, size!!)
+    override fun findSuppliers(page: Int?, size: Int?): Page<SupplierResponseDTO> {
+        val pageable = PageRequest.of(page ?: 0, size ?: 10)
         val suppliers = supplierRepository.findAll(pageable)
 
         if(suppliers.isEmpty) throw NotFoundException("Nenhum fornecedor encontrado.")
 
-        return suppliers
+        return suppliers.map { SupplierResponseDTO.fromEntity(it) }
     }
 
-    override fun findSupplierById(id: Int): Supplier {
-        val supplier = supplierRepository.findById(id)
-        if(supplier.isEmpty) throw NotFoundException("Fornecedor não encontrado.")
-
-        return supplier.get()
+    override fun findSupplierById(id: Int): SupplierResponseDTO {
+        val supplier = findSupplierEntityById(id)
+        return SupplierResponseDTO.fromEntity(supplier)
     }
 
-    override fun findSupplierByCnpj(cnpj: String, page: Int?, size: Int?): Page<Supplier> {
-        val pageable = PageRequest.of(page!!, size!!)
+    override fun findSupplierByCnpj(cnpj: String, page: Int?, size: Int?): Page<SupplierResponseDTO> {
+        val pageable = PageRequest.of(page ?: 0, size ?: 10)
         val suppliers = supplierRepository.findSupplierByCnpj(cnpj, pageable)
+        
         if(suppliers.isEmpty) throw NotFoundException("Nenhum fornecedor encontrado.")
 
-        return suppliers
+        return suppliers.map { SupplierResponseDTO.fromEntity(it) }
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun createSupplier(supplier: CreateSupplierDTO): Supplier {
+    override fun createSupplier(supplier: CreateSupplierDTO): SupplierResponseDTO {
         val existingSupplier = supplier.cnpj?.let { supplierRepository.findSuppliersByCnpj(it) }
 
-        when {
-            existingSupplier?.isNotEmpty() == true -> {
-                val supplierWithAsaasId = existingSupplier.find { it.asaasId != null }
-
-                require(supplierWithAsaasId == null) { "Fornecedor com CNPJ ${supplier.cnpj} já cadastrado e vinculado ao Asaas." }
-            }
+        if (existingSupplier?.isNotEmpty() == true) {
+            val supplierWithAsaasId = existingSupplier.find { it.asaasId != null }
+            require(supplierWithAsaasId == null) { "Fornecedor com CNPJ ${supplier.cnpj} já cadastrado e vinculado ao Asaas." }
         }
 
-        val savedContact = contactRepository.save(supplier.contact!!.toContact())
+        val savedContact = contactService.save(supplier.contact!!)
         val savedAddress = addressService.save(supplier.address!!)
 
         val newSupplier = supplier.toSupplier(
@@ -86,15 +80,15 @@ class SupplierService(
 
         subscriptionService.createSubscription(supplier.subscription!!, savedSupplier)
 
-        return savedSupplier
+        return SupplierResponseDTO.fromEntity(savedSupplier)
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun updateSupplier(id: Int, supplier: UpdateSupplierDTO): Supplier {
-        val existingSupplier = findSupplierById(id)
+    override fun updateSupplier(id: Int, supplier: UpdateSupplierDTO): SupplierResponseDTO {
+        val existingSupplier = findSupplierEntityById(id)
 
         val updatedContact = supplier.contact?.let {
-            updateContact(existingSupplier.contact, it)
+            contactService.update(existingSupplier.contact, it)
         } ?: existingSupplier.contact
 
         val updatedAddress = supplier.address?.let {
@@ -113,28 +107,18 @@ class SupplierService(
             address = updatedAddress
         )
 
-        return supplierRepository.save(updatedSupplier)
+        val savedSupplier = supplierRepository.save(updatedSupplier)
+        return SupplierResponseDTO.fromEntity(savedSupplier)
     }
 
     @Transactional(rollbackFor = [Exception::class])
     override fun deleteSupplier(id: Int) {
-        val existingSupplier = findSupplierById(id)
+        val existingSupplier = findSupplierEntityById(id)
         supplierRepository.deleteById(existingSupplier.id!!)
     }
 
-    private fun updateContact(existingContact: Contact, updatedContact: UpdateContactDTO): Contact {
-        val contactToPersist = existingContact.copy(
-            sellerName = updatedContact.sellerName ?: existingContact.sellerName,
-            itemsEmail = updatedContact.itemsEmail ?: existingContact.itemsEmail,
-            itemsPhone = updatedContact.itemsPhone ?: existingContact.itemsPhone,
-            whatsapp = updatedContact.whatsapp ?: existingContact.whatsapp,
-            itemsWhatsapp = updatedContact.itemsWhatsapp ?: existingContact.itemsWhatsapp,
-            stockEmail = updatedContact.stockEmail ?: existingContact.stockEmail,
-            billingEmail = updatedContact.billingEmail ?: existingContact.billingEmail,
-            nfEmail = updatedContact.nfEmail ?: existingContact.nfEmail,
-            site = updatedContact.site ?: existingContact.site
-        )
-
-        return contactRepository.save(contactToPersist)
+    private fun findSupplierEntityById(id: Int): Supplier {
+        return supplierRepository.findById(id)
+            .orElseThrow { NotFoundException("Fornecedor não encontrado.") }
     }
 }

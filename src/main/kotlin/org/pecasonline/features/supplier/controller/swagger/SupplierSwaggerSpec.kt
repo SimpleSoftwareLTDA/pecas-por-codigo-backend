@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
+import org.pecasonline.features.supplier.dto.SupplierResponseDTO
 import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
 import org.springframework.data.domain.Page
 
@@ -32,7 +32,7 @@ interface SupplierSwaggerSpec {
     fun suppliers(
         page: Int? = 0,
         size: Int? = 10
-    ): Page<Supplier>
+    ): Page<SupplierResponseDTO>
 
     @Operation(summary = "Buscar fornecedor por ID")
     @ApiResponses(value = [
@@ -57,7 +57,7 @@ interface SupplierSwaggerSpec {
     ])
     fun findSupplierById(
         id: Int
-    ): Supplier
+    ): SupplierResponseDTO
 
     @Operation(summary = "Buscar fornecedor por CNPJ")
     @ApiResponses(value = [
@@ -84,7 +84,7 @@ interface SupplierSwaggerSpec {
         cnpj: String,
         page: Int? = 0,
         size: Int? = 10
-    ): Page<Supplier>
+    ): Page<SupplierResponseDTO>
 
     @Operation(summary = "Criar fornecedor")
     @ApiResponses(value = [
@@ -96,14 +96,14 @@ interface SupplierSwaggerSpec {
         ]),
         ApiResponse(responseCode = "500", description = "Erro interno", content = [
             Content(mediaType = "application/json",
-                schema = Schema(implementation = Supplier::class),
+                schema = Schema(implementation = SupplierResponseDTO::class),
                 examples = [
                     ExampleObject(value = SupplierExamples.INTERNAL_SERVER_ERROR)
                 ])
         ]),
         ApiResponse(responseCode = "400", description = "Requisição inválida", content = [
             Content(mediaType = "application/json",
-                schema = Schema(implementation = Supplier::class),
+                schema = Schema(implementation = SupplierResponseDTO::class),
                 examples = [
                     ExampleObject(value = SupplierExamples.BAD_REQUEST)
                 ])
@@ -118,7 +118,7 @@ interface SupplierSwaggerSpec {
     )
     fun createSupplier(
         supplier: CreateSupplierDTO
-    ): Supplier
+    ): SupplierResponseDTO
 
     @Operation(summary = "Atualizar fornecedor")
     @ApiResponses(value = [
@@ -128,13 +128,13 @@ interface SupplierSwaggerSpec {
                     ExampleObject(value = SupplierExamples.GET_SUPPLIER_BY_ID)
                 ])
         ]),
-        ApiResponse(responseCode = "404", description = "Fornecedor nÇœo encontrado", content = [
+        ApiResponse(responseCode = "404", description = "Fornecedor não encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
                     ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)
                 ])
         ]),
-        ApiResponse(responseCode = "400", description = "RequisiÇõÇœo invÇ­lida", content = [
+        ApiResponse(responseCode = "400", description = "Requisição inválida", content = [
             Content(mediaType = "application/json",
                 examples = [
                     ExampleObject(value = SupplierExamples.BAD_REQUEST)
@@ -157,12 +157,12 @@ interface SupplierSwaggerSpec {
     fun updateSupplier(
         id: Int,
         supplier: UpdateSupplierDTO
-    ): Supplier
+    ): SupplierResponseDTO
 
     @Operation(summary = "Remover fornecedor")
     @ApiResponses(value = [
         ApiResponse(responseCode = "204", description = "Fornecedor removido"),
-        ApiResponse(responseCode = "404", description = "Fornecedor nÇœo encontrado", content = [
+        ApiResponse(responseCode = "404", description = "Fornecedor não encontrado", content = [
             Content(mediaType = "application/json",
                 examples = [
                     ExampleObject(value = SupplierExamples.SUPPLIER_NOT_FOUND)

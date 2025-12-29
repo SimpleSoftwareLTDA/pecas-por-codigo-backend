@@ -8,13 +8,11 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
-import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.address.dto.UpdateAddressDTO
 import org.pecasonline.features.address.service.IAddressService
 import org.pecasonline.features.banking.BankingService
@@ -24,10 +22,8 @@ import org.pecasonline.features.description.IDescriptionService
 import org.pecasonline.features.subscription.service.ISubscriptionService
 import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
-import org.pecasonline.features.supplier.dto.CreateContactDTO
 import org.pecasonline.features.supplier.dto.UpdateContactDTO
 import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
-import org.pecasonline.features.supplier.repository.ContactRepository
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -52,7 +48,7 @@ class SupplierServiceTest {
     private lateinit var subscriptionService: ISubscriptionService
 
     @Mock
-    private lateinit var contactRepository: ContactRepository
+    private lateinit var contactService: IContactService
 
     @Mock
     private lateinit var bankingService: BankingService
@@ -76,7 +72,8 @@ class SupplierServiceTest {
         val result = supplierService.findSuppliers(0, 10)
 
         assertEquals(1, result.content.size)
-        assertEquals(supplier, result.content[0])
+        assertEquals(supplier.id, result.content[0].id)
+        assertEquals(supplier.name, result.content[0].name)
     }
 
     @Test
@@ -98,7 +95,8 @@ class SupplierServiceTest {
 
         val result = supplierService.findSupplierById(supplier.id!!)
 
-        assertEquals(supplier, result)
+        assertEquals(supplier.id, result.id)
+        assertEquals(supplier.name, result.name)
     }
 
     @Test
@@ -140,20 +138,14 @@ class SupplierServiceTest {
             itemsEmail = "maria.souza@example.com",
             itemsPhone = "11999999999"
         )
-        whenever(contactRepository.save(any())).thenReturn(updatedContact)
+        whenever(contactService.update(any(), any())).thenReturn(updatedContact)
         whenever(supplierRepository.save(any())).thenReturn(supplier.copy(contact = updatedContact))
 
         val dto = UpdateSupplierDTO(
             contact = UpdateContactDTO(
                 sellerName = "Maria Souza",
                 itemsEmail = "maria.souza@example.com",
-                itemsPhone = "11999999999",
-                whatsapp = "11988888888",
-                itemsWhatsapp = "11977777777",
-                stockEmail = "estoque@example.com",
-                billingEmail = "financeiro@example.com",
-                nfEmail = "notas@example.com",
-                site = "https://fornecedor-atualizado.com"
+                itemsPhone = "11999999999"
             )
         )
 
@@ -161,7 +153,7 @@ class SupplierServiceTest {
 
         assertEquals("Maria Souza", result.contact.sellerName)
         assertEquals("maria.souza@example.com", result.contact.itemsEmail)
-        verify(contactRepository).save(any())
+        verify(contactService).update(any(), any())
     }
 
     @Test
@@ -176,10 +168,7 @@ class SupplierServiceTest {
         val dto = UpdateSupplierDTO(
             address = UpdateAddressDTO(
                 street = "Rua Nova 123",
-                city = "São Paulo",
-                cep = "04567000",
-                country = "Brasil",
-                stateId = 25
+                city = "São Paulo"
             )
         )
 
