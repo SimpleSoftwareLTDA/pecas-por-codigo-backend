@@ -1,10 +1,9 @@
 package org.pecasonline.features.supplier.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.pecasonline.features.address.domain.Address
-import org.pecasonline.features.brand.Brand
-import org.pecasonline.features.description.Description
-import org.pecasonline.features.supplier.domain.Contact
+import org.pecasonline.features.address.dto.AddressResponseDTO
+import org.pecasonline.features.brand.dto.BrandResponseDTO
+import org.pecasonline.features.description.dto.DescriptionResponseDTO
 import org.pecasonline.features.supplier.domain.Supplier
 
 data class SupplierResponseDTO(
@@ -16,16 +15,16 @@ data class SupplierResponseDTO(
     @JsonProperty("razaoSocial")
     val socialName: String,
     @JsonProperty("descricao")
-    val description: Description?,
+    val description: DescriptionResponseDTO?,
     @JsonProperty("marca")
-    val brand: Brand?,
+    val brand: BrandResponseDTO?,
     val cnpj: String,
     @JsonProperty("inscricaoEstadual")
     val stateSubscription: String?,
     @JsonProperty("endereco")
-    val address: Address,
+    val address: AddressResponseDTO,
     @JsonProperty("contato")
-    val contact: Contact
+    val contact: ContactResponseDTO
 ) {
     companion object {
         fun fromEntity(supplier: Supplier) = SupplierResponseDTO(
@@ -33,12 +32,12 @@ data class SupplierResponseDTO(
             name = supplier.name,
             supplierOriginalLink = supplier.supplierOriginalLink,
             socialName = supplier.socialName,
-            description = supplier.description,
-            brand = supplier.brand,
+            description = supplier.description?.let { DescriptionResponseDTO.fromEntity(it) },
+            brand = supplier.brand?.let { BrandResponseDTO.fromEntity(it) },
             cnpj = supplier.cnpj,
             stateSubscription = supplier.stateSubscription,
-            address = supplier.address,
-            contact = supplier.contact
+            address = AddressResponseDTO.fromEntity(supplier.address),
+            contact = ContactResponseDTO.fromEntity(supplier.contact)
         )
     }
 }
