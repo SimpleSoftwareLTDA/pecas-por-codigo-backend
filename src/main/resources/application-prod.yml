@@ -8,6 +8,7 @@ spring:
     username: ${MAIL_USERNAME}
     # Use a app password gerada no Gmail
     password: ${MAIL_PASSWORD}
+    from-email: ${SET_FROM_EMAIL}
     properties:
       mail:
         smtp:

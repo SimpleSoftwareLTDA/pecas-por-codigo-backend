@@ -25,7 +25,7 @@ class EmailSenderService(
     @Value("\${app.mail.redirect-to:}")
     private val redirectTo: String,
 
-    @Value("\${spring.mail.username}")
+    @Value("\${spring.mail.from-email}")
     private val fromEmail: String
 ) {
     init {

@@ -19,6 +19,7 @@ spring:
       max-request-size: 10MB
   mail:
     enabled: false
+    from-email: ${SET_FROM_EMAIL:estoque@pecasporcodigo.com.br}
   jpa:
     open-in-view: false
     properties:

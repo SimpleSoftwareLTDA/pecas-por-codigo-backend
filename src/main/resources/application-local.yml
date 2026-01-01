@@ -19,6 +19,7 @@ spring:
     port: 587
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
+    from-email: ${SET_FROM_EMAIL:estoque@pecasporcodigo.com.br}
     properties:
       mail:
         smtp:
