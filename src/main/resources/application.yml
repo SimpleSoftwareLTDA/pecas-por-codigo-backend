@@ -45,6 +45,8 @@ spring:
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://www.pecasporcodigo.com.br}
+  mail:
+    redirect-to: ${MAIL_REDIRECT_TO:} # Redireciona todos os e-mails para este endereço se definido (útil em dev/homol)
 
 decodo:
   proxy:

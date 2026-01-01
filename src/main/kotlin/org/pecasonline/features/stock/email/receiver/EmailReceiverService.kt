@@ -124,7 +124,8 @@ class EmailReceiverService(
 
                                         stockService.createStock(
                                             file = tempFile,
-                                            emailAddress = senderEmail
+                                            emailAddress = senderEmail,
+                                            originalFileName = fileName
                                         )
                                     }.onFailure { ex ->
                                         logger.error(ex) { "Erro ao processar arquivo" }

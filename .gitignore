@@ -48,3 +48,5 @@ deps.txt
 run_log.txt
 
 gha-creds-*.json
+testdb.*
+

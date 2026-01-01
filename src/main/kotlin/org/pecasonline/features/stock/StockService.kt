@@ -12,6 +12,7 @@ import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.service.SubscriptionService
+import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -70,7 +71,7 @@ class StockService(
         stockRepository.findStockBySupplierNameContainsIgnoreCase(name, PageRequest.of(page ?: 0, size ?: 10))
 
     @Async
-    override fun createStock(file: File, emailAddress: String, token: String?, cnpj: String?) {
+    override fun createStock(file: File, emailAddress: String, token: String?, cnpj: String?, originalFileName: String?) {
         val resolvedCnpj = token?.let {
             getSupplierByToken(token)
         } ?: cnpj ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
@@ -89,89 +90,124 @@ class StockService(
 
         subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, resolvedCnpj)
 
+        val dateSuffix = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMYYYY"))
+        val baseFileName = originalFileName?.substringBeforeLast(".") ?: file.name.substringBeforeLast(".")
+        val extension = originalFileName?.substringAfterLast(".", "").let { if (it.isNullOrEmpty()) "" else ".$it" }
+        val displayFileName = "${baseFileName}_$dateSuffix$extension"
+
         if (file.length() == 0L) {
             val errorMessage = "Arquivo vazio. Selecione um arquivo de estoque com dados para upload."
 
             emailSenderService.sendStockProcessingErrorNotification(
                 supplierEmail = emailAddress,
-                fileName = file.name,
+                fileName = displayFileName,
                 errorMessage = errorMessage
             )
             throw IllegalArgumentException(errorMessage)
         }
 
-        logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $resolvedCnpj" }
+        logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $resolvedCnpj (Arquivo: $displayFileName)" }
 
         emailSenderService.sendStockProcessingStartNotification(
             supplierEmail = supplier.contact.itemsEmail,
             supplierName = "${supplier.name} - ${supplier.cnpj}",
-            fileName = file.name
+            fileName = displayFileName
         )
 
         try {
             var totalProcessed = 0
             val updatedIds = mutableSetOf<Long>()
+            val invalidLines = mutableListOf<String>()
+            val validStockLines = mutableListOf<Stock>()
 
             Files.lines(file.toPath()).use { lines ->
                 lines.asSequence()
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-                    .mapNotNull { parseStockLine(it) }
-                    .chunked(1000)
-                    .forEachIndexed { index, batchItems ->
-                        val items = batchItems.map { it.item }
-                        val processedItemsMap = processAllItems(items)
-
-                        val itemCodes = processedItemsMap.values.map { it.code }
-                        val existingStocks = stockRepository.findBySupplierIdAndItemCodeIn(supplier.id!!, itemCodes)
-                        val existingStocksMap = existingStocks.associateBy { it.item.code }
-
-                        val updatedStocks = mutableListOf<Stock>()
-                        val newStocks = mutableListOf<Stock>()
-
-                        batchItems.forEach { stockLine ->
-                            val itemProcessed = processedItemsMap[stockLine.item.hash]
-                                ?: return@forEach // Should not happen if processAllItems parses correctly
-
-                            val existingStock = existingStocksMap[itemProcessed.code]
-
-                            if (existingStock != null) {
-                                updatedStocks.add(existingStock.copy(quantity = stockLine.quantity))
-                            } else {
-                                newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
+                    .forEach { line ->
+                        val stockLine = parseStockLine(line)
+                        if (stockLine == null) {
+                            invalidLines.add(line)
+                        } else {
+                            validStockLines.add(stockLine)
+                            if (validStockLines.size >= 1000) {
+                                processBatch(validStockLines, supplier, updatedIds)
+                                totalProcessed += validStockLines.size
+                                validStockLines.clear()
+                                logger.info { "Lote processado. Itens acumulados: $totalProcessed" }
                             }
                         }
-
-                        if (updatedStocks.isNotEmpty()) {
-                            val saved = stockRepository.saveAll(updatedStocks)
-                            saved.mapNotNull { it.id }.let { updatedIds.addAll(it) }
-                        }
-                        if (newStocks.isNotEmpty()) {
-                            val saved = stockRepository.saveAll(newStocks)
-                            saved.mapNotNull { it.id }.let { updatedIds.addAll(it) }
-                        }
-
-                        totalProcessed += batchItems.size
-                        if (index % 10 == 0) {
-                            logger.info { "Lote $index processado. Itens acumulados: $totalProcessed" }
-                        }
                     }
+            }
+
+            // Process remaining valid lines
+            if (validStockLines.isNotEmpty()) {
+                processBatch(validStockLines, supplier, updatedIds)
+                totalProcessed += validStockLines.size
+                validStockLines.clear()
+            }
+
+            logger.info { "Processamento finalizado. Válidos: $totalProcessed, Inválidos: ${invalidLines.size}" }
+
+            var errorFile: File? = null
+            if (invalidLines.isNotEmpty()) {
+                errorFile = File.createTempFile("errors_", "_${file.name}")
+                errorFile.writeText(invalidLines.joinToString("\n"))
+                logger.info { "Gerado arquivo de erros com ${invalidLines.size} linhas: ${errorFile.path}" }
             }
 
             emailSenderService.sendStockProcessingCompletionNotification(
                 supplierEmail = supplier.contact.itemsEmail,
                 supplierName = "${supplier.name} - ${supplier.cnpj}",
-                fileName = file.name,
-                updatedItemCount = updatedIds.size
+                fileName = displayFileName,
+                updatedItemCount = updatedIds.size,
+                attachment = errorFile
             )
 
-            logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $resolvedCnpj. Total Processado: $totalProcessed" }
+            logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $resolvedCnpj. Total Processado: $totalProcessed. Erros: ${invalidLines.size}" }
+            
+            errorFile?.let { 
+                logger.debug { "Error file generated. Deletion will be handled by EmailSenderService after sending." }
+            }
         } finally {
             file.delete()
             logger.info { "Arquivo temporário removido: ${file.path}" }
         }
     }
 
+    private fun processBatch(batchItems: List<Stock>, supplier: Supplier, updatedIds: MutableSet<Long>) {
+        val items = batchItems.map { it.item }
+        val processedItemsMap = processAllItems(items)
+
+        val itemCodes = processedItemsMap.values.map { it.code }
+        val existingStocks = stockRepository.findBySupplierIdAndItemCodeIn(supplier.id!!, itemCodes)
+        val existingStocksMap = existingStocks.associateBy { it.item.code }
+
+        val updatedStocks = mutableListOf<Stock>()
+        val newStocks = mutableListOf<Stock>()
+
+        batchItems.forEach { stockLine ->
+            val itemProcessed = processedItemsMap[stockLine.item.hash]
+                ?: return@forEach
+
+            val existingStock = existingStocksMap[itemProcessed.code]
+
+            if (existingStock != null) {
+                updatedStocks.add(existingStock.copy(quantity = stockLine.quantity))
+            } else {
+                newStocks.add(stockLine.copy(item = itemProcessed, supplier = supplier))
+            }
+        }
+
+        if (updatedStocks.isNotEmpty()) {
+            val saved = stockRepository.saveAll(updatedStocks)
+            saved.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+        }
+        if (newStocks.isNotEmpty()) {
+            val saved = stockRepository.saveAll(newStocks)
+            saved.mapNotNull { it.id }.let { updatedIds.addAll(it) }
+        }
+    }
 
     private fun processAllItems(allItems: List<Item>): Map<String, Item> {
         val itemsByHash = allItems.associateBy { it.hash }
@@ -262,6 +298,13 @@ class StockService(
         if (columns.isInvalidColumnSize()) return null
 
         val (code, quantityStr, priceStr, description) = columns
+        
+        // Detect scientific notation corruption (e.g., "7,90E+12"). 
+        // These are lossy conversions from Excel and should be treated as errors.
+        if (code.contains("E+", ignoreCase = true)) {
+            return null
+        }
+
         val quantity = quantityStr.toIntOrNull() ?: 0
         val priceInCents = parseMonetaryToCents(priceStr)
 

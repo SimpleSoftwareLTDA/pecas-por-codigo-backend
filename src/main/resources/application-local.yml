@@ -14,7 +14,7 @@ spring:
   flyway:
     baseline-on-migrate: true
   mail:
-    enabled: false
+    enabled: true
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME:}
@@ -50,6 +50,8 @@ springdoc:
 
 app:
   url: ${CURRENT_URL:}
+  mail:
+    redirect-to: robson.cassiano777@gmail.com
 
 asaas:
   api:
