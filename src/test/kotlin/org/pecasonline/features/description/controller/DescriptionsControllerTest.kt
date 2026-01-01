@@ -1,14 +1,14 @@
 package org.pecasonline.features.description.controller
 
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.pecasonline.features.description.Description
 import org.pecasonline.features.description.DescriptionsController
 import org.pecasonline.features.description.IDescriptionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -17,11 +17,10 @@ import org.springframework.test.web.servlet.get
 @org.springframework.test.context.ActiveProfiles("test")
 class DescriptionsControllerTest(@Autowired val mockMvc: MockMvc) {
 
-    @MockBean(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
-
-    @MockBean
+    @MockkBean
     private lateinit var descriptionService: IDescriptionService
 
     @Test
@@ -31,7 +30,7 @@ class DescriptionsControllerTest(@Autowired val mockMvc: MockMvc) {
             Description(id = 2, description = "Description 2")
         )
 
-        whenever(descriptionService.getAvailableDescriptions()).thenReturn(descriptions)
+        every { descriptionService.getAvailableDescriptions() } returns descriptions
 
         mockMvc.get("/api/v1/descricoes")
             .andExpect {
@@ -41,12 +40,12 @@ class DescriptionsControllerTest(@Autowired val mockMvc: MockMvc) {
                 jsonPath("$[1].descricao") { value("Description 2") }
             }
 
-        verify(descriptionService).getAvailableDescriptions()
+        verify { descriptionService.getAvailableDescriptions() }
     }
 
     @Test
     fun `should return empty list when no descriptions are available`() {
-        whenever(descriptionService.getAvailableDescriptions()).thenReturn(emptyList())
+        every { descriptionService.getAvailableDescriptions() } returns emptyList()
 
         mockMvc.get("/api/v1/descricoes")
             .andExpect {
@@ -55,6 +54,6 @@ class DescriptionsControllerTest(@Autowired val mockMvc: MockMvc) {
                 content { json("[]") }
             }
 
-        verify(descriptionService).getAvailableDescriptions()
+        verify { descriptionService.getAvailableDescriptions() }
     }
 }

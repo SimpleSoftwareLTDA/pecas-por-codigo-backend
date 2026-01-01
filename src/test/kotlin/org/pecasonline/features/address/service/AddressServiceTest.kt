@@ -1,25 +1,22 @@
 package org.pecasonline.features.address.service
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.never
-import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.dto.CreateAddressDTO
 import org.pecasonline.features.address.repository.AddressRepository
-import org.springframework.boot.test.context.SpringBootTest
 
 class AddressServiceTest {
 
-    private val addressRepository: AddressRepository = mock()
-    private val stateService: IStateService = mock()
+    private val addressRepository: AddressRepository = mockk()
+    private val stateService: IStateService = mockk()
     private val addressService = AddressService(addressRepository, stateService)
 
     @Test
@@ -41,8 +38,8 @@ class AddressServiceTest {
             state = state
         )
 
-        whenever(stateService.findStateById(createAddressDTO.stateId!!)).thenReturn(state)
-        whenever(addressRepository.save(any())).thenReturn(expectedAddress)
+        every { stateService.findStateById(createAddressDTO.stateId!!) } returns state
+        every { addressRepository.save(any()) } returns expectedAddress
 
         val savedAddress = addressService.save(createAddressDTO)
 
@@ -53,8 +50,8 @@ class AddressServiceTest {
         assertEquals(expectedAddress.country, savedAddress.country)
         assertEquals(expectedAddress.state, savedAddress.state)
 
-        verify(stateService).findStateById(createAddressDTO.stateId!!)
-        verify(addressRepository).save(any())
+        verify { stateService.findStateById(createAddressDTO.stateId!!) }
+        verify { addressRepository.save(any()) }
     }
 
     @Test
@@ -67,7 +64,7 @@ class AddressServiceTest {
             stateId = 99
         )
 
-        whenever(stateService.findStateById(createAddressDTO.stateId!!)).thenReturn(null)
+        every { stateService.findStateById(createAddressDTO.stateId!!) } returns null
 
         val exception = assertThrows<NotFoundException> {
             addressService.save(createAddressDTO)
@@ -75,7 +72,7 @@ class AddressServiceTest {
 
         assertEquals("Invalid state id: 99. No state found in the database", exception.message)
 
-        verify(stateService).findStateById(createAddressDTO.stateId!!)
-        verify(addressRepository, never()).save(any())
+        verify { stateService.findStateById(createAddressDTO.stateId!!) }
+        verify(exactly = 0) { addressRepository.save(any()) }
     }
 }

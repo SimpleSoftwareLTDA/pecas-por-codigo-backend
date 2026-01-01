@@ -290,7 +290,7 @@ class StockService(
             Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING)
         }
 
-    private fun parseStockLine(line: String): Stock? {
+    internal fun parseStockLine(line: String): Stock? {
         // Split by tab (\t) or semicolon (;) only — not spaces — to preserve prices like "89,427.27"
         // Split by tab (\t), semicolon (;), or multiple spaces (2+) to handle fixed-width-like files
         val columns = line.split(Regex("[\\t;]+|\\s{2,}")).filter { it.isNotEmpty() }

@@ -89,9 +89,8 @@ dependencies {
         exclude(group = "org.mockito", module = "mockito-core")
     }
     testImplementation("org.springframework.batch:spring-batch-test")
-    testImplementation("com.ninja-squad:springmockk:3.0.1")
-    testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("com.ninja-squad:springmockk:4.0.2")
+    testImplementation("io.mockk:mockk:1.13.13")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

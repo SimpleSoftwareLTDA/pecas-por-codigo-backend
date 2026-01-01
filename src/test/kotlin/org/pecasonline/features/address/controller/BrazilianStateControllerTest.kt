@@ -1,13 +1,13 @@
 package org.pecasonline.features.address.controller
 
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.pecasonline.features.address.domain.BrazilianState
 import org.pecasonline.features.address.service.IStateService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -16,11 +16,10 @@ import org.springframework.test.web.servlet.get
 @org.springframework.test.context.ActiveProfiles("test")
 class BrazilianStateControllerTest(@Autowired val mockMvc: MockMvc) {
 
-    @MockBean(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
-
-    @MockBean
+    @MockkBean
     private lateinit var stateService: IStateService
 
     @Test
@@ -30,7 +29,7 @@ class BrazilianStateControllerTest(@Autowired val mockMvc: MockMvc) {
             BrazilianState(id = 2, stateName = "Rio de Janeiro", stateCode = "RJ")
         )
 
-        whenever(stateService.getAvailableStates()).thenReturn(states)
+        every { stateService.getAvailableStates() } returns states
 
         mockMvc.get("/api/v1/estados")
             .andExpect {
@@ -42,6 +41,6 @@ class BrazilianStateControllerTest(@Autowired val mockMvc: MockMvc) {
                 jsonPath("$[1].sigla") { value("RJ") }
             }
 
-        verify(stateService).getAvailableStates()
+        verify { stateService.getAvailableStates() }
     }
 }

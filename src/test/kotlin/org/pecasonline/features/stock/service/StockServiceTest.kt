@@ -1,14 +1,13 @@
 package org.pecasonline.features.stock.service
 
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito.any
-import org.mockito.Mockito.`when`
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.verify
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
@@ -18,13 +17,11 @@ import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.Stock
 import org.pecasonline.features.stock.StockRepository
-import org.pecasonline.features.stock.StockService
 import org.pecasonline.features.supplier.domain.Contact
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.mock.web.MockMultipartFile
@@ -36,16 +33,16 @@ import java.util.*
 @org.springframework.test.context.ActiveProfiles("test")
 class StockServiceTest {
 
-    @MockBean
+    @MockkBean
     private lateinit var stockRepository: StockRepository
 
-    @MockBean
+    @MockkBean
     private lateinit var itemRepository: ItemRepository
 
-    @MockBean
+    @MockkBean
     private lateinit var supplierRepository: SupplierRepository
 
-    @MockBean
+    @MockkBean
     private lateinit var categoryService: ICategoryService
 
     @Autowired
@@ -89,28 +86,28 @@ class StockServiceTest {
     fun `getAllStocks should return paginated stock results`() {
         val pageable = PageRequest.of(0, 2)
         val pagedStocks = PageImpl(listOf(sampleStock), pageable, 1)
-        `when`(stockRepository.findAll(pageable)).thenReturn(pagedStocks)
+        every { stockRepository.findAll(pageable) } returns pagedStocks
 
         val result = stockService.getAllStocks(0, 2)
 
         assertEquals(1, result.totalElements)
         assertEquals(sampleStock, result.content[0])
-        verify(stockRepository).findAll(pageable)
+        verify { stockRepository.findAll(pageable) }
     }
 
     @Test
     fun `findStockById should return stock if found`() {
-        `when`(stockRepository.findById(1)).thenReturn(Optional.of(sampleStock))
+        every { stockRepository.findById(1) } returns Optional.of(sampleStock)
 
         val result = stockService.findStockById(1)
 
         assertEquals(sampleStock, result)
-        verify(stockRepository).findById(1)
+        verify { stockRepository.findById(1) }
     }
 
     @Test
     fun `findStockById should throw NotFoundException if stock is not found`() {
-        `when`(stockRepository.findById(99)).thenReturn(Optional.empty())
+        every { stockRepository.findById(99) } returns Optional.empty()
 
         assertThrows<NotFoundException> {
             stockService.findStockById(99)

@@ -1,16 +1,12 @@
 package org.pecasonline.features.subscription.service
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentMatchers.any
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.pecasonline.common.httpclients.dto.CreateSubscriptionResponse
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.plan.Plan
@@ -25,25 +21,17 @@ import java.time.format.DateTimeFormatter
 
 class SubscriptionServiceTest {
 
-    @Mock
-    private lateinit var planService: IPlanService
+    private val planService = mockk<IPlanService>()
+    private val subscriptionRepository = mockk<SubscriptionRepository>()
+    private val bankingService = mockk<BankingService>()
+    private val supplierRepository = mockk<SupplierRepository>()
 
-    @Mock
-    private lateinit var subscriptionRepository: SubscriptionRepository
-
-    @Mock
-    private lateinit var bankingService: BankingService
-
-    @Mock
-    private lateinit var supplierRepository: SupplierRepository
-
-    @InjectMocks
-    private lateinit var subscriptionService: SubscriptionService
-
-    @BeforeEach
-    fun setup() {
-        MockitoAnnotations.openMocks(this)
-    }
+    private val subscriptionService = SubscriptionService(
+        planService,
+        bankingService,
+        subscriptionRepository,
+        supplierRepository
+    )
 
     @Test
     fun `should create subscription successfully`() {
@@ -54,8 +42,8 @@ class SubscriptionServiceTest {
             socialName = "Test Social Name",
             cnpj = "15826705000130",
             stateSubscription = "123456789",
-            address = mock(),
-            contact = mock(),
+            address = mockk(),
+            contact = mockk(),
             asaasId = "some-id"
         )
 
@@ -76,18 +64,17 @@ class SubscriptionServiceTest {
             smallBannerUrl = "http://smallbanner.com"
         )
 
-        whenever(planService.getPlanById(subscriptionDto.planId)).thenReturn(plan)
-        whenever(subscriptionRepository.save(any())).thenAnswer { invocation ->
-            invocation.getArgument<Subscription>(0)
-        }
+        every { planService.getPlanById(subscriptionDto.planId) } returns plan
+        every { bankingService.createSubscription(any()) } returns mockk<CreateSubscriptionResponse>()
+        every { subscriptionRepository.save(any()) } answers { it.invocation.args[0] as Subscription }
 
         val subscription = subscriptionService.createSubscription(subscriptionDto, supplier)
 
         assertEquals(subscription.paymentDay, subscriptionDto.paymentDay)
         assertEquals(subscription.plan, plan)
         assertEquals(subscription.supplier, supplier)
-        assertEquals(org.pecasonline.features.subscription.entities.SubscriptionStatus.ACTIVE, subscription.status)
-        verify(subscriptionRepository).save(any())
+        assertEquals(SubscriptionStatus.ACTIVE, subscription.status)
+        verify { subscriptionRepository.save(any()) }
     }
 
     @Test
@@ -116,8 +103,8 @@ class SubscriptionServiceTest {
             socialName = "Test Social Name",
             cnpj = "15826705000130",
             stateSubscription = "123456789",
-            address = mock(),
-            contact = mock(),
+            address = mockk(),
+            contact = mockk(),
             asaasId = "some-id"
         )
 
@@ -128,7 +115,7 @@ class SubscriptionServiceTest {
             smallBannerUrl = "http://smallbanner.com"
         )
 
-        whenever(planService.getPlanById(subscriptionDto.planId)).thenThrow(IllegalArgumentException("O plano escolhido não existe. planId: ${subscriptionDto.planId}"))
+        every { planService.getPlanById(subscriptionDto.planId) } throws IllegalArgumentException("O plano escolhido não existe. planId: ${subscriptionDto.planId}")
 
         val exception = assertThrows<IllegalArgumentException> {
             subscriptionService.createSubscription(subscriptionDto, supplier)
