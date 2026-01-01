@@ -20,8 +20,18 @@ class EmailSenderService(
     private val isEmailEnabled: Boolean,
 
     @Value("\${app.site_url}")
-    private val siteUrl: String
+    private val siteUrl: String,
+
+    @Value("\${app.mail.redirect-to:}")
+    private val redirectTo: String,
+
+    @Value("\${spring.mail.username}")
+    private val fromEmail: String
 ) {
+    init {
+        logger.info { "EmailSenderService initialized. Email enabled: $isEmailEnabled, Redirect to: ${redirectTo.ifBlank { "NONE" }}, From: $fromEmail" }
+    }
+
     private val EMAIL_NOT_ENABLED_MESSAGE = "Email service is disabled. Notification email will not be sent."
 
     @Async
@@ -48,7 +58,8 @@ class EmailSenderService(
         supplierEmail: String,
         supplierName: String,
         fileName: String,
-        updatedItemCount: Int
+        updatedItemCount: Int,
+        attachment: java.io.File? = null
     ) {
         validateIfEmailIsEnabled()
 
@@ -57,15 +68,27 @@ class EmailSenderService(
             <html>
             <body>
                 <p>Olá $supplierName,</p>
-                <p>Informamos que o processamento do estoque para o arquivo <strong>$fileName</strong> foi concluído com sucesso.</p>
-                <p>Total de itens atualizados: <strong>$updatedItemCount</strong>.</p>
+                <p>Informamos que o processamento do estoque para o arquivo <strong>$fileName</strong> foi concluído.</p>
+                <p>Total de itens atualizados com sucesso: <strong>$updatedItemCount</strong>.</p>
+                ${if (attachment != null) """
+                    <div style="background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin: 15px 0;">
+                        <p><strong>Atenção:</strong> Foram encontradas linhas com erro no arquivo original. Enviamos anexo um arquivo contendo apenas as linhas que não puderam ser processadas para sua correção.</p>
+                        <p>Causas comuns de rejeição:</p>
+                        <ul>
+                            <li><strong>Formato Inválido:</strong> Linhas incompletas ou com caracteres inesperados.</li>
+                            <li><strong>Colunas Incorretas:</strong> O arquivo deve conter exatamente 4 colunas (Código, Quantidade, Preço, Descrição).</li>
+                            <li><strong>Notação Científica:</strong> Códigos corrompidos pelo Excel (ex: 7,90E+12). Verifique se a coluna de código no seu sistema está formatada como Texto antes de exportar.</li>
+                        </ul>
+                    </div>
+                """.trimIndent() else ""}
                 <p>Se houver alguma dúvida ou problema, não hesite em nos contatar.</p>
                 <p>Atenciosamente,<br>Equipe de Estoque</p>
             </body>
             </html>
         """.trimIndent()
 
-        sendEmail(supplierEmail, subject, htmlContent)
+        val attachmentName = attachment?.let { "itens_nao_processados_$fileName" }
+        sendEmail(supplierEmail, subject, htmlContent, attachment, attachmentName)
     }
 
     @Async
@@ -139,19 +162,49 @@ class EmailSenderService(
         sendEmail(CONTACT_EMAIL, emailSubject, htmlContent)
     }
 
-    private fun sendEmail(supplierEmail: String, subject: String, htmlContent: String) {
+    private fun sendEmail(
+        supplierEmail: String,
+        subject: String,
+        htmlContent: String,
+        attachment: java.io.File? = null,
+        attachmentName: String? = null
+    ) {
         runCatching {
+            val isRedirected = redirectTo.isNotBlank()
+            val finalRecipient = if (isRedirected) {
+                logger.info { "MAIL REDIRECT ACTIVE: Redirecting email from $supplierEmail to $redirectTo" }
+                redirectTo
+            } else {
+                supplierEmail
+            }
+
             val message: MimeMessage = emailSender.createMimeMessage()
             val helper = MimeMessageHelper(message, true)
 
-            helper.setTo(supplierEmail)
+            helper.setFrom(fromEmail)
+            helper.setTo(finalRecipient)
             helper.setSubject(subject)
             helper.setText(htmlContent, true)
+            
+            attachment?.let {
+                val finalName = attachmentName ?: "linhas_com_erro_${it.name}"
+                helper.addAttachment(finalName, it)
+            }
+            
             emailSender.send(message)
 
-            logger.info { "Sent email with subject '$subject' to: $supplierEmail" }
+            val logSuffix = if (isRedirected) " (ORIGINAL RECIPIENT: $supplierEmail)" else ""
+            logger.info { "Success: Sent email '$subject' to: $finalRecipient$logSuffix" }
         }.onFailure { ex ->
-            logger.error { "${"Failed to send email to: {}"} $supplierEmail $ex" }
+            logger.error { "Failed to send email to $supplierEmail: ${ex.message}" }
+        }.also {
+            attachment?.let {
+                runCatching {
+                    if (it.exists() && it.delete()) {
+                        logger.debug { "Temporary attachment deleted: ${it.absolutePath}" }
+                    }
+                }
+            }
         }
     }
 

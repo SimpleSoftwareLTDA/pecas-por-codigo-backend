@@ -1,14 +1,14 @@
 package org.pecasonline.features.plan.controller
 
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.plan.Plan
 import org.pecasonline.features.plan.PlanController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -17,11 +17,10 @@ import org.springframework.test.web.servlet.get
 @org.springframework.test.context.ActiveProfiles("test")
 class PlanControllerTest(@Autowired val mockMvc: MockMvc) {
 
-    @MockBean(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
-
-    @MockBean
+    @MockkBean
     private lateinit var planService: IPlanService
 
     @Test
@@ -31,7 +30,7 @@ class PlanControllerTest(@Autowired val mockMvc: MockMvc) {
             Plan(name = "Premium Plan", priceInCents = 15000, stock = false, quote = true, smallBanner = false, bigBanner = true)
         )
         
-        whenever(planService.getAvailablePlans()).thenReturn(plans)
+        every { planService.getAvailablePlans() } returns plans
 
         mockMvc.get("/api/v1/planos")
             .andExpect {
@@ -41,6 +40,6 @@ class PlanControllerTest(@Autowired val mockMvc: MockMvc) {
                 jsonPath("$[1].nome") { value("Premium Plan") }
             }
 
-        verify(planService).getAvailablePlans()
+        verify { planService.getAvailablePlans() }
     }
 }

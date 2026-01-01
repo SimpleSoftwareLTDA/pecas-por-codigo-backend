@@ -1,15 +1,11 @@
 package org.pecasonline.features.supplier.service
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.features.address.domain.Address
 import org.pecasonline.features.address.domain.BrazilianState
@@ -32,34 +28,23 @@ import java.util.*
 
 class SupplierServiceTest {
 
-    @Mock
-    private lateinit var supplierRepository: SupplierRepository
+    private val supplierRepository = mockk<SupplierRepository>()
+    private val addressService = mockk<IAddressService>()
+    private val descriptionService = mockk<IDescriptionService>()
+    private val brandService = mockk<IBrandService>()
+    private val subscriptionService = mockk<ISubscriptionService>()
+    private val contactService = mockk<IContactService>()
+    private val bankingService = mockk<BankingService>()
 
-    @Mock
-    private lateinit var addressService: IAddressService
-
-    @Mock
-    private lateinit var descriptionService: IDescriptionService
-
-    @Mock
-    private lateinit var brandService: IBrandService
-
-    @Mock
-    private lateinit var subscriptionService: ISubscriptionService
-
-    @Mock
-    private lateinit var contactService: IContactService
-
-    @Mock
-    private lateinit var bankingService: BankingService
-
-    @InjectMocks
-    private lateinit var supplierService: SupplierService
-
-    @BeforeEach
-    fun setup() {
-        MockitoAnnotations.openMocks(this)
-    }
+    private val supplierService = SupplierService(
+        supplierRepository,
+        addressService,
+        descriptionService,
+        brandService,
+        subscriptionService,
+        contactService,
+        bankingService
+    )
 
     @Test
     fun `should find suppliers successfully`() {
@@ -67,7 +52,7 @@ class SupplierServiceTest {
         val pageRequest = PageRequest.of(0, 10)
         val suppliersPage: Page<Supplier> = PageImpl(listOf(supplier))
 
-        whenever(supplierRepository.findAll(pageRequest)).thenReturn(suppliersPage)
+        every { supplierRepository.findAll(pageRequest) } returns suppliersPage
 
         val result = supplierService.findSuppliers(0, 10)
 
@@ -81,7 +66,7 @@ class SupplierServiceTest {
         val pageRequest = PageRequest.of(0, 10)
         val emptyPage: Page<Supplier> = PageImpl(emptyList())
 
-        whenever(supplierRepository.findAll(pageRequest)).thenReturn(emptyPage)
+        every { supplierRepository.findAll(pageRequest) } returns emptyPage
 
         assertThrows<NotFoundException> {
             supplierService.findSuppliers(0, 10)
@@ -91,7 +76,7 @@ class SupplierServiceTest {
     @Test
     fun `should find supplier by id`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
 
         val result = supplierService.findSupplierById(supplier.id!!)
 
@@ -101,7 +86,7 @@ class SupplierServiceTest {
 
     @Test
     fun `should throw NotFoundException when supplier by id not found`() {
-        whenever(supplierRepository.findById(any())).thenReturn(Optional.empty())
+        every { supplierRepository.findById(any()) } returns Optional.empty()
 
         assertThrows<NotFoundException> {
             supplierService.findSupplierById(999)
@@ -111,10 +96,10 @@ class SupplierServiceTest {
     @Test
     fun `should update supplier basic fields`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
 
         val updatedSupplier = supplier.copy(name = "Updated Supplier", socialName = "Updated Social Name")
-        whenever(supplierRepository.save(any())).thenReturn(updatedSupplier)
+        every { supplierRepository.save(any()) } returns updatedSupplier
 
         val dto = UpdateSupplierDTO(
             name = "Updated Supplier",
@@ -125,21 +110,21 @@ class SupplierServiceTest {
 
         assertEquals("Updated Supplier", result.name)
         assertEquals("Updated Social Name", result.socialName)
-        verify(supplierRepository).save(any())
+        verify { supplierRepository.save(any()) }
     }
 
     @Test
     fun `should update supplier contact`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
 
         val updatedContact = supplier.contact.copy(
             sellerName = "Maria Souza",
             itemsEmail = "maria.souza@example.com",
             itemsPhone = "11999999999"
         )
-        whenever(contactService.update(any(), any())).thenReturn(updatedContact)
-        whenever(supplierRepository.save(any())).thenReturn(supplier.copy(contact = updatedContact))
+        every { contactService.update(any(), any()) } returns updatedContact
+        every { supplierRepository.save(any()) } returns supplier.copy(contact = updatedContact)
 
         val dto = UpdateSupplierDTO(
             contact = UpdateContactDTO(
@@ -153,17 +138,17 @@ class SupplierServiceTest {
 
         assertEquals("Maria Souza", result.contact.sellerName)
         assertEquals("maria.souza@example.com", result.contact.itemsEmail)
-        verify(contactService).update(any(), any())
+        verify { contactService.update(any(), any()) }
     }
 
     @Test
     fun `should update supplier address`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
 
         val updatedAddress = supplier.address.copy(city = "São Paulo", street = "Rua Nova 123")
-        whenever(addressService.update(any(), any())).thenReturn(updatedAddress)
-        whenever(supplierRepository.save(any())).thenReturn(supplier.copy(address = updatedAddress))
+        every { addressService.update(any(), any()) } returns updatedAddress
+        every { supplierRepository.save(any()) } returns supplier.copy(address = updatedAddress)
 
         val dto = UpdateSupplierDTO(
             address = UpdateAddressDTO(
@@ -176,29 +161,29 @@ class SupplierServiceTest {
 
         assertEquals("São Paulo", result.address.city)
         assertEquals("Rua Nova 123", result.address.street)
-        verify(addressService).update(any(), any())
+        verify { addressService.update(any(), any()) }
     }
 
     @Test
     fun `should update supplier description`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
 
         val newDescription = Description(id = 2, description = "Distribuidor")
-        whenever(descriptionService.findDescriptionById(2)).thenReturn(newDescription)
-        whenever(supplierRepository.save(any())).thenReturn(supplier.copy(description = newDescription))
+        every { descriptionService.findDescriptionById(2) } returns newDescription
+        every { supplierRepository.save(any()) } returns supplier.copy(description = newDescription)
 
         val dto = UpdateSupplierDTO(descriptionId = 2)
 
         val result = supplierService.updateSupplier(supplier.id!!, dto)
 
         assertEquals("Distribuidor", result.description?.description)
-        verify(descriptionService).findDescriptionById(2)
+        verify { descriptionService.findDescriptionById(2) }
     }
 
     @Test
     fun `should throw NotFoundException when updating missing supplier`() {
-        whenever(supplierRepository.findById(any())).thenReturn(Optional.empty())
+        every { supplierRepository.findById(any()) } returns Optional.empty()
 
         assertThrows<NotFoundException> {
             supplierService.updateSupplier(123, UpdateSupplierDTO(name = "Invalid"))
@@ -208,16 +193,17 @@ class SupplierServiceTest {
     @Test
     fun `should delete supplier`() {
         val supplier = buildSupplier()
-        whenever(supplierRepository.findById(supplier.id!!)).thenReturn(Optional.of(supplier))
+        every { supplierRepository.findById(supplier.id!!) } returns Optional.of(supplier)
+        every { supplierRepository.deleteById(supplier.id!!) } returns Unit
 
         supplierService.deleteSupplier(supplier.id!!)
 
-        verify(supplierRepository).deleteById(supplier.id!!)
+        verify { supplierRepository.deleteById(supplier.id!!) }
     }
 
     @Test
     fun `should throw NotFoundException when deleting missing supplier`() {
-        whenever(supplierRepository.findById(any())).thenReturn(Optional.empty())
+        every { supplierRepository.findById(any()) } returns Optional.empty()
 
         assertThrows<NotFoundException> {
             supplierService.deleteSupplier(404)

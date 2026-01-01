@@ -1,14 +1,14 @@
 package org.pecasonline.features.brand.controller
 
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.pecasonline.features.brand.Brand
 import org.pecasonline.features.brand.BrandController
 import org.pecasonline.features.brand.IBrandService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -17,11 +17,10 @@ import org.springframework.test.web.servlet.get
 @org.springframework.test.context.ActiveProfiles("test")
 class BrandControllerTest(@Autowired val mockMvc: MockMvc) {
 
-    @MockBean(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
-
-    @MockBean
+    @MockkBean
     private lateinit var brandService: IBrandService
 
     @Test
@@ -31,7 +30,7 @@ class BrandControllerTest(@Autowired val mockMvc: MockMvc) {
             Brand(id = 2, brandName = "Honda")
         )
         
-        whenever(brandService.getAvailableBrands()).thenReturn(brands)
+        every { brandService.getAvailableBrands() } returns brands
 
         mockMvc.get("/api/v1/marcas")
             .andExpect {
@@ -41,6 +40,6 @@ class BrandControllerTest(@Autowired val mockMvc: MockMvc) {
                 jsonPath("$[1].marca") { value("Honda") }
             }
 
-        verify(brandService).getAvailableBrands()
+        verify { brandService.getAvailableBrands() }
     }
 }

@@ -92,7 +92,7 @@ class StockController(
                 val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
                 tempFile.outputStream().use { it.write(utf8Bytes) }
 
-                stockService.createStock(file = tempFile, token = token)
+                stockService.createStock(file = tempFile, token = token, originalFileName = file.originalFilename)
             }
         }
     }
@@ -114,7 +114,7 @@ class StockController(
                 val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
                 tempFile.outputStream().use { it.write(utf8Bytes) }
 
-                stockService.createStock(file = tempFile, cnpj = cnpj)
+                stockService.createStock(file = tempFile, cnpj = cnpj, originalFileName = file.originalFilename)
             }
         }
     }
