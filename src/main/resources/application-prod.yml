@@ -36,6 +36,7 @@ springdoc:
     enabled: true
     operationsSorter: method
     tagsSorter: method
+    disable-swagger-default-url: true
 logging:
   level:
     org:
