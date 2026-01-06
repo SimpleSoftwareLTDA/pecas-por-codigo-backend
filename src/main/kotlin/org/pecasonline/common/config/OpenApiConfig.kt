@@ -12,7 +12,7 @@ import org.springframework.core.env.Environment
 @Configuration
 class OpenApiConfig(private val env: Environment) {
 
-    @Value("${app.url}")
+    @Value("\${app.url}")
     private lateinit var currentURL: String
 
     @Bean
