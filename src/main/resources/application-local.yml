@@ -50,7 +50,7 @@ springdoc:
     tagsSorter: method
 
 app:
-  url: ${CURRENT_URL:}
+  url: ${CURRENT_URL:http://localhost:8080}
   mail:
     redirect-to: robson.cassiano777@gmail.com
 
