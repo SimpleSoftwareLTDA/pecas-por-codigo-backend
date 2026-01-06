@@ -21,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.multipart.MaxUploadSizeExceededException
 import kotlin.reflect.KClass
 
 @RestControllerAdvice
@@ -109,6 +110,15 @@ class ExceptionsAdvisor {
             .put("status", 401)
             .put("message", ex.message)
         return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException): ResponseEntity<BaseExceptionResponseJson> {
+        val response = BaseExceptionResponseJson(
+            HttpStatus.PAYLOAD_TOO_LARGE.value(),
+            "O arquivo enviado é muito grande. O limite é de 100MB."
+        )
+        return ResponseEntity.status(response.httpStatusCode).body(response)
     }
 
 

@@ -15,8 +15,8 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 100MB
+      max-request-size: 100MB
   mail:
     enabled: false
     from-email: ${SET_FROM_EMAIL:estoque@pecasporcodigo.com.br}
@@ -45,7 +45,7 @@ spring:
 
 app:
   url: ${CURRENT_URL:}
-  site_url: ${SITE_URL:https://www.pecasporcodigo.com.br}
+  site_url: ${SITE_URL:https://pecasporcodigo.com.br}
   mail:
     redirect-to: ${MAIL_REDIRECT_TO:} # Redireciona todos os e-mails para este endereço se definido (útil em dev/homol)
 
