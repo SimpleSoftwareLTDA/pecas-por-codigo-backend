@@ -15,12 +15,17 @@ class OpenApiConfig {
 
     @Bean
     fun customOpenAPI(): OpenAPI {
-        return OpenAPI()
+        val openApi = OpenAPI()
             .info(
                 Info().title("Peças Por Código API")
                     .description("API de Catalogo de peças automotivas e seus fornecedores.")
                     .version("1.0")
             )
-            .addServersItem(Server().url(currentURL))
+
+        if (currentURL.isNotBlank() && !currentURL.contains("localhost")) {
+            openApi.addServersItem(Server().url(currentURL))
+        }
+
+        return openApi
     }
 }

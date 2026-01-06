@@ -46,7 +46,7 @@ server:
   forward-headers-strategy: native
 
 app:
-  url: ${CURRENT_URL:}
+  url: ${CURRENT_URL:/}
 
 asaas:
   api:
