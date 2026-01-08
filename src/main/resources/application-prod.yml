@@ -47,6 +47,8 @@ server:
 
 app:
   url: ${CURRENT_URL:https://backend.pecasporcodigo.com.br/}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:https://backend.pecasporcodigo.com.br}
 
 asaas:
   api:

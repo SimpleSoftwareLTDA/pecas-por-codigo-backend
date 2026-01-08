@@ -46,6 +46,8 @@ spring:
 app:
   url: ${CURRENT_URL:}
   site_url: ${SITE_URL:https://pecasporcodigo.com.br}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:*}
   mail:
     redirect-to: ${MAIL_REDIRECT_TO:} # Redireciona todos os e-mails para este endereço se definido (útil em dev/homol)
 
