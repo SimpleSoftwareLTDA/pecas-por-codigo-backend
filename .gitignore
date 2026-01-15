@@ -51,3 +51,12 @@ gha-creds-*.json
 *testdb*
 
 testdb.trace.db
+
+node_modules
+.git
+.DS_Store
+# Keep package.json as it might be needed for some build steps or metadata
+# even if we are just serving static files
+# Dockerfile and .dockerignore are usually excluded from the image anyway
+
+**node_modules**

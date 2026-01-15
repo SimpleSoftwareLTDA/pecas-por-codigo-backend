@@ -2,7 +2,13 @@
     "name": "pecas-por-codigo-admin-frontend",
     "version": "1.0.0",
     "scripts": {
-        "dev": "bun x serve ."
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy"
     },
-    "dependencies": {}
+    "devDependencies": {
+        "wrangler": "^4.59.2"
+    },
+    "dependencies": {
+        "@cloudflare/kv-asset-handler": "^0.4.2"
+    }
 }

@@ -1,5 +1,10 @@
 const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
 
+// --- Feature Flags ---
+const FLAGS = {
+    ENABLE_LOGIN: false
+};
+
 // --- Auth Management ---
 const loginScreen = document.getElementById('loginScreen');
 const mainApp = document.getElementById('mainApp');
@@ -11,6 +16,12 @@ const logoutBtn = document.getElementById('logoutBtn');
 let currentToken = localStorage.getItem('ppc_admin_token');
 
 async function checkAuth() {
+    if (!FLAGS.ENABLE_LOGIN) {
+        hideLogin();
+        fetchSuppliers();
+        return;
+    }
+
     if (!currentToken) {
         showLogin();
         return;
