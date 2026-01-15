@@ -340,9 +340,47 @@ const fileNameLabel = document.getElementById('fileName');
 
 stockFile.onchange = (e) => {
     if (e.target.files.length > 0) {
-        fileNameLabel.innerText = e.target.files[0].name;
+        const file = e.target.files[0];
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext !== 'tsv' && ext !== 'csv') {
+            alert('Apenas arquivos .tsv ou .csv são permitidos.');
+            stockFile.value = '';
+            fileNameLabel.innerText = '';
+            return;
+        }
+        fileNameLabel.innerText = file.name;
     }
 };
+
+// --- Drag and Drop ---
+const dropZone = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+
+    if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (ext !== 'tsv' && ext !== 'csv') {
+            alert('Apenas arquivos .tsv ou .csv são permitidos.');
+            return;
+        }
+
+        stockFile.files = e.dataTransfer.files;
+        fileNameLabel.innerText = file.name;
+    }
+});
 
 uploadBtn.onclick = async () => {
     const file = stockFile.files[0];
