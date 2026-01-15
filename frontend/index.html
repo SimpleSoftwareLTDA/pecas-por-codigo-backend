@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PPC Admin Panel</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -111,11 +112,47 @@
                         <input type="text" id="stockCnpj" placeholder="00.000.000/0000-00">
                     </div>
 
+                    <!-- File Preview Section -->
+                    <div id="filePreview" class="file-preview hidden">
+                        <h3><i class="fas fa-eye"></i> Preview do Arquivo (primeiras 10 linhas)</h3>
+                        <div id="validationMessages" class="validation-messages"></div>
+                        <div class="preview-table-container">
+                            <table id="previewTable" class="preview-table">
+                                <thead id="previewTableHead"></thead>
+                                <tbody id="previewTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="preview-stats">
+                            <span id="previewStats"></span>
+                        </div>
+                    </div>
+
                     <button id="uploadBtn" class="btn-primary full-width" style="margin-top: 1rem;">Processar
                         Estoque</button>
 
                     <div id="uploadProgress" class="progress-bar hidden">
                         <div class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Upload History -->
+                <div class="card" style="margin-top: 2rem;">
+                    <h2><i class="fas fa-history"></i> Histórico de Uploads</h2>
+                    <div class="table-container" style="margin-top: 1.5rem;">
+                        <table id="uploadHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Arquivo</th>
+                                    <th>CNPJ</th>
+                                    <th>Status</th>
+                                    <th>Linhas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uploadHistoryList">
+                                <!-- History items will be injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

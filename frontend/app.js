@@ -348,18 +348,154 @@ const stockFile = document.getElementById('stockFile');
 const stockCnpjInput = document.getElementById('stockCnpj');
 const uploadBtn = document.getElementById('uploadBtn');
 const fileNameLabel = document.getElementById('fileName');
+const filePreview = document.getElementById('filePreview');
+const previewTableHead = document.getElementById('previewTableHead');
+const previewTableBody = document.getElementById('previewTableBody');
+const previewStats = document.getElementById('previewStats');
+const validationMessages = document.getElementById('validationMessages');
+const uploadHistoryList = document.getElementById('uploadHistoryList');
 
-stockFile.onchange = (e) => {
+let currentFileData = null;
+let uploadHistory = JSON.parse(localStorage.getItem('ppc_upload_history') || '[]');
+
+// Template download
+downloadTemplateBtn.onclick = () => {
+    const template = `CODIGO\tQUANTIDADE\tPRECO\tDESCRICAO
+ABC123\t10\t150.50\tPeça de exemplo 1
+XYZ789\t5\t89.90\tPeça de exemplo 2
+DEF456\t20\t45.00\tPeça de exemplo 3`;
+
+    const blob = new Blob([template], { type: 'text/tab-separated-values' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template_estoque.tsv';
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
+// File validation and preview
+async function validateAndPreviewFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'tsv' && ext !== 'csv') {
+        showValidationMessage('Apenas arquivos .tsv ou .csv são permitidos.', 'error');
+        return false;
+    }
+
+    try {
+        const text = await file.text();
+        const delimiter = ext === 'tsv' ? '\t' : /[;\t]/;
+        const lines = text.trim().split('\n').filter(line => line.trim());
+
+        if (lines.length === 0) {
+            showValidationMessage('Arquivo vazio.', 'error');
+            return false;
+        }
+
+        const rows = lines.map(line => line.split(delimiter).map(cell => cell.trim()));
+
+        // Validation
+        const validationResults = [];
+        let hasErrors = false;
+
+        // Check column count consistency
+        const expectedColumns = 4;
+        const invalidRows = rows.filter(row => row.length !== expectedColumns);
+
+        if (invalidRows.length > 0) {
+            validationResults.push({
+                type: 'error',
+                message: `${invalidRows.length} linha(s) com número incorreto de colunas (esperado: ${expectedColumns})`
+            });
+            hasErrors = true;
+        }
+
+        // Check for required fields
+        const emptyFields = rows.slice(1).filter(row =>
+            !row[0] || !row[1] || !row[2] || !row[3]
+        );
+
+        if (emptyFields.length > 0) {
+            validationResults.push({
+                type: 'warning',
+                message: `${emptyFields.length} linha(s) com campos vazios`
+            });
+        }
+
+        // Check numeric fields
+        const invalidQuantities = rows.slice(1).filter(row =>
+            row[1] && isNaN(parseInt(row[1]))
+        );
+
+        if (invalidQuantities.length > 0) {
+            validationResults.push({
+                type: 'error',
+                message: `${invalidQuantities.length} linha(s) com quantidade inválida`
+            });
+            hasErrors = true;
+        }
+
+        // Success message
+        if (!hasErrors) {
+            validationResults.push({
+                type: 'success',
+                message: `✓ Arquivo válido! ${rows.length - 1} linha(s) de dados encontradas.`
+            });
+        }
+
+        // Display validation messages
+        validationMessages.innerHTML = '';
+        validationResults.forEach(result => {
+            const div = document.createElement('div');
+            div.className = `validation-message ${result.type}`;
+            div.innerHTML = `<i class="fas fa-${result.type === 'error' ? 'exclamation-circle' : result.type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i> ${result.message}`;
+            validationMessages.appendChild(div);
+        });
+
+        // Show preview (first 10 rows)
+        const previewRows = rows.slice(0, 11); // Header + 10 data rows
+
+        // Build table header
+        previewTableHead.innerHTML = `<tr>${previewRows[0].map(cell => `<th>${cell}</th>`).join('')}</tr>`;
+
+        // Build table body
+        previewTableBody.innerHTML = previewRows.slice(1).map(row =>
+            `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+        ).join('');
+
+        // Show stats
+        const totalRows = rows.length - 1;
+        const showing = Math.min(10, totalRows);
+        previewStats.textContent = `Exibindo ${showing} de ${totalRows} linha(s) de dados`;
+
+        filePreview.classList.remove('hidden');
+        currentFileData = { rows, totalRows, hasErrors };
+
+        return !hasErrors;
+    } catch (err) {
+        console.error('Error parsing file:', err);
+        showValidationMessage('Erro ao processar arquivo. Verifique o formato.', 'error');
+        return false;
+    }
+}
+
+function showValidationMessage(message, type) {
+    validationMessages.innerHTML = `
+        <div class="validation-message ${type}">
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+        </div>
+    `;
+}
+
+stockFile.onchange = async (e) => {
     if (e.target.files.length > 0) {
         const file = e.target.files[0];
-        const ext = file.name.split('.').pop().toLowerCase();
-        if (ext !== 'tsv' && ext !== 'csv') {
-            alert('Apenas arquivos .tsv ou .csv são permitidos.');
-            stockFile.value = '';
-            fileNameLabel.innerText = '';
-            return;
-        }
         fileNameLabel.innerText = file.name;
+        await validateAndPreviewFile(file);
+    } else {
+        filePreview.classList.add('hidden');
+        currentFileData = null;
     }
 };
 
@@ -375,58 +511,118 @@ dropZone.addEventListener('dragleave', () => {
     dropZone.classList.remove('dragover');
 });
 
-dropZone.addEventListener('drop', (e) => {
+dropZone.addEventListener('drop', async (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
 
     if (e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
-        const ext = file.name.split('.').pop().toLowerCase();
-
-        if (ext !== 'tsv' && ext !== 'csv') {
-            alert('Apenas arquivos .tsv ou .csv são permitidos.');
-            return;
-        }
-
         stockFile.files = e.dataTransfer.files;
         fileNameLabel.innerText = file.name;
+        await validateAndPreviewFile(file);
     }
 });
+
+// Upload History Management
+function addToHistory(entry) {
+    uploadHistory.unshift(entry);
+    if (uploadHistory.length > 20) uploadHistory = uploadHistory.slice(0, 20);
+    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+    renderUploadHistory();
+}
+
+function renderUploadHistory() {
+    if (uploadHistory.length === 0) {
+        uploadHistoryList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Nenhum upload realizado ainda</td></tr>';
+        return;
+    }
+
+    uploadHistoryList.innerHTML = uploadHistory.map(entry => {
+        const statusClass = entry.status === 'completed' ? 'completed' : entry.status === 'error' ? 'error' : 'processing';
+        return `
+            <tr>
+                <td>${new Date(entry.timestamp).toLocaleString('pt-BR')}</td>
+                <td>${entry.fileName}</td>
+                <td>${entry.cnpj}</td>
+                <td><span class="status-badge ${statusClass}">${entry.status === 'completed' ? 'Concluído' : entry.status === 'error' ? 'Erro' : 'Processando'}</span></td>
+                <td>${entry.rows || '-'}</td>
+            </tr>
+        `;
+    }).join('');
+}
 
 uploadBtn.onclick = async () => {
     const file = stockFile.files[0];
     const cnpj = stockCnpjInput.value.trim();
 
     if (!file || !cnpj) {
-        return alert('Selecione um arquivo e informe o CNPJ do fornecedor.');
+        showValidationMessage('Selecione um arquivo e informe o CNPJ do fornecedor.', 'error');
+        return;
+    }
+
+    if (currentFileData && currentFileData.hasErrors) {
+        showValidationMessage('Corrija os erros de validação antes de enviar.', 'error');
+        return;
     }
 
     const formData = new FormData();
     formData.append('file', file);
 
+    const historyEntry = {
+        timestamp: new Date().toISOString(),
+        fileName: file.name,
+        cnpj: cnpj,
+        status: 'processing',
+        rows: currentFileData?.totalRows || 0
+    };
+
+    addToHistory(historyEntry);
+
     try {
         uploadBtn.disabled = true;
         uploadBtn.innerText = 'Processando...';
 
-        // Updated endpoint: /estoque/estoque-by-cnpj?cnpj={cnpj}
         const response = await fetch(`${API_BASE}/estoque/estoque-by-cnpj?cnpj=${encodeURIComponent(cnpj)}`, {
             method: 'POST',
             body: formData
         });
 
         if (response.ok) {
-            alert('Arquivo enviado! O fornecedor receberá um aviso quando o processamento terminar.');
+            // Update history status
+            uploadHistory[0].status = 'completed';
+            localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+            renderUploadHistory();
+
+            showValidationMessage('✓ Arquivo enviado com sucesso! O fornecedor receberá um aviso quando o processamento terminar.', 'success');
+
+            // Reset form
+            stockFile.value = '';
+            fileNameLabel.innerText = '';
+            filePreview.classList.add('hidden');
+            currentFileData = null;
         } else {
-            alert('Erro no upload. Verifique se o CNPJ está correto.');
+            uploadHistory[0].status = 'error';
+            localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+            renderUploadHistory();
+
+            showValidationMessage('Erro no upload. Verifique se o CNPJ está correto.', 'error');
         }
     } catch (err) {
         console.error(err);
-        alert('Erro de conexão ao tentar subir o estoque.');
+
+        uploadHistory[0].status = 'error';
+        localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+        renderUploadHistory();
+
+        showValidationMessage('Erro de conexão ao tentar subir o estoque.', 'error');
     } finally {
         uploadBtn.disabled = false;
         uploadBtn.innerText = 'Processar Estoque';
     }
 };
+
+// Initialize history on load
+renderUploadHistory();
 
 // --- Helpers ---
 function setLoader(id, show) {

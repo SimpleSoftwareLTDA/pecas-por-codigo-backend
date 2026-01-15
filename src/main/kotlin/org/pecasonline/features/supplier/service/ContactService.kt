@@ -19,12 +19,18 @@ class ContactService(
 
     @Transactional
     override fun update(existingContact: Contact, updatedContact: UpdateContactDTO): Contact {
+        // If any phone field is provided, use it for all phone fields
+        val phoneValue = updatedContact.itemsPhone 
+            ?: updatedContact.whatsapp 
+            ?: updatedContact.itemsWhatsapp 
+            ?: existingContact.itemsPhone
+        
         val contactToPersist = existingContact.copy(
             sellerName = updatedContact.sellerName ?: existingContact.sellerName,
             itemsEmail = updatedContact.itemsEmail ?: existingContact.itemsEmail,
-            itemsPhone = updatedContact.itemsPhone ?: existingContact.itemsPhone,
-            whatsapp = updatedContact.whatsapp ?: existingContact.whatsapp,
-            itemsWhatsapp = updatedContact.itemsWhatsapp ?: existingContact.itemsWhatsapp,
+            itemsPhone = phoneValue,
+            whatsapp = phoneValue,
+            itemsWhatsapp = phoneValue,
             stockEmail = updatedContact.stockEmail ?: existingContact.stockEmail,
             billingEmail = updatedContact.billingEmail ?: existingContact.billingEmail,
             nfEmail = updatedContact.nfEmail ?: existingContact.nfEmail,

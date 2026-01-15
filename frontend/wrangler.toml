@@ -8,3 +8,10 @@ bucket = "."
 [[routes]]
 pattern = "adm.pecasporcodigo.com.br"
 custom_domain = true
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
