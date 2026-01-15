@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPC Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav>
+        <div class="container nav-content">
+            <div class="logo">PPC <span>Admin</span></div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-tab="suppliers">Fornecedores</a>
+                <a href="#" class="nav-link" data-tab="contacts">Contatos</a>
+                <a href="#" class="nav-link" data-tab="stock">Estoque</a>
+            </div>
+            <div class="auth-status" id="authStatus">
+                <i class="fas fa-circle-user"></i>
+                <span>Admin Mode</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Suppliers Tab -->
+        <section id="suppliers" class="tab-content active">
+            <div class="section-header">
+                <div>
+                    <h1>Gerenciamento de Fornecedores</h1>
+                    <p>Controle total sobre a base de parceiros.</p>
+                </div>
+                <button id="addSupplierBtn" class="btn-primary"><i class="fas fa-plus"></i> Novo Fornecedor</button>
+            </div>
+
+            <div class="search-bar card">
+                <i class="fas fa-search"></i>
+                <input type="text" id="supplierSearch" placeholder="Buscar por CNPJ ou Nome...">
+            </div>
+
+            <div class="card table-container">
+                <table id="supplierTable">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>CNPJ</th>
+                            <th>Cidade</th>
+                            <th>Plano</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierList">
+                        <!-- Suppliers will be injected here -->
+                    </tbody>
+                </table>
+                <div id="tableLoader" class="loader hidden"></div>
+            </div>
+        </section>
+
+        <!-- Contacts Tab -->
+        <section id="contacts" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h1>Formulário de Contato</h1>
+                    <p>Envie notificações ou suporte via e-mail.</p>
+                </div>
+            </div>
+
+            <div class="card form-card">
+                <form id="contactForm">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Nome</label>
+                            <input type="text" id="contactName" required>
+                        </div>
+                        <div class="input-group">
+                            <label>E-mail</label>
+                            <input type="email" id="contactEmail" required>
+                        </div>
+                        <div class="input-group full-width">
+                            <label>Assunto</label>
+                            <input type="text" id="contactSubject" required>
+                        </div>
+                        <div class="input-group full-width">
+                            <label>Mensagem</label>
+                            <textarea id="contactMessage" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Enviar Mensagem</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Stock Tab -->
+        <section id="stock" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h1>Upload de Estoque</h1>
+                    <p>Atualize a base de dados via arquivos tabulados.</p>
+                </div>
+            </div>
+
+            <div class="card upload-card">
+                <div class="upload-area" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                    <p>Arraste seu arquivo (TXT/CSV) aqui ou</p>
+                    <button class="btn-secondary" onclick="document.getElementById('stockFile').click()">Selecionar
+                        Arquivo</button>
+                    <input type="file" id="stockFile" hidden>
+                    <span id="fileName" class="file-name"></span>
+                </div>
+
+                <div class="input-group" style="margin-top: 2rem;">
+                    <label>Token de Acesso</label>
+                    <input type="text" id="stockToken" placeholder="Insira seu token de segurança">
+                </div>
+
+                <button id="uploadBtn" class="btn-primary full-width" style="margin-top: 1rem;">Processar
+                    Estoque</button>
+
+                <div id="uploadProgress" class="progress-bar hidden">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Supplier Modal -->
+    <div id="supplierModal" class="modal">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2 id="modalTitle">Novo Fornecedor</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="supplierForm">
+                <div class="modal-scroll">
+                    <div class="form-section">
+                        <h3>Dados Básicos</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Empresa</label>
+                                <input type="text" name="empresa" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Razão Social</label>
+                                <input type="text" name="razaoSocial" required>
+                            </div>
+                            <div class="input-group">
+                                <label>CNPJ</label>
+                                <input type="text" name="cnpj" required placeholder="00.000.000/0000-00">
+                            </div>
+                            <div class="input-group">
+                                <label>Inscrição Estadual</label>
+                                <input type="text" name="inscricao">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Contato</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Vendedores</label>
+                                <input type="text" name="vendedores">
+                            </div>
+                            <div class="input-group">
+                                <label>E-mail Peças</label>
+                                <input type="email" name="emailPecas">
+                            </div>
+                            <div class="input-group">
+                                <label>WhatsApp Peças</label>
+                                <input type="text" name="whatsappPecas">
+                            </div>
+                            <div class="input-group">
+                                <label>Website</label>
+                                <input type="url" name="website">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Endereço</h3>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label>Logradouro / Rua</label>
+                                <input type="text" name="endereco" placeholder="Ex: Rua Exemplo, 123">
+                            </div>
+                            <div class="input-group">
+                                <label>Cidade</label>
+                                <input type="text" name="cidade">
+                            </div>
+                            <div class="input-group">
+                                <label>CEP</label>
+                                <input type="text" name="cep">
+                            </div>
+                            <div class="input-group">
+                                <label>Estado (ID)</label>
+                                <input type="number" name="idEstado" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; padding-bottom: 1rem; display: flex; justify-content: center;">
+                        <button type="submit" class="btn-primary" style="padding: 1rem 3rem; width: 100%;">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Assinatura</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Plano (ID)</label>
+                                <input type="number" name="idPlano" value="3">
+                            </div>
+                            <div class="input-group">
+                                <label>Dia Pagamento</label>
+                                <input type="number" name="diaPagamento" value="15">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Fornecedor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Peças por Código - Robson Cassiano</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
