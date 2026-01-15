@@ -23,7 +23,6 @@
             <div class="logo">PPC <span>Admin</span></div>
             <div class="nav-links">
                 <a href="#" class="nav-link active" data-tab="suppliers">Fornecedores</a>
-                <a href="#" class="nav-link" data-tab="contacts">Contatos</a>
                 <a href="#" class="nav-link" data-tab="stock">Estoque</a>
             </div>
             <div class="auth-status" id="authStatus">
@@ -68,39 +67,6 @@
             </div>
         </section>
 
-        <!-- Contacts Tab -->
-        <section id="contacts" class="tab-content">
-            <div class="section-header">
-                <div>
-                    <h1>Formulário de Contato</h1>
-                    <p>Envie notificações ou suporte via e-mail.</p>
-                </div>
-            </div>
-
-            <div class="card form-card">
-                <form id="contactForm">
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label>Nome</label>
-                            <input type="text" id="contactName" required>
-                        </div>
-                        <div class="input-group">
-                            <label>E-mail</label>
-                            <input type="email" id="contactEmail" required>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Assunto</label>
-                            <input type="text" id="contactSubject" required>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Mensagem</label>
-                            <textarea id="contactMessage" rows="5" required></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary">Enviar Mensagem</button>
-                </form>
-            </div>
-        </section>
 
         <!-- Stock Tab -->
         <section id="stock" class="tab-content">
@@ -122,8 +88,8 @@
                 </div>
 
                 <div class="input-group" style="margin-top: 2rem;">
-                    <label>Token de Acesso</label>
-                    <input type="text" id="stockToken" placeholder="Insira seu token de segurança">
+                    <label>CNPJ do Fornecedor</label>
+                    <input type="text" id="stockCnpj" placeholder="00.000.000/0000-00">
                 </div>
 
                 <button id="uploadBtn" class="btn-primary full-width" style="margin-top: 1rem;">Processar
@@ -221,8 +187,11 @@
                         <h3>Assinatura</h3>
                         <div class="form-grid">
                             <div class="input-group">
-                                <label>Plano (ID)</label>
-                                <input type="number" name="idPlano" value="3">
+                                <label>Plano</label>
+                                <select name="idPlano">
+                                    <option value="1">Básico</option>
+                                    <option value="2">VIP</option>
+                                </select>
                             </div>
                             <div class="input-group">
                                 <label>Dia Pagamento</label>

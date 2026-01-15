@@ -106,11 +106,13 @@ function renderSuppliers(suppliers) {
         const displayName = s.nome || s.name || s.empresa || 'N/A';
         const displaySocial = s.razaoSocial || s.socialName || 'N/A';
 
+        const planName = s.idPlano == 2 ? 'VIP' : 'Básico';
+
         tr.innerHTML = `
             <td><strong>${displayName}</strong></td>
             <td>${s.cnpj || 'N/A'}</td>
             <td>${s.address?.cidade || s.endereco?.cidade || 'N/A'}</td>
-            <td><span class="badge">Plano ${s.idPlano || '-'}</span></td>
+            <td><span class="badge ${planName.toLowerCase()}">${planName}</span></td>
             <td>
                 <div class="action-btns">
                     <button class="btn-icon" onclick="editSupplier(${s.id})"><i class="fas fa-edit"></i></button>
@@ -205,7 +207,7 @@ window.editSupplier = async (id) => {
         f['cep'].value = addr?.cep || '';
         f['idEstado'].value = addr?.estado?.id || addr?.state?.id || 1;
 
-        f['idPlano'].value = s.idPlano || 3;
+        f['idPlano'].value = s.idPlano || 1;
 
         supplierModal.style.display = 'block';
     } catch (err) {
@@ -256,7 +258,7 @@ contactForm.onsubmit = async (e) => {
 
 // --- Stock Upload ---
 const stockFile = document.getElementById('stockFile');
-const stockToken = document.getElementById('stockToken');
+const stockCnpjInput = document.getElementById('stockCnpj');
 const uploadBtn = document.getElementById('uploadBtn');
 const fileNameLabel = document.getElementById('fileName');
 
@@ -268,10 +270,10 @@ stockFile.onchange = (e) => {
 
 uploadBtn.onclick = async () => {
     const file = stockFile.files[0];
-    const token = stockToken.value.trim();
+    const cnpj = stockCnpjInput.value.trim();
 
-    if (!file || !token) {
-        return alert('Selecione um arquivo e informe o token.');
+    if (!file || !cnpj) {
+        return alert('Selecione um arquivo e informe o CNPJ do fornecedor.');
     }
 
     const formData = new FormData();
@@ -281,18 +283,20 @@ uploadBtn.onclick = async () => {
         uploadBtn.disabled = true;
         uploadBtn.innerText = 'Processando...';
 
-        const response = await fetch(`${API_BASE}/estoque?token=${token}`, {
+        // Updated endpoint: /estoque/estoque-by-cnpj?cnpj={cnpj}
+        const response = await fetch(`${API_BASE}/estoque/estoque-by-cnpj?cnpj=${encodeURIComponent(cnpj)}`, {
             method: 'POST',
             body: formData
         });
 
         if (response.ok) {
-            alert('Arquivo enviado! O processamento pode levar alguns minutos.');
+            alert('Arquivo enviado! O fornecedor receberá um aviso quando o processamento terminar.');
         } else {
-            alert('Erro no upload.');
+            alert('Erro no upload. Verifique se o CNPJ está correto.');
         }
     } catch (err) {
         console.error(err);
+        alert('Erro de conexão ao tentar subir o estoque.');
     } finally {
         uploadBtn.disabled = false;
         uploadBtn.innerText = 'Processar Estoque';

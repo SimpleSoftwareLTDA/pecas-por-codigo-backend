@@ -339,10 +339,16 @@ select {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
     outline: none;
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.06);
+}
+
+select option {
+    background: var(--bg-dark);
+    color: white;
 }
 
 /* Upload Area */
@@ -462,6 +468,17 @@ textarea:focus {
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 600;
+}
+
+.badge.vip {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge.básico {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
 }
 
 .loader {
