@@ -497,6 +497,55 @@ select option {
     }
 }
 
+/* Login Screen */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 3rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.login-card .logo {
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+}
+
+.login-card h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.login-card p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.error-msg {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 footer {
     margin-top: 5rem;
     padding: 3rem 0;

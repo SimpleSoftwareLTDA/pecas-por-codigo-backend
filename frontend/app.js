@@ -1,9 +1,85 @@
 const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
 
-// --- Navigation ---
+// --- Auth Management ---
+const loginScreen = document.getElementById('loginScreen');
+const mainApp = document.getElementById('mainApp');
+const loginTokenInput = document.getElementById('loginToken');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+const logoutBtn = document.getElementById('logoutBtn');
+
+let currentToken = localStorage.getItem('ppc_admin_token');
+
+async function checkAuth() {
+    if (!currentToken) {
+        showLogin();
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/login/verify?token=${currentToken}`);
+        if (response.ok) {
+            hideLogin();
+            fetchSuppliers();
+        } else {
+            localStorage.removeItem('ppc_admin_token');
+            showLogin();
+        }
+    } catch (err) {
+        console.error('Auth check failed:', err);
+        showLogin();
+    }
+}
+
+function showLogin() {
+    loginScreen.classList.remove('hidden');
+    mainApp.classList.add('hidden');
+}
+
+function hideLogin() {
+    loginScreen.classList.add('hidden');
+    mainApp.classList.remove('hidden');
+}
+
+loginBtn.onclick = async () => {
+    const token = loginTokenInput.value.trim();
+    if (!token) return;
+
+    loginBtn.disabled = true;
+    loginBtn.innerText = 'Verificando...';
+    loginError.classList.add('hidden');
+
+    try {
+        const response = await fetch(`${API_BASE}/login/verify?token=${token}`);
+        if (response.ok) {
+            currentToken = token;
+            localStorage.setItem('ppc_admin_token', token);
+            hideLogin();
+            fetchSuppliers();
+        } else {
+            loginError.classList.remove('hidden');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        alert('Erro de conexão ao verificar token.');
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = 'Acessar Painel';
+    }
+};
+
+logoutBtn.onclick = () => {
+    localStorage.removeItem('ppc_admin_token');
+    currentToken = null;
+    location.reload();
+};
+
+// Start by checking auth
+checkAuth();
+
+// --- UI Elements ---
 const navLinks = document.querySelectorAll('.nav-link');
 const tabContents = document.querySelectorAll('.tab-content');
-
 const supplierSearch = document.getElementById('supplierSearch');
 let allSuppliers = [];
 
