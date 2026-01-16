@@ -52,8 +52,11 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
     fun `should set a banner URL for a supplier`() {
         // Given
         val cnpj = "12345678000195" // Valid CNPJ for testing
+        val formattedCnpj = "12.345.678/0001-95"
         val newBannerUrl = "https://example.com/new-banner.jpg"
-        every { subscriptionService.setBigBannerUrlForSupplier(cnpj = cnpj, newBannerUrl = newBannerUrl) } returns Unit
+
+        // O controller chama formatCnpj internamente, então o mock deve refletir a normalização
+        every { subscriptionService.setBigBannerUrlForSupplier(cnpj = formattedCnpj, newBannerUrl = newBannerUrl) } returns Unit
 
         // When & Then
         mockMvc.post("/api/v1/banner") {
@@ -63,7 +66,7 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
             status { isAccepted() }
         }
 
-        verify { subscriptionService.setBigBannerUrlForSupplier(cnpj = cnpj, newBannerUrl = newBannerUrl) }
+        verify { subscriptionService.setBigBannerUrlForSupplier(cnpj = formattedCnpj, newBannerUrl = newBannerUrl) }
     }
 
     @Test
