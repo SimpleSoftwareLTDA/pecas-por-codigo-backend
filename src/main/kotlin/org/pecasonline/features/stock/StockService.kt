@@ -87,6 +87,7 @@ class StockService(
         }
 
         val supplier = supplierRepository.findSupplierByCnpj(resolvedCnpj)
+            ?: throw IllegalArgumentException("Fornecedor com CNPJ: $resolvedCnpj não encontrado.")
 
         subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, resolvedCnpj)
 

@@ -126,15 +126,23 @@ class SubscriptionService(
 
     fun setBigBannerUrlForSupplier(cnpj: String, newBannerUrl: String) {
         val supplier = supplierRepository.findSupplierByCnpj(cnpj)
+            ?: supplierRepository.findSupplierByCnpj(formatCnpj(cnpj))
+            ?: throw IllegalArgumentException("Fornecedor com CNPJ: $cnpj não encontrado.")
 
-        checkIfSubscriptionIsActiveOrThrow(supplier = supplier, cnpj = cnpj)
+        checkIfSubscriptionIsActiveOrThrow(supplier = supplier, cnpj = supplier.cnpj)
 
-        checkIfSubscriptionIsVipOrThrow(supplier = supplier, cnpj = cnpj)
+        checkIfSubscriptionIsVipOrThrow(supplier = supplier, cnpj = supplier.cnpj)
 
         subscriptionRepository.updateBigBannerUrlByCnpj(
-            cnpj = cnpj,
+            cnpj = supplier.cnpj,
             bigBannerUrl = newBannerUrl
         )
+    }
+
+    private fun formatCnpj(cnpj: String): String {
+        val digits = cnpj.filter { it.isDigit() }
+        if (digits.length != 14) return cnpj
+        return "${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/${digits.substring(8, 12)}-${digits.substring(12, 14)}"
     }
 }
 

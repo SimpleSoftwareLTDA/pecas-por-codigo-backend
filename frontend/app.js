@@ -5,15 +5,78 @@ const FLAGS = {
     ENABLE_LOGIN: false
 };
 
-// --- Auth Management ---
-const loginScreen = document.getElementById('loginScreen');
-const mainApp = document.getElementById('mainApp');
-const loginTokenInput = document.getElementById('loginToken');
-const loginBtn = document.getElementById('loginBtn');
-const loginError = document.getElementById('loginError');
-const logoutBtn = document.getElementById('logoutBtn');
+console.log('App.js loaded - Script starting');
 
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded - Initializing App');
+
+    // Initialize all modules
+    initAuth();
+    initNav();
+    initSuppliers();
+    initContactForm();
+    initStockUpload();
+    initBannerManagement();
+
+    // Initial check
+    checkAuth();
+});
+
+// --- State Variables (Module Scope) ---
 let currentToken = localStorage.getItem('ppc_admin_token');
+let allSuppliers = [];
+let uploadHistory = JSON.parse(localStorage.getItem('ppc_upload_history') || '[]');
+let currentFileData = null;
+let editingSupplierId = null;
+
+// --- Auth Module ---
+let loginScreen, mainApp, loginTokenInput, loginBtn, loginError, logoutBtn;
+
+function initAuth() {
+    loginScreen = document.getElementById('loginScreen');
+    mainApp = document.getElementById('mainApp');
+    loginTokenInput = document.getElementById('loginToken');
+    loginBtn = document.getElementById('loginBtn');
+    loginError = document.getElementById('loginError');
+    logoutBtn = document.getElementById('logoutBtn');
+
+    if (loginBtn) {
+        loginBtn.onclick = async () => {
+            const token = loginTokenInput.value.trim();
+            if (!token) return;
+
+            loginBtn.disabled = true;
+            loginBtn.innerText = 'Verificando...';
+            loginError.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/login/verify?token=${token}`);
+                if (response.ok) {
+                    currentToken = token;
+                    localStorage.setItem('ppc_admin_token', token);
+                    hideLogin();
+                    fetchSuppliers();
+                } else {
+                    loginError.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                alert('Erro de conexão ao verificar token.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerText = 'Acessar Painel';
+            }
+        };
+    }
+
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('ppc_admin_token');
+            currentToken = null;
+            location.reload();
+        };
+    }
+}
 
 async function checkAuth() {
     if (!FLAGS.ENABLE_LOGIN) {
@@ -43,139 +106,138 @@ async function checkAuth() {
 }
 
 function showLogin() {
-    loginScreen.classList.remove('hidden');
-    mainApp.classList.add('hidden');
+    if (loginScreen) loginScreen.classList.remove('hidden');
+    if (mainApp) mainApp.classList.add('hidden');
 }
 
 function hideLogin() {
-    loginScreen.classList.add('hidden');
-    mainApp.classList.remove('hidden');
+    if (loginScreen) loginScreen.classList.add('hidden');
+    if (mainApp) mainApp.classList.remove('hidden');
 }
 
-loginBtn.onclick = async () => {
-    const token = loginTokenInput.value.trim();
-    if (!token) return;
+// --- Navigation Module ---
+function initNav() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    loginBtn.disabled = true;
-    loginBtn.innerText = 'Verificando...';
-    loginError.classList.add('hidden');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = link.getAttribute('data-tab');
 
-    try {
-        const response = await fetch(`${API_BASE}/login/verify?token=${token}`);
-        if (response.ok) {
-            currentToken = token;
-            localStorage.setItem('ppc_admin_token', token);
-            hideLogin();
-            fetchSuppliers();
-        } else {
-            loginError.classList.remove('hidden');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        alert('Erro de conexão ao verificar token.');
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerText = 'Acessar Painel';
-    }
-};
+            navLinks.forEach(l => l.classList.remove('active'));
+            tabContents.forEach(tc => tc.classList.remove('active'));
 
-logoutBtn.onclick = () => {
-    localStorage.removeItem('ppc_admin_token');
-    currentToken = null;
-    location.reload();
-};
+            link.classList.add('active');
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
 
-// Start by checking auth
-checkAuth();
-
-// --- UI Elements ---
-const navLinks = document.querySelectorAll('.nav-link');
-const tabContents = document.querySelectorAll('.tab-content');
-const supplierSearch = document.getElementById('supplierSearch');
-let allSuppliers = [];
-
-// Banner UI Elements
-const bannersList = document.getElementById('bannersList');
-const bannersLoader = document.getElementById('bannersLoader');
-const bannerCnpjInput = document.getElementById('bannerCnpj');
-const bannerUrlInput = document.getElementById('bannerUrl');
-const updateBannerBtn = document.getElementById('updateBannerBtn');
-const bannerUpdateMessage = document.getElementById('bannerUpdateMessage');
-
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const tabId = link.getAttribute('data-tab');
-
-        navLinks.forEach(l => l.classList.remove('active'));
-        tabContents.forEach(tc => tc.classList.remove('active'));
-
-        link.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-
-        if (tabId === 'suppliers') fetchSuppliers();
-        if (tabId === 'banners') fetchBanners();
+            if (tabId === 'suppliers') fetchSuppliers();
+            if (tabId === 'banners') fetchBanners();
+        });
     });
-});
-
-// Search functionality
-supplierSearch.addEventListener('input', (e) => {
-    const term = e.target.value.trim().toLowerCase();
-    if (term.length === 0) {
-        renderSuppliers(allSuppliers);
-        return;
-    }
-
-    // If it looks like a CNPJ (mostly digits), we could call the backend
-    // But for a fast UI, we filter locally first
-    const filtered = allSuppliers.filter(s =>
-        (s.empresa && s.empresa.toLowerCase().includes(term)) ||
-        (s.cnpj && s.cnpj.includes(term)) ||
-        (s.razaoSocial && s.razaoSocial.toLowerCase().includes(term))
-    );
-    renderSuppliers(filtered);
-});
-
-// Add Enter listener for CNPJ backend search (Main Key)
-supplierSearch.addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-        let cnpj = e.target.value.trim();
-        // Clean non-digits for API call if needed, but let's keep it as is if backend handles it
-        if (cnpj.length >= 14) {
-            searchByCnpj(cnpj);
-        }
-    }
-});
-
-async function searchByCnpj(cnpj) {
-    try {
-        setLoader('tableLoader', true);
-        // Ensure CNPJ is formatted or cleaned as per backend expectations
-        const response = await fetch(`${API_BASE}/fornecedores/cnpj?cnpj=${encodeURIComponent(cnpj)}`);
-        if (!response.ok) throw new Error('CNPJ search failed');
-        const data = await response.json();
-        // Backend returns Page object
-        allSuppliers = data.content || (Array.isArray(data) ? data : [data]);
-        renderSuppliers(allSuppliers);
-
-        if (allSuppliers.length === 0) {
-            alert('Nenhum fornecedor encontrado com este CNPJ.');
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Erro ao buscar CNPJ. Verifique a conexão com o backend.');
-    } finally {
-        setLoader('tableLoader', false);
-    }
 }
 
-// --- Suppliers CRUD ---
-const supplierList = document.getElementById('supplierList');
-const supplierForm = document.getElementById('supplierForm');
-const supplierModal = document.getElementById('supplierModal');
-const addSupplierBtn = document.getElementById('addSupplierBtn');
-const closeModalBtns = document.querySelectorAll('.close-modal');
-let editingSupplierId = null;
+// --- Suppliers Module ---
+let supplierList, supplierForm, supplierModal, addSupplierBtn, supplierSearch;
+
+function initSuppliers() {
+    supplierList = document.getElementById('supplierList');
+    supplierForm = document.getElementById('supplierForm');
+    supplierModal = document.getElementById('supplierModal');
+    addSupplierBtn = document.getElementById('addSupplierBtn');
+    supplierSearch = document.getElementById('supplierSearch');
+    const closeModalBtns = document.querySelectorAll('.close-modal');
+
+    if (addSupplierBtn) {
+        addSupplierBtn.onclick = () => {
+            editingSupplierId = null;
+            if (document.getElementById('modalTitle')) document.getElementById('modalTitle').innerText = 'Novo Fornecedor';
+            if (supplierForm) supplierForm.reset();
+            if (supplierModal) supplierModal.style.display = 'block';
+        };
+    }
+
+    closeModalBtns.forEach(btn => btn.onclick = () => {
+        if (supplierModal) supplierModal.style.display = 'none';
+    });
+
+    if (supplierForm) {
+        supplierForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(supplierForm);
+            const payload = {
+                empresa: formData.get('empresa'),
+                razaoSocial: formData.get('razaoSocial'),
+                cnpj: formData.get('cnpj'),
+                inscricao: formData.get('inscricao'),
+                idPlano: parseInt(formData.get('idPlano')),
+                contato: {
+                    vendedores: formData.get('vendedores'),
+                    emailPecas: formData.get('emailPecas'),
+                    whatsappPecas: formData.get('whatsappPecas'),
+                    website: formData.get('website')
+                },
+                endereco: {
+                    endereco: formData.get('endereco'),
+                    cidade: formData.get('cidade'),
+                    cep: formData.get('cep'),
+                    idEstado: parseInt(formData.get('idEstado'))
+                },
+                name: formData.get('empresa'),
+                socialName: formData.get('razaoSocial')
+            };
+
+            try {
+                const method = editingSupplierId ? 'PUT' : 'POST';
+                const url = editingSupplierId ? `${API_BASE}/fornecedores/${editingSupplierId}` : `${API_BASE}/fornecedores`;
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert('Fornecedor salvo com sucesso!');
+                    supplierModal.style.display = 'none';
+                    fetchSuppliers();
+                } else {
+                    alert('Erro ao salvar fornecedor.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+    }
+
+    if (supplierSearch) {
+        supplierSearch.addEventListener('input', (e) => {
+            const term = e.target.value.trim().toLowerCase();
+            if (term.length === 0) {
+                renderSuppliers(allSuppliers);
+                return;
+            }
+
+            const filtered = allSuppliers.filter(s =>
+                (s.empresa && s.empresa.toLowerCase().includes(term)) ||
+                (s.cnpj && s.cnpj.includes(term)) ||
+                (s.razaoSocial && s.razaoSocial.toLowerCase().includes(term))
+            );
+            renderSuppliers(filtered);
+        });
+
+        supplierSearch.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                let cnpj = e.target.value.trim();
+                const formattedCnpj = formatCnpj(cnpj);
+                if (formattedCnpj.length >= 14) {
+                    searchByCnpj(formattedCnpj);
+                }
+            }
+        });
+    }
+}
 
 async function fetchSuppliers() {
     try {
@@ -188,20 +250,19 @@ async function fetchSuppliers() {
         renderSuppliers(allSuppliers);
     } catch (err) {
         console.error('Error fetching suppliers:', err);
-        supplierList.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger)">Erro ao carregar fornecedores. Verifique se o backend está rodando em :8080</td></tr>`;
+        if (supplierList) supplierList.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger)">Erro ao carregar fornecedores. Verifique se o backend está rodando em :8080</td></tr>`;
     } finally {
         setLoader('tableLoader', false);
     }
 }
 
 function renderSuppliers(suppliers) {
+    if (!supplierList) return;
     supplierList.innerHTML = '';
     suppliers.forEach(s => {
         const tr = document.createElement('tr');
-        // Using s.name or s.nome depending on mapping
         const displayName = s.nome || s.name || s.empresa || 'N/A';
         const displaySocial = s.razaoSocial || s.socialName || 'N/A';
-
         const planName = s.idPlano == 2 ? 'VIP' : 'Básico';
 
         tr.innerHTML = `
@@ -220,92 +281,35 @@ function renderSuppliers(suppliers) {
     });
 }
 
-addSupplierBtn.onclick = () => {
-    editingSupplierId = null;
-    document.getElementById('modalTitle').innerText = 'Novo Fornecedor';
-    supplierForm.reset();
-    supplierModal.style.display = 'block';
-};
-
-closeModalBtns.forEach(btn => btn.onclick = () => supplierModal.style.display = 'none');
-
-supplierForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(supplierForm);
-    const payload = {
-        empresa: formData.get('empresa'),
-        razaoSocial: formData.get('razaoSocial'),
-        cnpj: formData.get('cnpj'),
-        inscricao: formData.get('inscricao'),
-        idPlano: parseInt(formData.get('idPlano')),
-        contato: {
-            vendedores: formData.get('vendedores'),
-            emailPecas: formData.get('emailPecas'),
-            whatsappPecas: formData.get('whatsappPecas'),
-            website: formData.get('website')
-        },
-        endereco: {
-            endereco: formData.get('endereco'),
-            cidade: formData.get('cidade'),
-            cep: formData.get('cep'),
-            idEstado: parseInt(formData.get('idEstado'))
-        },
-        // Requirements for Create/Update Aliases
-        name: formData.get('empresa'),
-        socialName: formData.get('razaoSocial')
-    };
-
-    try {
-        const method = editingSupplierId ? 'PUT' : 'POST';
-        const url = editingSupplierId ? `${API_BASE}/fornecedores/${editingSupplierId}` : `${API_BASE}/fornecedores`;
-
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            alert('Fornecedor salvo com sucesso!');
-            supplierModal.style.display = 'none';
-            fetchSuppliers();
-        } else {
-            alert('Erro ao salvar fornecedor.');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-};
-
+// Helpers for window (global access needed for inline onclick)
 window.editSupplier = async (id) => {
     try {
         const response = await fetch(`${API_BASE}/fornecedores/${id}`);
         const s = await response.json();
 
         editingSupplierId = id;
-        document.getElementById('modalTitle').innerText = 'Editar Fornecedor';
+        if (document.getElementById('modalTitle')) document.getElementById('modalTitle').innerText = 'Editar Fornecedor';
 
-        // Fill form
-        const f = supplierForm.elements;
-        f['empresa'].value = s.nome || s.name || '';
-        f['razaoSocial'].value = s.razaoSocial || s.socialName || '';
-        f['cnpj'].value = s.cnpj || '';
-        f['inscricao'].value = s.inscricaoEstadual || s.inscricao || '';
-        f['vendedores'].value = s.contato?.vendedores || '';
-        f['emailPecas'].value = s.contato?.emailPecas || '';
-        f['whatsappPecas'].value = s.contato?.whatsappPecas || '';
-        f['website'].value = s.contato?.website || '';
+        if (supplierForm) {
+            const f = supplierForm.elements;
+            if (f['empresa']) f['empresa'].value = s.nome || s.name || '';
+            if (f['razaoSocial']) f['razaoSocial'].value = s.razaoSocial || s.socialName || '';
+            if (f['cnpj']) f['cnpj'].value = s.cnpj || '';
+            if (f['inscricao']) f['inscricao'].value = s.inscricaoEstadual || s.inscricao || '';
+            if (f['vendedores']) f['vendedores'].value = s.contato?.vendedores || '';
+            if (f['emailPecas']) f['emailPecas'].value = s.contato?.emailPecas || '';
+            if (f['whatsappPecas']) f['whatsappPecas'].value = s.contato?.whatsappPecas || '';
+            if (f['website']) f['website'].value = s.contato?.website || '';
 
-        // Address mapping (Backend uses 'endereco' which contains 'endereco' as street)
-        const addr = s.endereco || s.address;
-        f['endereco'].value = addr?.endereco || addr?.street || '';
-        f['cidade'].value = addr?.cidade || addr?.city || '';
-        f['cep'].value = addr?.cep || '';
-        f['idEstado'].value = addr?.estado?.id || addr?.state?.id || 1;
+            const addr = s.endereco || s.address;
+            if (f['endereco']) f['endereco'].value = addr?.endereco || addr?.street || '';
+            if (f['cidade']) f['cidade'].value = addr?.cidade || addr?.city || '';
+            if (f['cep']) f['cep'].value = addr?.cep || '';
+            if (f['idEstado']) f['idEstado'].value = addr?.estado?.id || addr?.state?.id || 1;
+            if (f['idPlano']) f['idPlano'].value = s.idPlano || 1;
+        }
 
-        f['idPlano'].value = s.idPlano || 1;
-
-        supplierModal.style.display = 'block';
+        if (supplierModal) supplierModal.style.display = 'block';
     } catch (err) {
         console.error(err);
         alert('Erro ao carregar detalhes do fornecedor.');
@@ -324,66 +328,203 @@ window.deleteSupplier = async (id) => {
     }
 };
 
-// --- Contact Form ---
-const contactForm = document.getElementById('contactForm');
-contactForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-        name: document.getElementById('contactName').value,
-        email: document.getElementById('contactEmail').value,
-        subject: document.getElementById('contactSubject').value,
-        message: document.getElementById('contactMessage').value
-    };
-
+async function searchByCnpj(cnpj) {
     try {
-        const response = await fetch(`${API_BASE}/contact-form`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (response.ok) {
-            alert('Mensagem enviada com sucesso!');
-            contactForm.reset();
-        } else {
-            alert('Erro ao enviar mensagem.');
+        setLoader('tableLoader', true);
+        const response = await fetch(`${API_BASE}/fornecedores/cnpj?cnpj=${encodeURIComponent(cnpj)}`);
+        if (!response.ok) throw new Error('CNPJ search failed');
+        const data = await response.json();
+        allSuppliers = data.content || (Array.isArray(data) ? data : [data]);
+        renderSuppliers(allSuppliers);
+
+        if (allSuppliers.length === 0) {
+            alert('Nenhum fornecedor encontrado com este CNPJ.');
         }
     } catch (err) {
         console.error(err);
+        alert('Erro ao buscar CNPJ. Verifique a conexão com o backend.');
+    } finally {
+        setLoader('tableLoader', false);
     }
-};
+}
+
+
+// --- Contact Form ---
+function initContactForm() {
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('contactName').value,
+                email: document.getElementById('contactEmail').value,
+                subject: document.getElementById('contactSubject').value,
+                message: document.getElementById('contactMessage').value
+            };
+            try {
+                const response = await fetch(`${API_BASE}/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    alert('Mensagem enviada com sucesso!');
+                    contactForm.reset();
+                } else {
+                    alert('Erro ao enviar mensagem.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+    }
+}
 
 // --- Stock Upload ---
-const stockFile = document.getElementById('stockFile');
-const stockCnpjInput = document.getElementById('stockCnpj');
-const uploadBtn = document.getElementById('uploadBtn');
-const fileNameLabel = document.getElementById('fileName');
-const filePreview = document.getElementById('filePreview');
-const previewTableHead = document.getElementById('previewTableHead');
-const previewTableBody = document.getElementById('previewTableBody');
-const previewStats = document.getElementById('previewStats');
-const validationMessages = document.getElementById('validationMessages');
-const uploadHistoryList = document.getElementById('uploadHistoryList');
+let stockFile, stockCnpjInput, uploadBtn, fileNameLabel, filePreview, previewTableHead, previewTableBody, previewStats, validationMessages, uploadHistoryList, downloadTemplateBtn, dropZone;
 
-let currentFileData = null;
-let uploadHistory = JSON.parse(localStorage.getItem('ppc_upload_history') || '[]');
+function initStockUpload() {
+    stockFile = document.getElementById('stockFile');
+    stockCnpjInput = document.getElementById('stockCnpj');
+    uploadBtn = document.getElementById('uploadBtn');
+    fileNameLabel = document.getElementById('fileName');
+    filePreview = document.getElementById('filePreview');
+    previewTableHead = document.getElementById('previewTableHead');
+    previewTableBody = document.getElementById('previewTableBody');
+    previewStats = document.getElementById('previewStats');
+    validationMessages = document.getElementById('validationMessages');
+    uploadHistoryList = document.getElementById('uploadHistoryList');
+    downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+    dropZone = document.getElementById('dropZone');
 
-// Template download
-downloadTemplateBtn.onclick = () => {
-    const template = `CODIGO\tQUANTIDADE\tPRECO\tDESCRICAO
+    renderUploadHistory();
+
+    if (downloadTemplateBtn) {
+        downloadTemplateBtn.onclick = () => {
+            const template = `CODIGO\tQUANTIDADE\tPRECO\tDESCRICAO
 ABC123\t10\t150.50\tPeça de exemplo 1
 XYZ789\t5\t89.90\tPeça de exemplo 2
 DEF456\t20\t45.00\tPeça de exemplo 3`;
 
-    const blob = new Blob([template], { type: 'text/tab-separated-values' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'template_estoque.tsv';
-    a.click();
-    URL.revokeObjectURL(url);
-};
+            const blob = new Blob([template], { type: 'text/tab-separated-values' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'template_estoque.tsv';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+    }
 
-// File validation and preview
+    if (stockFile) {
+        stockFile.onchange = async (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                if (fileNameLabel) fileNameLabel.innerText = file.name;
+                await validateAndPreviewFile(file);
+            } else {
+                if (filePreview) filePreview.classList.add('hidden');
+                currentFileData = null;
+            }
+        };
+    }
+
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (stockFile) stockFile.files = e.dataTransfer.files;
+                if (fileNameLabel) fileNameLabel.innerText = file.name;
+                await validateAndPreviewFile(file);
+            }
+        });
+    }
+
+    if (uploadBtn) {
+        uploadBtn.onclick = async () => {
+            const file = stockFile ? stockFile.files[0] : null;
+            const cnpj = stockCnpjInput ? stockCnpjInput.value.trim() : '';
+
+            if (!file || !cnpj) {
+                showValidationMessage('Selecione um arquivo e informe o CNPJ do fornecedor.', 'error');
+                return;
+            }
+
+            if (currentFileData && currentFileData.hasErrors) {
+                showValidationMessage('Corrija os erros de validação antes de enviar.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const historyEntry = {
+                timestamp: new Date().toISOString(),
+                fileName: file.name,
+                cnpj: cnpj,
+                status: 'processing',
+                rows: currentFileData?.totalRows || 0
+            };
+
+            addToHistory(historyEntry);
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.innerText = 'Processando...';
+
+                const response = await fetch(`${API_BASE}/estoque/estoque-by-cnpj?cnpj=${encodeURIComponent(cnpj)}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Update history status
+                    uploadHistory[0].status = 'completed';
+                    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+                    renderUploadHistory();
+
+                    showValidationMessage('✓ Arquivo enviado com sucesso! O fornecedor receberá um aviso quando o processamento terminar.', 'success');
+
+                    // Reset form
+                    if (stockFile) stockFile.value = '';
+                    if (fileNameLabel) fileNameLabel.innerText = '';
+                    if (filePreview) filePreview.classList.add('hidden');
+                    currentFileData = null;
+                } else {
+                    uploadHistory[0].status = 'error';
+                    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+                    renderUploadHistory();
+
+                    showValidationMessage('Erro no upload. Verifique se o CNPJ está correto.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+
+                uploadHistory[0].status = 'error';
+                localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
+                renderUploadHistory();
+
+                showValidationMessage('Erro de conexão ao tentar subir o estoque.', 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerText = 'Processar Estoque';
+            }
+        };
+    }
+}
+
 async function validateAndPreviewFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     if (ext !== 'tsv' && ext !== 'csv') {
@@ -453,31 +594,35 @@ async function validateAndPreviewFile(file) {
         }
 
         // Display validation messages
-        validationMessages.innerHTML = '';
-        validationResults.forEach(result => {
-            const div = document.createElement('div');
-            div.className = `validation-message ${result.type}`;
-            div.innerHTML = `<i class="fas fa-${result.type === 'error' ? 'exclamation-circle' : result.type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i> ${result.message}`;
-            validationMessages.appendChild(div);
-        });
+        if (validationMessages) {
+            validationMessages.innerHTML = '';
+            validationResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `validation-message ${result.type}`;
+                div.innerHTML = `<i class="fas fa-${result.type === 'error' ? 'exclamation-circle' : result.type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i> ${result.message}`;
+                validationMessages.appendChild(div);
+            });
+        }
 
         // Show preview (first 10 rows)
         const previewRows = rows.slice(0, 11); // Header + 10 data rows
 
         // Build table header
-        previewTableHead.innerHTML = `<tr>${previewRows[0].map(cell => `<th>${cell}</th>`).join('')}</tr>`;
+        if (previewTableHead) previewTableHead.innerHTML = `<tr>${previewRows[0].map(cell => `<th>${cell}</th>`).join('')}</tr>`;
 
         // Build table body
-        previewTableBody.innerHTML = previewRows.slice(1).map(row =>
-            `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
-        ).join('');
+        if (previewTableBody) {
+            previewTableBody.innerHTML = previewRows.slice(1).map(row =>
+                `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+            ).join('');
+        }
 
         // Show stats
         const totalRows = rows.length - 1;
         const showing = Math.min(10, totalRows);
-        previewStats.textContent = `Exibindo ${showing} de ${totalRows} linha(s) de dados`;
+        if (previewStats) previewStats.textContent = `Exibindo ${showing} de ${totalRows} linha(s) de dados`;
 
-        filePreview.classList.remove('hidden');
+        if (filePreview) filePreview.classList.remove('hidden');
         currentFileData = { rows, totalRows, hasErrors };
 
         return !hasErrors;
@@ -489,50 +634,16 @@ async function validateAndPreviewFile(file) {
 }
 
 function showValidationMessage(message, type) {
-    validationMessages.innerHTML = `
-        <div class="validation-message ${type}">
-            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
-            ${message}
-        </div>
-    `;
+    if (validationMessages) {
+        validationMessages.innerHTML = `
+            <div class="validation-message ${type}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            </div>
+        `;
+    }
 }
 
-stockFile.onchange = async (e) => {
-    if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        fileNameLabel.innerText = file.name;
-        await validateAndPreviewFile(file);
-    } else {
-        filePreview.classList.add('hidden');
-        currentFileData = null;
-    }
-};
-
-// --- Drag and Drop ---
-const dropZone = document.getElementById('dropZone');
-
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-});
-
-dropZone.addEventListener('drop', async (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-
-    if (e.dataTransfer.files.length > 0) {
-        const file = e.dataTransfer.files[0];
-        stockFile.files = e.dataTransfer.files;
-        fileNameLabel.innerText = file.name;
-        await validateAndPreviewFile(file);
-    }
-});
-
-// Upload History Management
 function addToHistory(entry) {
     uploadHistory.unshift(entry);
     if (uploadHistory.length > 20) uploadHistory = uploadHistory.slice(0, 20);
@@ -541,6 +652,8 @@ function addToHistory(entry) {
 }
 
 function renderUploadHistory() {
+    if (!uploadHistoryList) return;
+
     if (uploadHistory.length === 0) {
         uploadHistoryList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Nenhum upload realizado ainda</td></tr>';
         return;
@@ -560,89 +673,106 @@ function renderUploadHistory() {
     }).join('');
 }
 
-uploadBtn.onclick = async () => {
-    const file = stockFile.files[0];
-    const cnpj = stockCnpjInput.value.trim();
 
-    if (!file || !cnpj) {
-        showValidationMessage('Selecione um arquivo e informe o CNPJ do fornecedor.', 'error');
-        return;
+// --- Banner Management Module ---
+let bannersList, bannersLoader, bannerCnpjInput, bannerUrlInput, updateBannerBtn, bannerUpdateMessage;
+
+function initBannerManagement() {
+    console.log('Initializing Banner Management');
+    bannersList = document.getElementById('bannersList');
+    bannersLoader = document.getElementById('bannersLoader');
+    bannerCnpjInput = document.getElementById('bannerCnpj');
+    bannerUrlInput = document.getElementById('bannerUrl');
+    updateBannerBtn = document.getElementById('updateBannerBtn');
+    bannerUpdateMessage = document.getElementById('bannerUpdateMessage');
+
+    console.log('Banner elements found:', {
+        list: !!bannersList,
+        loader: !!bannersLoader,
+        cnpj: !!bannerCnpjInput,
+        url: !!bannerUrlInput,
+        btn: !!updateBannerBtn,
+        msg: !!bannerUpdateMessage
+    });
+
+    if (updateBannerBtn) {
+        updateBannerBtn.onclick = async () => {
+            console.log('Update banner button clicked');
+            let cnpj = bannerCnpjInput.value.trim();
+            const url = bannerUrlInput.value.trim();
+
+            console.log('Original CNPJ:', cnpj);
+            console.log('Original URL:', url);
+
+            if (!cnpj || !url) {
+                showBannerMessage('Preencha o CNPJ e a URL do banner', 'error');
+                updateBannerBtn.classList.add('shake');
+                setTimeout(() => updateBannerBtn.classList.remove('shake'), 500);
+                return;
+            }
+
+            // Sanitize CNPJ: format it correctly (standard XX.XXX.XXX/XXXX-XX)
+            cnpj = formatCnpj(cnpj);
+            const sanitizedUrl = url.trim();
+            console.log('Final CNPJ for request:', cnpj);
+            console.log('Sanitized URL:', sanitizedUrl);
+
+            // Basic URL validation
+            try {
+                new URL(sanitizedUrl);
+            } catch (e) {
+                showBannerMessage('URL inválida. Use o formato: https://exemplo.com/banner.jpg', 'error');
+                updateBannerBtn.classList.add('shake');
+                setTimeout(() => updateBannerBtn.classList.remove('shake'), 500);
+                return;
+            }
+
+            try {
+                updateBannerBtn.disabled = true;
+                updateBannerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+
+                const formData = new URLSearchParams();
+                formData.append('novo-banner', sanitizedUrl);
+                formData.append('cnpj', cnpj);
+
+                console.log('Sending to backend:', { 'novo-banner': sanitizedUrl, 'cnpj': cnpj });
+
+                const response = await fetch(`${API_BASE}/banner`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    console.log('Banner update successful');
+                    showBannerMessage('✓ Banner atualizado com sucesso!', 'success');
+                    bannerCnpjInput.value = '';
+                    bannerUrlInput.value = '';
+
+                    // Refresh banners list
+                    setTimeout(() => fetchBanners(), 1000);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Banner update failed:', response.status, errorText);
+                    showBannerMessage(`Erro ao atualizar banner: ${errorText || 'Verifique o CNPJ'}`, 'error');
+                }
+            } catch (err) {
+                console.error('Error updating banner:', err);
+                showBannerMessage('Erro de conexão ao atualizar banner', 'error');
+            } finally {
+                updateBannerBtn.disabled = false;
+                updateBannerBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Banner';
+            }
+        };
+        console.log('Banner Update Button event listener attached');
+    } else {
+        console.error('Update Banner Button NOT found');
     }
+}
 
-    if (currentFileData && currentFileData.hasErrors) {
-        showValidationMessage('Corrija os erros de validação antes de enviar.', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const historyEntry = {
-        timestamp: new Date().toISOString(),
-        fileName: file.name,
-        cnpj: cnpj,
-        status: 'processing',
-        rows: currentFileData?.totalRows || 0
-    };
-
-    addToHistory(historyEntry);
-
-    try {
-        uploadBtn.disabled = true;
-        uploadBtn.innerText = 'Processando...';
-
-        const response = await fetch(`${API_BASE}/estoque/estoque-by-cnpj?cnpj=${encodeURIComponent(cnpj)}`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            // Update history status
-            uploadHistory[0].status = 'completed';
-            localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-            renderUploadHistory();
-
-            showValidationMessage('✓ Arquivo enviado com sucesso! O fornecedor receberá um aviso quando o processamento terminar.', 'success');
-
-            // Reset form
-            stockFile.value = '';
-            fileNameLabel.innerText = '';
-            filePreview.classList.add('hidden');
-            currentFileData = null;
-        } else {
-            uploadHistory[0].status = 'error';
-            localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-            renderUploadHistory();
-
-            showValidationMessage('Erro no upload. Verifique se o CNPJ está correto.', 'error');
-        }
-    } catch (err) {
-        console.error(err);
-
-        uploadHistory[0].status = 'error';
-        localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-        renderUploadHistory();
-
-        showValidationMessage('Erro de conexão ao tentar subir o estoque.', 'error');
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerText = 'Processar Estoque';
-    }
-};
-
-// Initialize history on load
-renderUploadHistory();
-
-
-
-
-
-
-
-// --- Banner Management ---
-// Define helper functions first
 function showBannerMessage(message, type) {
-    const bannerUpdateMessage = document.getElementById('bannerUpdateMessage');
     if (!bannerUpdateMessage) return;
 
     bannerUpdateMessage.innerHTML = `
@@ -657,7 +787,7 @@ function showBannerMessage(message, type) {
     }, 5000);
 }
 
-// Define copyToClipboard so it's available when HTML is rendered
+// Global copyToClipboard for inline usage
 window.copyToClipboard = async (text) => {
     console.log('Copying to clipboard:', text);
     try {
@@ -695,13 +825,7 @@ async function fetchBanners() {
 }
 
 function renderBanners(banners) {
-    console.log('renderBanners called with:', banners);
-    console.log('bannersList element:', bannersList);
-
-    if (!bannersList) {
-        console.error('bannersList element not found!');
-        return;
-    }
+    if (!bannersList) return;
 
     if (!banners || banners.length === 0) {
         bannersList.innerHTML = `
@@ -722,70 +846,19 @@ function renderBanners(banners) {
         </div>
     `).join('');
 
-    console.log('Generated HTML length:', html.length);
     bannersList.innerHTML = html;
-    console.log('bannersList.innerHTML set');
 }
 
-updateBannerBtn.onclick = async () => {
-    const cnpj = bannerCnpjInput.value.trim();
-    const url = bannerUrlInput.value.trim();
-
-    if (!cnpj || !url) {
-        showBannerMessage('Preencha o CNPJ e a URL do banner', 'error');
-        return;
-    }
-
-    // Basic URL validation
-    try {
-        new URL(url);
-    } catch (e) {
-        showBannerMessage('URL inválida. Use o formato: https://exemplo.com/banner.jpg', 'error');
-        return;
-    }
-
-    try {
-        updateBannerBtn.disabled = true;
-        updateBannerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
-
-        const formData = new URLSearchParams();
-        formData.append('novo-banner', url);
-        formData.append('cnpj', cnpj);
-
-        const response = await fetch(`${API_BASE}/banner`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: formData
-        });
-
-        if (response.ok) {
-            showBannerMessage('✓ Banner atualizado com sucesso!', 'success');
-            bannerCnpjInput.value = '';
-            bannerUrlInput.value = '';
-
-            // Refresh banners list
-            setTimeout(() => fetchBanners(), 1000);
-        } else {
-            const errorText = await response.text();
-            showBannerMessage(`Erro ao atualizar banner: ${errorText || 'Verifique o CNPJ'}`, 'error');
-        }
-    } catch (err) {
-        console.error(err);
-        showBannerMessage('Erro de conexão ao atualizar banner', 'error');
-    } finally {
-        updateBannerBtn.disabled = false;
-        updateBannerBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Banner';
-    }
-};
-
-// --- Helpers ---
+// --- General Helpers ---
 function setLoader(id, show) {
     const loader = document.getElementById(id);
+    if (!loader) return;
     if (show) loader.classList.remove('hidden');
     else loader.classList.add('hidden');
 }
 
-// Initial
-fetchSuppliers();
+function formatCnpj(cnpj) {
+    const digits = cnpj.replace(/\D/g, '');
+    if (digits.length !== 14) return digits;
+    return `${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/${digits.substring(8, 12)}-${digits.substring(12, 14)}`;
+}
