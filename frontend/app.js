@@ -94,6 +94,14 @@ const tabContents = document.querySelectorAll('.tab-content');
 const supplierSearch = document.getElementById('supplierSearch');
 let allSuppliers = [];
 
+// Banner UI Elements
+const bannersList = document.getElementById('bannersList');
+const bannersLoader = document.getElementById('bannersLoader');
+const bannerCnpjInput = document.getElementById('bannerCnpj');
+const bannerUrlInput = document.getElementById('bannerUrl');
+const updateBannerBtn = document.getElementById('updateBannerBtn');
+const bannerUpdateMessage = document.getElementById('bannerUpdateMessage');
+
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -106,6 +114,7 @@ navLinks.forEach(link => {
         document.getElementById(tabId).classList.add('active');
 
         if (tabId === 'suppliers') fetchSuppliers();
+        if (tabId === 'banners') fetchBanners();
     });
 });
 
@@ -623,6 +632,153 @@ uploadBtn.onclick = async () => {
 
 // Initialize history on load
 renderUploadHistory();
+
+
+
+
+
+
+
+// --- Banner Management ---
+// Define helper functions first
+function showBannerMessage(message, type) {
+    const bannerUpdateMessage = document.getElementById('bannerUpdateMessage');
+    if (!bannerUpdateMessage) return;
+
+    bannerUpdateMessage.innerHTML = `
+        <div class="validation-message ${type}">
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
+            ${message}
+        </div>
+    `;
+
+    setTimeout(() => {
+        bannerUpdateMessage.innerHTML = '';
+    }, 5000);
+}
+
+// Define copyToClipboard so it's available when HTML is rendered
+window.copyToClipboard = async (text) => {
+    console.log('Copying to clipboard:', text);
+    try {
+        await navigator.clipboard.writeText(text);
+        showBannerMessage('URL copiada para a área de transferência!', 'success');
+    } catch (err) {
+        console.error('Failed to copy:', err);
+        showBannerMessage('Erro ao copiar URL', 'error');
+    }
+};
+
+async function fetchBanners() {
+    try {
+        setLoader('bannersLoader', true);
+        const response = await fetch(`${API_BASE}/banner/all`);
+
+        if (!response.ok) throw new Error('Failed to fetch banners');
+
+        const banners = await response.json();
+        console.log('Fetched banners:', banners);
+        renderBanners(banners);
+    } catch (err) {
+        console.error('Error fetching banners:', err);
+        if (bannersList) {
+            bannersList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Erro ao carregar banners</p>
+                </div>
+            `;
+        }
+    } finally {
+        setLoader('bannersLoader', false);
+    }
+}
+
+function renderBanners(banners) {
+    console.log('renderBanners called with:', banners);
+    console.log('bannersList element:', bannersList);
+
+    if (!bannersList) {
+        console.error('bannersList element not found!');
+        return;
+    }
+
+    if (!banners || banners.length === 0) {
+        bannersList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-images"></i>
+                <p>Nenhum banner cadastrado ainda</p>
+            </div>
+        `;
+        return;
+    }
+
+    const html = banners.map((url, index) => `
+        <div class="banner-item">
+            <img src="${url}" alt="Banner ${index + 1}" class="banner-preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22200%22%3E%3Crect fill=%22%23334155%22 width=%22800%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2224%22%3EImagem não disponível%3C/text%3E%3C/svg%3E'">
+            <div class="banner-info">
+                <div class="banner-url">${url}</div>
+            </div>
+        </div>
+    `).join('');
+
+    console.log('Generated HTML length:', html.length);
+    bannersList.innerHTML = html;
+    console.log('bannersList.innerHTML set');
+}
+
+updateBannerBtn.onclick = async () => {
+    const cnpj = bannerCnpjInput.value.trim();
+    const url = bannerUrlInput.value.trim();
+
+    if (!cnpj || !url) {
+        showBannerMessage('Preencha o CNPJ e a URL do banner', 'error');
+        return;
+    }
+
+    // Basic URL validation
+    try {
+        new URL(url);
+    } catch (e) {
+        showBannerMessage('URL inválida. Use o formato: https://exemplo.com/banner.jpg', 'error');
+        return;
+    }
+
+    try {
+        updateBannerBtn.disabled = true;
+        updateBannerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+
+        const formData = new URLSearchParams();
+        formData.append('novo-banner', url);
+        formData.append('cnpj', cnpj);
+
+        const response = await fetch(`${API_BASE}/banner`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            showBannerMessage('✓ Banner atualizado com sucesso!', 'success');
+            bannerCnpjInput.value = '';
+            bannerUrlInput.value = '';
+
+            // Refresh banners list
+            setTimeout(() => fetchBanners(), 1000);
+        } else {
+            const errorText = await response.text();
+            showBannerMessage(`Erro ao atualizar banner: ${errorText || 'Verifique o CNPJ'}`, 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showBannerMessage('Erro de conexão ao atualizar banner', 'error');
+    } finally {
+        updateBannerBtn.disabled = false;
+        updateBannerBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Banner';
+    }
+};
 
 // --- Helpers ---
 function setLoader(id, show) {
