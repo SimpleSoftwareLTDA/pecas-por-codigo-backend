@@ -67,6 +67,11 @@ class ExceptionsAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error" to "Validation failure")
     }
 
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException::class)
+    fun handleConstraintViolationException(ex: jakarta.validation.ConstraintViolationException): ResponseEntity<Pair<String, String?>> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error" to ex.message)
+    }
+
     @ExceptionHandler(InvalidTokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<JsonNode> {

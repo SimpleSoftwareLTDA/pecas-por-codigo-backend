@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
+import org.hibernate.validator.constraints.br.CNPJ
 import org.pecasonline.features.supplier.dto.CreateSupplierDTO
 import org.pecasonline.features.supplier.dto.SupplierResponseDTO
 import org.pecasonline.features.supplier.dto.UpdateSupplierDTO
@@ -81,7 +83,7 @@ interface SupplierSwaggerSpec {
         ])
     ])
     fun findSupplierByCnpj(
-        cnpj: String,
+        @CNPJ cnpj: String,
         page: Int? = 0,
         size: Int? = 10
     ): Page<SupplierResponseDTO>
@@ -117,7 +119,7 @@ interface SupplierSwaggerSpec {
         )]
     )
     fun createSupplier(
-        supplier: CreateSupplierDTO
+        @Valid supplier: CreateSupplierDTO
     ): SupplierResponseDTO
 
     @Operation(summary = "Atualizar fornecedor")
@@ -156,7 +158,7 @@ interface SupplierSwaggerSpec {
     )
     fun updateSupplier(
         id: Int,
-        supplier: UpdateSupplierDTO
+        @Valid supplier: UpdateSupplierDTO
     ): SupplierResponseDTO
 
     @Operation(summary = "Remover fornecedor")

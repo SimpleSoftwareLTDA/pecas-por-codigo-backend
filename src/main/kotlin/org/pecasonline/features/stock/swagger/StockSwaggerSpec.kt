@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.pecasonline.features.stock.Stock
+import org.hibernate.validator.constraints.br.CNPJ
 import org.springframework.data.domain.Page
 import org.springframework.web.multipart.MultipartFile
 
@@ -145,5 +146,12 @@ interface StockSwaggerSpec {
         content = [Content(mediaType = "application/json")]
     )
     fun createItem(file: MultipartFile, token: String)
+
+    @Operation(summary = "Cria um estoque por CNPJ")
+    @ApiResponse(responseCode = "201",
+        description = "Estoque sendo processado",
+        content = [Content(mediaType = "application/json")]
+    )
+    fun createItemStockByCNPJ(file: MultipartFile, @CNPJ cnpj: String)
 
 }

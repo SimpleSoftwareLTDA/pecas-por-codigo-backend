@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.util.*
 
+import org.hibernate.validator.constraints.br.CNPJ
 @Validated
 @RestController
 @RequestMapping("$BASE_ENDPOINT/estoque")
@@ -99,11 +100,12 @@ class StockController(
 
     @PostMapping(path = ["/estoque-by-cnpj"], consumes = ["multipart/form-data"])
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun createItemStockByCNPJ(
+    override fun createItemStockByCNPJ(
         @RequestPart file: MultipartFile,
         @RequestParam cnpj: String
     ) {
-        MDC.putCloseable("token", cnpj).use {
+        val normalizedCnpj = org.pecasonline.common.formatCnpj(cnpj)
+        MDC.putCloseable("token", normalizedCnpj).use {
             MDC.putCloseable("tid", UUID.randomUUID().toString()).use {
                 val tempDir = System.getProperty("java.io.tmpdir")
 
@@ -114,7 +116,7 @@ class StockController(
                 val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
                 tempFile.outputStream().use { it.write(utf8Bytes) }
 
-                stockService.createStock(file = tempFile, cnpj = cnpj, originalFileName = file.originalFilename)
+                stockService.createStock(file = tempFile, cnpj = normalizedCnpj, originalFileName = file.originalFilename)
             }
         }
     }

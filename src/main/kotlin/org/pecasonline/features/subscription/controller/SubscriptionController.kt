@@ -57,8 +57,9 @@ class SubscriptionController(
     @PostMapping("/api/v1/banner")
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun setBannerUrl(@RequestParam("novo-banner") newBannerUrl: String, @RequestParam("cnpj") @CNPJ cnpj: String) {
-        subscriptionService.setBigBannerUrlForSupplier(newBannerUrl = newBannerUrl, cnpj = cnpj)
-        meterRegistry.counter("banner.update", "cnpj", cnpj).increment()
+        val normalizedCnpj = org.pecasonline.common.formatCnpj(cnpj)
+        subscriptionService.setBigBannerUrlForSupplier(newBannerUrl = newBannerUrl, cnpj = normalizedCnpj)
+        meterRegistry.counter("banner.update", "cnpj", normalizedCnpj).increment()
     }
 
     @GetMapping("/api/v1/banner/all")

@@ -1,6 +1,7 @@
 package org.pecasonline.features.subscription.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.pecasonline.common.formatCnpj
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.common.httpclients.dto.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
@@ -137,12 +138,6 @@ class SubscriptionService(
             cnpj = supplier.cnpj,
             bigBannerUrl = newBannerUrl
         )
-    }
-
-    private fun formatCnpj(cnpj: String): String {
-        val digits = cnpj.filter { it.isDigit() }
-        if (digits.length != 14) return cnpj
-        return "${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/${digits.substring(8, 12)}-${digits.substring(12, 14)}"
     }
 }
 

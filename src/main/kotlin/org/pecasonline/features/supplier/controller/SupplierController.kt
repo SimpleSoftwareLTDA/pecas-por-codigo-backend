@@ -11,6 +11,10 @@ import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
+import org.hibernate.validator.constraints.br.CNPJ
+import org.springframework.validation.annotation.Validated
+
+@Validated
 @RequestMapping("$BASE_ENDPOINT/fornecedores")
 @RestController
 class SupplierController(
@@ -38,21 +42,24 @@ class SupplierController(
         @RequestParam("cnpj") cnpj: String,
         @RequestParam("page") page: Int?,
         @RequestParam("size") size: Int?
-    ): Page<SupplierResponseDTO> = supplierService.findSupplierByCnpj(cnpj, page, size).also {
-        meterRegistry.counter("supplier.search.cnpj", "cnpj", cnpj).increment()
+    ): Page<SupplierResponseDTO> {
+        val normalizedCnpj = org.pecasonline.common.formatCnpj(cnpj)
+        return supplierService.findSupplierByCnpj(normalizedCnpj, page, size).also {
+            meterRegistry.counter("supplier.search.cnpj", "cnpj", normalizedCnpj).increment()
+        }
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     override fun createSupplier(
-        @RequestBody @Valid supplier: CreateSupplierDTO
+        @RequestBody supplier: CreateSupplierDTO
     ): SupplierResponseDTO = supplierService.createSupplier(supplier)
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     override fun updateSupplier(
         @PathVariable("id") id: Int,
-        @RequestBody @Valid supplier: UpdateSupplierDTO
+        @RequestBody supplier: UpdateSupplierDTO
     ): SupplierResponseDTO = supplierService.updateSupplier(id, supplier)
 
     @DeleteMapping("{id}")
