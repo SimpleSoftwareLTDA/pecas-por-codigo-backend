@@ -70,6 +70,23 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `should return 400 when setting a banner URL for a supplier with invalid CNPJ`() {
+        // Given
+        val invalidCnpj = "12345678000100" // Invalid CNPJ (wrong check digits)
+        val newBannerUrl = "https://example.com/new-banner.jpg"
+
+        // When & Then
+        mockMvc.post("/api/v1/banner") {
+            param("novo-banner", newBannerUrl)
+            param("cnpj", invalidCnpj)
+        }.andExpect {
+            status { isBadRequest() }
+        }
+
+        verify(exactly = 0) { subscriptionService.setBigBannerUrlForSupplier(any(), any()) }
+    }
+
+    @Test
     fun `should return all banner URLs`() {
         // Given
         val bannerUrls = listOf("https://example.com/banner1.jpg", "https://example.com/banner2.jpg")

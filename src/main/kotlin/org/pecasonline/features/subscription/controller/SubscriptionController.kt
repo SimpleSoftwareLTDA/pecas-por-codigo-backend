@@ -10,6 +10,7 @@ import org.pecasonline.features.subscription.dto.AsaasWebhook
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -20,6 +21,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
 
+@Validated
 @RestController
 class SubscriptionController(
     private val bankingService: BankingService,
