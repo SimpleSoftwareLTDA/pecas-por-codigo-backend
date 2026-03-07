@@ -61,7 +61,7 @@ services:
     container_name: novo-pecas-online-backend
     restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: local
       ASAAS_API_KEY: ${ASAAS_API_KEY}
       OTEL_EXPORTER_ENDPOINT: http://otel-collector:4318
       POSTGRES_HOST: novo-pecas-online-db

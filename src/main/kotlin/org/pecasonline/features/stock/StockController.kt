@@ -120,4 +120,23 @@ class StockController(
             }
         }
     }
+
+    @PostMapping(path = ["/validate"], consumes = ["multipart/form-data"])
+    @ResponseStatus(HttpStatus.OK)
+    override fun validateStockFile(
+        @RequestPart file: MultipartFile
+    ): org.pecasonline.features.stock.dto.StockValidationResult {
+        val tempDir = System.getProperty("java.io.tmpdir")
+        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val tempFile = File(uploadDir, "upload_validate_${UUID.randomUUID()}.tmp")
+
+        try {
+            val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+            tempFile.outputStream().use { it.write(utf8Bytes) }
+
+            return stockService.validateStockFile(tempFile)
+        } finally {
+            tempFile.delete()
+        }
+    }
 }

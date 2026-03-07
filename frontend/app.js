@@ -452,18 +452,44 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
         });
     }
 
+    const verifyBtn = document.getElementById('verifyBtn');
+    if (verifyBtn) {
+        verifyBtn.onclick = async (e) => {
+            e.preventDefault();
+            const file = stockFile ? stockFile.files[0] : null;
+            if (!file) {
+                showValidationMessage('Selecione um arquivo para verificar.', 'error');
+                return;
+            }
+            await validateAndPreviewFile(file);
+        };
+    }
+
     if (uploadBtn) {
-        uploadBtn.onclick = async () => {
+        uploadBtn.onclick = async (e) => {
+            e.preventDefault();
             const file = stockFile ? stockFile.files[0] : null;
             const cnpj = stockCnpjInput ? stockCnpjInput.value.trim() : '';
 
-            if (!file || !cnpj) {
-                showValidationMessage('Selecione um arquivo e informe o CNPJ do fornecedor.', 'error');
+            if (!file) {
+                showValidationMessage('Selecione um arquivo anexado para prosseguir.', 'error');
                 return;
             }
 
-            if (currentFileData && currentFileData.hasErrors) {
-                showValidationMessage('Corrija os erros de validação antes de enviar.', 'error');
+            if (!cnpj) {
+                if (stockCnpjInput) {
+                    stockCnpjInput.setCustomValidity('O CNPJ deve ser preenchido.');
+                    stockCnpjInput.reportValidity();
+                    stockCnpjInput.focus();
+
+                    const clearValidity = () => {
+                        stockCnpjInput.setCustomValidity('');
+                        stockCnpjInput.removeEventListener('input', clearValidity);
+                    };
+                    stockCnpjInput.addEventListener('input', clearValidity);
+                } else {
+                    showValidationMessage('Informe o CNPJ do fornecedor.', 'error');
+                }
                 return;
             }
 
@@ -527,108 +553,86 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
 
 async function validateAndPreviewFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
-    if (ext !== 'tsv' && ext !== 'csv') {
-        showValidationMessage('Apenas arquivos .tsv ou .csv são permitidos.', 'error');
+    if (ext !== 'tsv' && ext !== 'csv' && ext !== 'txt') {
+        showValidationMessage('Apenas arquivos .tsv, .csv ou .txt são permitidos.', 'error');
         return false;
     }
 
     try {
-        const text = await file.text();
-        const delimiter = ext === 'tsv' ? '\t' : /[;\t]/;
-        const lines = text.trim().split('\n').filter(line => line.trim());
-
-        if (lines.length === 0) {
-            showValidationMessage('Arquivo vazio.', 'error');
-            return false;
+        if (validationMessages) {
+            validationMessages.innerHTML = '<div class="validation-message"><i class="fas fa-spinner fa-spin"></i> Validando arquivo no servidor...</div>';
         }
 
-        const rows = lines.map(line => line.split(delimiter).map(cell => cell.trim()));
+        const formData = new FormData();
+        formData.append('file', file);
 
-        // Validation
+        const response = await fetch(`${API_BASE}/estoque/validate`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao validar no servidor');
+        }
+
+        const data = await response.json();
+        const totalRows = data.totalLines;
+        const validCount = data.validLinesCount;
+        const invalidCount = data.invalidLinesCount;
+        const hasErrors = invalidCount > 0;
+
         const validationResults = [];
-        let hasErrors = false;
 
-        // Check column count consistency
-        const expectedColumns = 4;
-        const invalidRows = rows.filter(row => row.length !== expectedColumns);
-
-        if (invalidRows.length > 0) {
-            validationResults.push({
-                type: 'error',
-                message: `${invalidRows.length} linha(s) com número incorreto de colunas (esperado: ${expectedColumns})`
-            });
-            hasErrors = true;
+        if (invalidCount > 0) {
+            validationResults.push({ type: 'warning', message: `${invalidCount} linha(s) com erros (formato incorreto, código/descrição vazios, etc.) não serão processadas.` });
+            validationResults.push({ type: 'success', message: `⚠️ O arquivo contém erros, mas você pode enviá-lo mesmo assim! Serão processadas as ${validCount} linhas corretas e o backend enviará um relatório das rejeitadas.` });
+        } else {
+            validationResults.push({ type: 'success', message: `✓ Arquivo perfeitamente estruturado! ${validCount} linha(s) de dados prontas para envio.` });
         }
 
-        // Check for required fields
-        const emptyFields = rows.slice(1).filter(row =>
-            !row[0] || !row[1] || !row[2] || !row[3]
-        );
-
-        if (emptyFields.length > 0) {
-            validationResults.push({
-                type: 'warning',
-                message: `${emptyFields.length} linha(s) com campos vazios`
-            });
-        }
-
-        // Check numeric fields
-        const invalidQuantities = rows.slice(1).filter(row =>
-            row[1] && isNaN(parseInt(row[1]))
-        );
-
-        if (invalidQuantities.length > 0) {
-            validationResults.push({
-                type: 'error',
-                message: `${invalidQuantities.length} linha(s) com quantidade inválida`
-            });
-            hasErrors = true;
-        }
-
-        // Success message
-        if (!hasErrors) {
-            validationResults.push({
-                type: 'success',
-                message: `✓ Arquivo válido! ${rows.length - 1} linha(s) de dados encontradas.`
-            });
-        }
-
-        // Display validation messages
         if (validationMessages) {
             validationMessages.innerHTML = '';
             validationResults.forEach(result => {
                 const div = document.createElement('div');
                 div.className = `validation-message ${result.type}`;
-                div.innerHTML = `<i class="fas fa-${result.type === 'error' ? 'exclamation-circle' : result.type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i> ${result.message}`;
+                div.innerHTML = `<i class="fas fa-${result.type === 'error' ? 'exclamation-circle' : result.type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i> <strong>${result.message}</strong>`;
                 validationMessages.appendChild(div);
             });
         }
 
-        // Show preview (first 10 rows)
-        const previewRows = rows.slice(0, 11); // Header + 10 data rows
-
-        // Build table header
-        if (previewTableHead) previewTableHead.innerHTML = `<tr>${previewRows[0].map(cell => `<th>${cell}</th>`).join('')}</tr>`;
-
-        // Build table body
+        // --- Frontend Preview Building ---
+        if (previewTableHead) {
+            previewTableHead.innerHTML = `<tr><th>Código</th><th>Quantidade</th><th>Preço</th><th>Descrição</th></tr>`;
+        }
         if (previewTableBody) {
-            previewTableBody.innerHTML = previewRows.slice(1).map(row =>
-                `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
-            ).join('');
+            const previewRows = data.validLines.slice(0, 10);
+            previewTableBody.innerHTML = previewRows.map(row => {
+                const precoFormatado = (row.priceInCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                return `<tr><td>${row.code}</td><td>${row.quantity}</td><td>${precoFormatado}</td><td>${row.description}</td></tr>`;
+            }).join('');
         }
 
-        // Show stats
-        const totalRows = rows.length - 1;
-        const showing = Math.min(10, totalRows);
-        if (previewStats) previewStats.textContent = `Exibindo ${showing} de ${totalRows} linha(s) de dados`;
+        if (previewStats) previewStats.textContent = `Exibindo ${Math.min(10, validCount)} de ${totalRows} linha(s) analisadas`;
+
+        const invalidLinesSection = document.getElementById('invalidLinesSection');
+        const invalidLinesBody = document.getElementById('invalidLinesBody');
+
+        if (invalidCount > 0 && data.invalidLines && data.invalidLines.length > 0) {
+            if (invalidLinesSection) invalidLinesSection.classList.remove('hidden');
+            if (invalidLinesBody) {
+                invalidLinesBody.innerHTML = data.invalidLines.map(line => `<tr><td style="color: var(--danger); font-family: monospace; font-size: 0.9em; white-space: pre-wrap;">${line}</td></tr>`).join('');
+            }
+        } else {
+            if (invalidLinesSection) invalidLinesSection.classList.add('hidden');
+        }
 
         if (filePreview) filePreview.classList.remove('hidden');
-        currentFileData = { rows, totalRows, hasErrors };
+        currentFileData = { totalRows, hasErrors };
 
         return !hasErrors;
     } catch (err) {
-        console.error('Error parsing file:', err);
-        showValidationMessage('Erro ao processar arquivo. Verifique o formato.', 'error');
+        console.error('Error validating file:', err);
+        showValidationMessage('Erro ao comunicar com o servidor para validar o arquivo.', 'error');
         return false;
     }
 }

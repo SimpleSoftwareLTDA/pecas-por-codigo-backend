@@ -109,7 +109,9 @@
                     </div>
 
                     <div class="input-group" style="margin-top: 2rem;">
-                        <label>CNPJ do Fornecedor</label>
+                        <label>CNPJ do Fornecedor <span
+                                style="font-size: 0.85em; font-weight: normal; color: var(--text-muted); margin-left: 0.5rem;">(Opcional
+                                para a opção "Verificar Arquivo")</span></label>
                         <input type="text" id="stockCnpj" placeholder="00.000.000/0000-00">
                     </div>
 
@@ -126,10 +128,30 @@
                         <div class="preview-stats">
                             <span id="previewStats"></span>
                         </div>
+
+                        <div id="invalidLinesSection" class="hidden" style="margin-top: 1.5rem;">
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;"><i class="fas fa-times-circle"></i>
+                                Linhas Inválidas Encontradas</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">As seguintes
+                                linhas não puderam ser compreendidas e serão descartadas se você prosseguir com o
+                                processamento.</p>
+                            <div class="preview-table-container" style="max-height: 200px; overflow-y: auto;">
+                                <table class="preview-table" style="border-left: 4px solid var(--danger);">
+                                    <thead>
+                                        <tr>
+                                            <th>Conteúdo Original da Linha com Erro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invalidLinesBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
-                    <button id="uploadBtn" class="btn-primary full-width" style="margin-top: 1rem;">Processar
-                        Estoque</button>
+                    <div class="button-group" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button id="verifyBtn" class="btn-secondary full-width">Verificar Arquivo</button>
+                        <button id="uploadBtn" class="btn-primary full-width">Processar Estoque</button>
+                    </div>
 
                     <div id="uploadProgress" class="progress-bar hidden">
                         <div class="progress-fill"></div>
@@ -313,9 +335,10 @@
         </div>
 
         <footer>
-            <p>&copy; 2024 Peças por Código - Robson Cassiano</p>
+            <p>&copy; 2024 Peças por Código</p>
         </footer>
 
+        <script src="env.js"></script>
         <script src="app.js"></script>
     </div>
 </body>

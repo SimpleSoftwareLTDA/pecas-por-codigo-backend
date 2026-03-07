@@ -154,4 +154,11 @@ interface StockSwaggerSpec {
     )
     fun createItemStockByCNPJ(file: MultipartFile, @CNPJ cnpj: String)
 
+    @Operation(summary = "Valida um arquivo de estoque linha a linha e retorna o discriminativo das linhas (corretas/erradas)")
+    @ApiResponse(responseCode = "200",
+        description = "Arquivo processado e linhas validadas",
+        content = [Content(mediaType = "application/json")]
+    )
+    fun validateStockFile(file: MultipartFile): org.pecasonline.features.stock.dto.StockValidationResult
+
 }

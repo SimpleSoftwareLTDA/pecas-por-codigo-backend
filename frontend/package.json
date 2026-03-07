@@ -9,6 +9,7 @@
         "wrangler": "^4.59.2"
     },
     "dependencies": {
-        "@cloudflare/kv-asset-handler": "^0.4.2"
+        "@cloudflare/kv-asset-handler": "^0.4.2",
+        "puppeteer": "^24.38.0"
     }
 }

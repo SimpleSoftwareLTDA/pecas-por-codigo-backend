@@ -9,6 +9,8 @@ import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
+import org.pecasonline.features.stock.dto.StockValidationResult
+import org.pecasonline.features.stock.dto.ValidStockLineDto
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
 import org.pecasonline.features.subscription.service.SubscriptionService
@@ -176,6 +178,43 @@ class StockService(
         }
     }
 
+    override fun validateStockFile(file: File): StockValidationResult {
+        val invalidLines = mutableListOf<String>()
+        val validLines = mutableListOf<ValidStockLineDto>()
+        var totalLines = 0
+
+        Files.lines(file.toPath()).use { lines ->
+            lines.asSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .forEach { line ->
+                    totalLines++
+                    val stockLine = parseStockLine(line)
+                    if (stockLine == null) {
+                        invalidLines.add(line)
+                    } else {
+                        validLines.add(
+                            ValidStockLineDto(
+                                line = line,
+                                code = stockLine.item.code,
+                                quantity = stockLine.quantity,
+                                priceInCents = stockLine.item.priceInCents ?: 0L,
+                                description = stockLine.item.description ?: ""
+                            )
+                        )
+                    }
+                }
+        }
+
+        return StockValidationResult(
+            totalLines = totalLines,
+            validLinesCount = validLines.size,
+            invalidLinesCount = invalidLines.size,
+            validLines = validLines,
+            invalidLines = invalidLines
+        )
+    }
+
     private fun processBatch(batchItems: List<Stock>, supplier: Supplier, updatedIds: MutableSet<Long>) {
         val items = batchItems.map { it.item }
         val processedItemsMap = processAllItems(items)
@@ -293,21 +332,24 @@ class StockService(
 
     internal fun parseStockLine(line: String): Stock? {
         // Split by tab (\t) or semicolon (;) only — not spaces — to preserve prices like "89,427.27"
-        // Split by tab (\t), semicolon (;), or multiple spaces (2+) to handle fixed-width-like files
-        val columns = line.split(Regex("[\\t;]+|\\s{2,}")).filter { it.isNotEmpty() }
+        // Also support fixed-width like spaces if there are 2 or more
+        val columns = line.split(Regex("[\\t;]|\\s{2,}")).map { it.trim() }
 
-        if (columns.isInvalidColumnSize()) return null
+        if (columns.size < 4) return null
 
-        val (code, quantityStr, priceStr, description) = columns
+        val code = columns[0]
+        val quantityStr = columns[1]
+        val priceStr = columns[2]
+        val description = columns[3]
         
         // Detect scientific notation corruption (e.g., "7,90E+12"). 
         // These are lossy conversions from Excel and should be treated as errors.
-        if (code.contains("E+", ignoreCase = true)) {
+        if (code.contains("E+", ignoreCase = true) || code.isEmpty() || description.isEmpty()) {
             return null
         }
 
         val quantity = quantityStr.toIntOrNull() ?: 0
-        val priceInCents = parseMonetaryToCents(priceStr)
+        val priceInCents = if (priceStr.isBlank()) 0L else parseMonetaryToCents(priceStr)
 
         val item = Item.buildFromMinimalProperties(
             code = code,
