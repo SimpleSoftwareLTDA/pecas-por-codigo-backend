@@ -40,8 +40,8 @@ EXPOSE 8080
 
 # Optimized ENTRYPOINT for Spring Boot Layers
 ENTRYPOINT ["java", \
-    "-Xms1g", \
-    "-Xmx1g", \
+    "-Xms512m", \
+    "-Xmx750m", \
     "-XX:+UseContainerSupport", \
     "-XX:+UseStringDeduplication", \
     "-XX:+ExitOnOutOfMemoryError", \
