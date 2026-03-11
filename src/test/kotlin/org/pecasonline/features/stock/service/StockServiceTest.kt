@@ -4,6 +4,8 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -174,4 +176,50 @@ class StockServiceTest {
             tempFile.delete()
         }
     }
+
+    @Test
+
+    fun `validateStockFile with real PD2602 file should pass`() {
+        val resourceStream = this.javaClass.classLoader.getResourceAsStream("PD2602.txt")
+            ?: throw IllegalStateException("Resource PD2602.txt not found")
+        
+        val tempFile = java.io.File.createTempFile("PD2602", ".txt")
+        tempFile.outputStream().use { resourceStream.copyTo(it) }
+        
+        try {
+            val result = stockService.validateStockFile(tempFile)
+            
+            println("=== Test Debug Info ===")
+            println("Total lines: ${result.totalLines}")
+            println("Valid lines: ${result.validLinesCount}")
+            println("Invalid lines: ${result.invalidLinesCount}")
+            
+            if (result.invalidLinesCount > 1) {
+                println("First 10 invalid lines:")
+                result.invalidLines.take(10).forEach { println("[$it]") }
+            }
+            
+            if (result.validLinesCount > 0) {
+                println("First 5 valid lines:")
+                result.validLines.take(5).forEach { println("[Code: ${it.code}, Qty: ${it.quantity}, Price: ${it.priceInCents}, Desc: ${it.description}]") }
+            }
+            
+            // Assertions
+            assertTrue(result.validLinesCount > 60000, "Should have processed most lines as valid. Found only ${result.validLinesCount}")
+            assertEquals(1, result.invalidLinesCount, "Should have 1 invalid line (42534498) for this specific file. Found: ${result.invalidLines.joinToString(",")}")
+            assertEquals("42534498", result.invalidLines[0].trim())
+            
+            // Verify first line: 4C4513A350AA               1           0.00 INTERRUPTOR
+            val firstLine = result.validLines[0]
+            assertEquals("4C4513A350AA", firstLine.code)
+            assertEquals(1, firstLine.quantity)
+            assertEquals(0L, firstLine.priceInCents)
+            assertEquals("INTERRUPTOR", firstLine.description)
+            
+        } finally {
+
+            tempFile.delete()
+        }
+    }
 }
+

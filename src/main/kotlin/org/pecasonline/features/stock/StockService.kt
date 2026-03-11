@@ -432,13 +432,37 @@ class StockService(
         }
 
     internal fun parseStockLine(line: String): Stock? {
-        // Split by tab (\t) or semicolon (;) only — not spaces — to preserve prices like "89,427.27"
-        // Also support fixed-width like spaces if there are 2 or more
-        val columns = line.split(Regex("[\\t;]|\\s{2,}")).map { it.trim() }
+        val trimmedLine = line.trim()
+        if (trimmedLine.isEmpty()) return null
+
+        val columns: List<String>
+        if (trimmedLine.contains(';')) {
+            columns = trimmedLine.split(';').map { it.trim() }
+        } else if (trimmedLine.contains('\t')) {
+            columns = trimmedLine.split('\t').map { it.trim() }
+        } else {
+            // Regex Option 1: Safely extracts exactly 4 groups correctly regardless of space lengths
+            // Group 1: Code (starts with non-white, until quantity)
+            // Group 2: Quantity (digits, dot, commas - e.g. 2.467)
+            // Group 3: Price (digits, dot, commas)
+            // Group 4: Description (everything else)
+            val match = Regex("^(\\S.*?)\\s+([\\d.,]+)\\s+([\\d.,]+)(?:\\s+(.*))?$").find(trimmedLine)
+            columns = if (match != null) {
+                listOf(
+                    match.groupValues[1].trim(),
+                    match.groupValues[2].trim(),
+                    match.groupValues[3].trim(),
+                    match.groupValues[4].trim()
+                )
+            } else {
+                emptyList()
+            }
+        }
 
         if (columns.size < 4) return null
 
         val code = columns[0]
+
         val quantityStr = columns[1]
         val priceStr = columns[2]
         val description = columns[3]
