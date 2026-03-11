@@ -3,8 +3,12 @@ name: Docker Image CI
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - 'frontend-admin/**'
   pull_request:
     branches: ["main"]
+    paths-ignore:
+      - 'frontend-admin/**'
 
 jobs:
   build-and-push:

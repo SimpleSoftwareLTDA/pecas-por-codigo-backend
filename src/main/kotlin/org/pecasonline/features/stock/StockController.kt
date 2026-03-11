@@ -19,7 +19,9 @@ import org.hibernate.validator.constraints.br.CNPJ
 @Tag(name = "Estoque", description = "Operações relacionadas ao estoque")
 class StockController(
     val stockService: IStockService,
-    private val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry,
+    private val stringRedisTemplate: org.springframework.data.redis.core.StringRedisTemplate,
+    private val objectMapper: com.fasterxml.jackson.databind.ObjectMapper
 ) : StockSwaggerSpec {
 
     @GetMapping
@@ -126,15 +128,39 @@ class StockController(
     override fun validateStockFile(
         @RequestPart file: MultipartFile
     ): org.pecasonline.features.stock.dto.StockValidationResult {
+        val fileBytes = file.bytes
+        val fileHash = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(fileBytes)
+            .joinToString("") { "%02x".format(it) }
+        
+        val cacheKey = "ppc:stock_validation:$fileHash"
+
+        // Check if validation result is already cached in Redis
+        val cachedContent = stringRedisTemplate.opsForValue().get(cacheKey)
+        if (cachedContent != null) {
+            org.slf4j.LoggerFactory.getLogger(StockController::class.java).info("Validating stock file via Redis cache HIT. (Hash: $fileHash)")
+            return objectMapper.readValue(cachedContent, org.pecasonline.features.stock.dto.StockValidationResult::class.java)
+        }
+
+        org.slf4j.LoggerFactory.getLogger(StockController::class.java).info("Validating stock file natively (Cache MISS).")
         val tempDir = System.getProperty("java.io.tmpdir")
-        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
-        val tempFile = File(uploadDir, "upload_validate_${UUID.randomUUID()}.tmp")
+        val uploadDir = java.io.File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val tempFile = java.io.File(uploadDir, "upload_validate_${java.util.UUID.randomUUID()}.tmp")
 
         try {
-            val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+            val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(fileBytes)
             tempFile.outputStream().use { it.write(utf8Bytes) }
 
-            return stockService.validateStockFile(tempFile)
+            val result = stockService.validateStockFile(tempFile)
+
+            // Save to cache for 1 hour
+            stringRedisTemplate.opsForValue().set(
+                cacheKey,
+                objectMapper.writeValueAsString(result),
+                java.time.Duration.ofHours(1)
+            )
+
+            return result
         } finally {
             tempFile.delete()
         }
