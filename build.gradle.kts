@@ -57,8 +57,6 @@ dependencies {
 
     // Email dependencies
     implementation("org.springframework.boot:spring-boot-starter-mail")
-    implementation("jakarta.mail:jakarta.mail-api:2.1.3")
-    implementation("com.sun.mail:jakarta.mail:2.0.1")
 
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
     implementation("commons-fileupload:commons-fileupload:1.4")

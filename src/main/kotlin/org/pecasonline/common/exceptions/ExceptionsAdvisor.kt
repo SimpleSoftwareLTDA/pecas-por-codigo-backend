@@ -31,9 +31,9 @@ class ExceptionsAdvisor {
     private val fieldAliases = getJsonAliasesWithJackson(CreateSupplierDTO::class)
 
     @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception, response: HttpServletResponse): ResponseEntity<Pair<String, String?>> {
+    fun handleException(ex: Exception, response: HttpServletResponse): ResponseEntity<Map<String, String?>> {
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error" to ex.message)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to ex.message))
     }
 
 
@@ -63,13 +63,13 @@ class ExceptionsAdvisor {
     }
 
     @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException::class)
-    fun handleHandlerMethodValidationException(ex: org.springframework.web.method.annotation.HandlerMethodValidationException): ResponseEntity<Pair<String, String?>> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error" to "Validation failure")
+    fun handleHandlerMethodValidationException(ex: org.springframework.web.method.annotation.HandlerMethodValidationException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to "Validation failure"))
     }
 
     @ExceptionHandler(jakarta.validation.ConstraintViolationException::class)
-    fun handleConstraintViolationException(ex: jakarta.validation.ConstraintViolationException): ResponseEntity<Pair<String, String?>> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error" to ex.message)
+    fun handleConstraintViolationException(ex: jakarta.validation.ConstraintViolationException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to ex.message))
     }
 
     @ExceptionHandler(InvalidTokenException::class)
