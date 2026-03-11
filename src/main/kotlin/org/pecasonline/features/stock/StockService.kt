@@ -469,17 +469,22 @@ class StockService(
         
         // Detect scientific notation corruption (e.g., "7,90E+12"). 
         // These are lossy conversions from Excel and should be treated as errors.
-        if (code.contains("E+", ignoreCase = true) || code.isEmpty() || description.isEmpty()) {
+        if (code.contains("E+", ignoreCase = true) || code.isEmpty()) {
             return null
         }
 
-        val quantity = quantityStr.toIntOrNull() ?: 0
+        // Sanitize quantity by removing dots and commas to treat "2.467" as 2467 units.
+        val sanitizedQuantityStr = quantityStr.replace(Regex("[.,]"), "")
+        val quantity = sanitizedQuantityStr.toIntOrNull() ?: 0
+        
         val priceInCents = if (priceStr.isBlank()) 0L else parseMonetaryToCents(priceStr)
+
+        val finalDescription = if (description.isEmpty()) "Sem descrição" else description
 
         val item = Item.buildFromMinimalProperties(
             code = code,
             priceInCents = priceInCents,
-            description = description
+            description = finalDescription
         )
 
         return Stock(quantity = quantity, item = item)

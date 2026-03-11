@@ -44,12 +44,12 @@ class StockParsingTest {
     }
 
     @Test
-    fun `should handle empty descriptions correctly if required by regex`() {
+    fun `should handle empty descriptions correctly as fallback value`() {
         val line = "4C4513A350AA               1           0.00 "
         val result = stockService.parseStockLine(line)
         if (result != null) {
             assertEquals("4C4513A350AA", result.item.code)
-            assertTrue(result.item.description.isNullOrBlank())
+            assertEquals("Sem descrição", result.item.description)
         }
     }
 
@@ -66,16 +66,18 @@ class StockParsingTest {
     }
 
     @Test
-    fun `should parse fractional quantities with dots and commas`() {
-        // Quantities like 2.467 from PD2602
+    fun `should parse fractional quantities with dots and commas as thousands`() {
+        // Quantities like 2.467 from PD2602 should be sanitized to 2467
         val line = "CODE123               2.467           10,50 DESC"
         val result = stockService.parseStockLine(line)
         assertNotNull(result)
-        // 2.467 string parsed by `toIntOrNull()` will return null and fallback to 0. Is this expected?
-        // Wait, if it's "2.467", toIntOrNull() fails. In the actual code `val quantity = quantityStr.toIntOrNull() ?: 0`.
-        // So quantity becomes 0.
-        // Let's assert what the actual code does.
-        assertEquals(0, result?.quantity)
+        assertEquals(2467, result?.quantity)
+        
+        // Also test commas
+        val lineComma = "CODE124               1,500           20.00 DESC2"
+        val resultComma = stockService.parseStockLine(lineComma)
+        assertNotNull(resultComma)
+        assertEquals(1500, resultComma?.quantity)
     }
 
     @Test
