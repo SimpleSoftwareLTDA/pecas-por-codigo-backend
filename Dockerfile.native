@@ -1,0 +1,33 @@
+# Build stage
+FROM ghcr.io/graalvm/native-image-community:23 AS builder
+
+WORKDIR /build
+
+# Removendo o 'microdnf update' problemático. O GraalVM oficial já
+# traz quase tudo (gcc, zlib) pré-instalado sob o Oracle Linux 9.
+# Vamos adicionar o findutils para o gradlew funcionar (que precisa do xargs)
+USER root
+RUN microdnf install -y freetype-devel zlib-devel findutils
+
+COPY gradlew ./
+COPY gradle gradle
+COPY build.gradle.kts gradle.properties settings.gradle.kts ./
+RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
+
+COPY src src
+RUN ./gradlew nativeCompile -Dorg.gradle.daemon=false --no-daemon -x generateGitProperties
+
+# Runtime stage (usando oraclelinux-slim para suporte nativo a glibc)
+# Como a imagem do builder é baseada em Oracle Linux (glibc), evitamos o Alpine
+# para não precisar lidar com gcompat ou dependências estáticas pesadas.
+FROM oraclelinux:9-slim
+
+WORKDIR /app
+
+# O binário gerado tem o nome do diretório/projeto por padrão (pecas-por-codigo-backend)
+COPY --from=builder /build/build/native/nativeCompile/* ./app
+
+EXPOSE 8080
+
+ENTRYPOINT ["./app", "-Xmx256m"]

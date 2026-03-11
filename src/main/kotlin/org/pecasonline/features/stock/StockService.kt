@@ -118,29 +118,37 @@ class StockService(
         )
 
         try {
+            val normalizedFile = autoNormalizeFile(file)
             var totalProcessed = 0
             val updatedIds = mutableSetOf<Long>()
             val invalidLines = mutableListOf<String>()
             val validStockLines = mutableListOf<Stock>()
 
-            Files.lines(file.toPath()).use { lines ->
-                lines.asSequence()
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .forEach { line ->
-                        val stockLine = parseStockLine(line)
-                        if (stockLine == null) {
-                            invalidLines.add(line)
-                        } else {
-                            validStockLines.add(stockLine)
-                            if (validStockLines.size >= 1000) {
-                                processBatch(validStockLines, supplier, updatedIds)
-                                totalProcessed += validStockLines.size
-                                validStockLines.clear()
-                                logger.info { "Lote processado. Itens acumulados: $totalProcessed" }
+            try {
+                Files.lines(normalizedFile.toPath()).use { lines ->
+                    lines.asSequence()
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .forEach { line ->
+                            val stockLine = parseStockLine(line)
+                            if (stockLine == null) {
+                                invalidLines.add(line)
+                            } else {
+                                validStockLines.add(stockLine)
+                                if (validStockLines.size >= 1000) {
+                                    processBatch(validStockLines, supplier, updatedIds)
+                                    totalProcessed += validStockLines.size
+                                    validStockLines.clear()
+                                    logger.info { "Lote processado. Itens acumulados: $totalProcessed" }
+                                }
                             }
                         }
-                    }
+                }
+            } finally {
+                if (normalizedFile.absolutePath != file.absolutePath) {
+                    normalizedFile.delete()
+                    logger.debug { "Arquivo normalizado temporário removido: ${normalizedFile.path}" }
+                }
             }
 
             // Process remaining valid lines
@@ -179,31 +187,38 @@ class StockService(
     }
 
     override fun validateStockFile(file: File): StockValidationResult {
+        val normalizedFile = autoNormalizeFile(file)
         val invalidLines = mutableListOf<String>()
         val validLines = mutableListOf<ValidStockLineDto>()
         var totalLines = 0
 
-        Files.lines(file.toPath()).use { lines ->
-            lines.asSequence()
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-                .forEach { line ->
-                    totalLines++
-                    val stockLine = parseStockLine(line)
-                    if (stockLine == null) {
-                        invalidLines.add(line)
-                    } else {
-                        validLines.add(
-                            ValidStockLineDto(
-                                line = line,
-                                code = stockLine.item.code,
-                                quantity = stockLine.quantity,
-                                priceInCents = stockLine.item.priceInCents ?: 0L,
-                                description = stockLine.item.description ?: ""
+        try {
+            Files.lines(normalizedFile.toPath()).use { lines ->
+                lines.asSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .forEach { line ->
+                        totalLines++
+                        val stockLine = parseStockLine(line)
+                        if (stockLine == null) {
+                            invalidLines.add(line)
+                        } else {
+                            validLines.add(
+                                ValidStockLineDto(
+                                    line = line,
+                                    code = stockLine.item.code,
+                                    quantity = stockLine.quantity,
+                                    priceInCents = stockLine.item.priceInCents ?: 0L,
+                                    description = stockLine.item.description ?: ""
+                                )
                             )
-                        )
+                        }
                     }
-                }
+            }
+        } finally {
+            if (normalizedFile.absolutePath != file.absolutePath) {
+                normalizedFile.delete()
+            }
         }
 
         return StockValidationResult(
@@ -213,6 +228,92 @@ class StockService(
             validLines = validLines,
             invalidLines = invalidLines
         )
+    }
+
+    override fun formatStockFile(file: File, codeCol: Int, qtyCol: Int, priceCol: Int, descCol: Int, delimiter: String): File {
+        val tempDir = System.getProperty("java.io.tmpdir")
+        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val formattedFile = File(uploadDir, "formatted_stock_${java.util.UUID.randomUUID()}.txt")
+
+        val actualDelimiter = if (delimiter == "\\t" || delimiter == "tab") "\t" else delimiter
+
+        formattedFile.bufferedWriter(Charsets.UTF_8).use { writer ->
+            Files.lines(file.toPath()).use { lines ->
+                lines.asSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .forEach { line ->
+                        val columns = line.split(actualDelimiter)
+                        if (columns.size > maxOf(codeCol, qtyCol, priceCol, descCol)) {
+                            val code = columns[codeCol].trim()
+                            val qty = columns[qtyCol].trim()
+                            val price = columns[priceCol].trim()
+                            val desc = columns[descCol].trim()
+                            
+                            if (code.isNotEmpty() && desc.isNotEmpty()) {
+                                writer.write("$code;$qty;$price;$desc\n")
+                            }
+                        }
+                    }
+            }
+        }
+        return formattedFile
+    }
+
+    private fun autoNormalizeFile(originalFile: File): File {
+        val lines = originalFile.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.isEmpty()) return originalFile // empty
+
+        val delimiters = listOf(";", "\t", ",", "|")
+        var bestDelimiter = ";"
+        var maxConsistency = 0
+
+        for (delimiter in delimiters) {
+            val counts = lines.take(20).map { splitCsvLine(it, delimiter[0]).size }
+            val commonCountEntry = counts.groupBy { it }.maxByOrNull { it.value.size }
+            if (commonCountEntry != null && commonCountEntry.key >= 3) {
+                if (commonCountEntry.value.size > maxConsistency) {
+                    maxConsistency = commonCountEntry.value.size
+                    bestDelimiter = delimiter
+                }
+            }
+        }
+
+        val tempDir = System.getProperty("java.io.tmpdir")
+        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val normalizedFile = File(uploadDir, "normalized_stock_${java.util.UUID.randomUUID()}.txt")
+
+        normalizedFile.bufferedWriter(Charsets.UTF_8).use { writer ->
+            for (line in lines) {
+                val cols = splitCsvLine(line, bestDelimiter[0])
+                if (cols.size >= 3) {
+                    writer.write(cols.joinToString(";") + "\n")
+                } else {
+                    writer.write(line + "\n")
+                }
+            }
+        }
+
+        logger.info { "Arquivo normalizado automaticamente utilizando delimitador '$bestDelimiter'." }
+        return normalizedFile
+    }
+
+    private fun splitCsvLine(line: String, delimiter: Char): List<String> {
+        val result = mutableListOf<String>()
+        var current = StringBuilder()
+        var inQuotes = false
+        for (char in line) {
+            if (char == '\"') {
+                inQuotes = !inQuotes
+            } else if (char == delimiter && !inQuotes) {
+                result.add(current.toString().trim())
+                current = StringBuilder()
+            } else {
+                current.append(char)
+            }
+        }
+        result.add(current.toString().trim())
+        return result
     }
 
     private fun processBatch(batchItems: List<Stock>, supplier: Supplier, updatedIds: MutableSet<Long>) {

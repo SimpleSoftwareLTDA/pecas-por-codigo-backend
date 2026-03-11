@@ -161,4 +161,18 @@ interface StockSwaggerSpec {
     )
     fun validateStockFile(file: MultipartFile): org.pecasonline.features.stock.dto.StockValidationResult
 
+    @Operation(summary = "Formata um arquivo de estoque extraindo as colunas especificadas (0-indexadas) e separando-as por ponto-e-vírgula")
+    @ApiResponse(responseCode = "200",
+        description = "Arquivo formatado e retornado para download",
+        content = [Content(mediaType = "text/csv")]
+    )
+    fun formatStockFile(
+        file: MultipartFile,
+        codeCol: Int,
+        qtyCol: Int,
+        priceCol: Int,
+        descCol: Int,
+        delimiter: String
+    ): org.springframework.http.ResponseEntity<org.springframework.core.io.Resource>
+
 }

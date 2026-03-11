@@ -139,4 +139,38 @@ class StockController(
             tempFile.delete()
         }
     }
+
+    @PostMapping(path = ["/format"], consumes = ["multipart/form-data"], produces = ["text/csv"])
+    @ResponseStatus(HttpStatus.OK)
+    override fun formatStockFile(
+        @RequestPart file: MultipartFile,
+        @RequestParam codeCol: Int,
+        @RequestParam qtyCol: Int,
+        @RequestParam priceCol: Int,
+        @RequestParam descCol: Int,
+        @RequestParam(defaultValue = ";") delimiter: String
+    ): org.springframework.http.ResponseEntity<org.springframework.core.io.Resource> {
+        val tempDir = System.getProperty("java.io.tmpdir")
+        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val tempFile = File(uploadDir, "upload_format_${UUID.randomUUID()}.tmp")
+
+        try {
+            val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+            tempFile.outputStream().use { it.write(utf8Bytes) }
+
+            val formattedFile = stockService.formatStockFile(tempFile, codeCol, qtyCol, priceCol, descCol, delimiter)
+
+            val resource = org.springframework.core.io.FileSystemResource(formattedFile)
+            val headers = org.springframework.http.HttpHeaders()
+            headers.add(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"formatted_stock.txt\"")
+
+            return org.springframework.http.ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(formattedFile.length())
+                .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                .body(resource)
+        } finally {
+            tempFile.delete()
+        }
+    }
 }

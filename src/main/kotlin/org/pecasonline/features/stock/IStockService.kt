@@ -13,4 +13,5 @@ interface IStockService {
     fun findStockBySupplierName(name: String, page: Int? = 0, size: Int? = 10): Page<Stock>
     fun createStock(file: File, emailAddress: String = "", token: String? = null, cnpj: String? = null, originalFileName: String? = null)
     fun validateStockFile(file: File): org.pecasonline.features.stock.dto.StockValidationResult
+    fun formatStockFile(file: File, codeCol: Int, qtyCol: Int, priceCol: Int, descCol: Int, delimiter: String): File
 }

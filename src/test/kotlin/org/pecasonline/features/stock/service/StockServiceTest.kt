@@ -113,4 +113,65 @@ class StockServiceTest {
             stockService.findStockById(99)
         }
     }
+
+    @Test
+    fun `validateStockFile should auto-normalize comma separated files`() {
+        val tempFile = java.io.File.createTempFile("test_comma", ".csv")
+        tempFile.writeText("CODE1, 10, 15.00, Descricao teste\nCODE2, 5, 2.00, Outra peca")
+        
+        try {
+            val result = stockService.validateStockFile(tempFile)
+            assertEquals(2, result.validLinesCount)
+            assertEquals(0, result.invalidLinesCount)
+            assertEquals("CODE1", result.validLines[0].code)
+            assertEquals(1500L, result.validLines[0].priceInCents)
+        } finally {
+            tempFile.delete()
+        }
+    }
+
+    @Test
+    fun `validateStockFile should auto-normalize pipe separated files`() {
+        val tempFile = java.io.File.createTempFile("test_pipe", ".txt")
+        tempFile.writeText("CODE1| 10 | 15.00 | Descricao teste\nCODE2| 5 | 2.00 | Outra peca")
+        
+        try {
+            val result = stockService.validateStockFile(tempFile)
+            assertEquals(2, result.validLinesCount)
+            assertEquals(1500L, result.validLines[0].priceInCents)
+            assertEquals(200L, result.validLines[1].priceInCents)
+        } finally {
+            tempFile.delete()
+        }
+    }
+
+    @Test
+    fun `validateStockFile should auto-normalize tab separated files`() {
+        val tempFile = java.io.File.createTempFile("test_tab", ".tsv")
+        tempFile.writeText("CODE1\t10\t1500\tDescricao teste\nCODE2\t5\t200\tOutra peca")
+        
+        try {
+            val result = stockService.validateStockFile(tempFile)
+            assertEquals(2, result.validLinesCount)
+            assertEquals("CODE1", result.validLines[0].code)
+            assertEquals("Descricao teste", result.validLines[0].description)
+        } finally {
+            tempFile.delete()
+        }
+    }
+
+    @Test
+    fun `validateStockFile should handle separators inside quotes safely`() {
+        val tempFile = java.io.File.createTempFile("test_quotes", ".csv")
+        tempFile.writeText("CODE1, 10, \"1,500.00\", \"Descricao com virgula, teste\"\nCODE2, 5, 200, Outra peca")
+        
+        try {
+            val result = stockService.validateStockFile(tempFile)
+            assertEquals(2, result.validLinesCount)
+            assertEquals("CODE1", result.validLines[0].code)
+            assertEquals("Descricao com virgula, teste", result.validLines[0].description.replace("\"", ""))
+        } finally {
+            tempFile.delete()
+        }
+    }
 }
