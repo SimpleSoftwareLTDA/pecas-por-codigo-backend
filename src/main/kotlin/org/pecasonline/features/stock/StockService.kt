@@ -240,20 +240,19 @@ class StockService(
         formattedFile.bufferedWriter(Charsets.UTF_8).use { writer ->
             Files.lines(file.toPath()).use { lines ->
                 lines.asSequence()
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .forEach { line ->
-                        val columns = line.split(actualDelimiter)
-                        if (columns.size > maxOf(codeCol, qtyCol, priceCol, descCol)) {
-                            val code = columns[codeCol].trim()
-                            val qty = columns[qtyCol].trim()
-                            val price = columns[priceCol].trim()
-                            val desc = columns[descCol].trim()
-                            
-                            if (code.isNotEmpty() && desc.isNotEmpty()) {
-                                writer.write("$code;$qty;$price;$desc\n")
-                            }
-                        }
+                    .mapNotNull {
+                        // Aplica o motor TDD para ignorar linhas inválidas, higienizar ints e aplicar fallback
+                        extractAndSanitizeRow(
+                            line = it,
+                            delimiter = actualDelimiter,
+                            codeCol = codeCol,
+                            qtyCol = qtyCol,
+                            priceCol = priceCol,
+                            descCol = descCol
+                        )
+                    }
+                    .forEach { parsed ->
+                        writer.write("${parsed.code};${parsed.quantityStr};${parsed.priceStr};${parsed.description}\n")
                     }
             }
         }
@@ -431,60 +430,83 @@ class StockService(
             Files.copy(file.inputStream, it, StandardCopyOption.REPLACE_EXISTING)
         }
 
-    internal fun parseStockLine(line: String): Stock? {
+    companion object {
+        private val STOCK_PARSER_REGEX = Regex("^(\\S.*?)\\s+([\\d.,]+)\\s+([\\d.,]+)(?:\\s+(.*))?$")
+        private val DECIMAL_CLEANER_REGEX = Regex("[.,]")
+    }
+
+    internal data class ParsedRawStock(val code: String, val quantityStr: String, val priceStr: String, val description: String)
+
+    internal fun extractAndSanitizeRow(
+        line: String,
+        delimiter: String = "",
+        codeCol: Int = 0,
+        qtyCol: Int = 1,
+        priceCol: Int = 2,
+        descCol: Int = 3
+    ): ParsedRawStock? {
         val trimmedLine = line.trim()
         if (trimmedLine.isEmpty()) return null
 
+        val isCustomDelimiterValid = delimiter.isNotEmpty() && trimmedLine.contains(delimiter)
+        
         val columns: List<String>
-        if (trimmedLine.contains(';')) {
+        var isRegexUsed = false
+
+        if (isCustomDelimiterValid) {
+            columns = trimmedLine.split(delimiter).map { it.trim() }
+        } else if (trimmedLine.contains(';')) {
             columns = trimmedLine.split(';').map { it.trim() }
         } else if (trimmedLine.contains('\t')) {
             columns = trimmedLine.split('\t').map { it.trim() }
         } else {
-            // Regex Option 1: Safely extracts exactly 4 groups correctly regardless of space lengths
-            // Group 1: Code (starts with non-white, until quantity)
-            // Group 2: Quantity (digits, dot, commas - e.g. 2.467)
-            // Group 3: Price (digits, dot, commas)
-            // Group 4: Description (everything else)
-            val match = Regex("^(\\S.*?)\\s+([\\d.,]+)\\s+([\\d.,]+)(?:\\s+(.*))?$").find(trimmedLine)
-            columns = if (match != null) {
-                listOf(
+            val match = STOCK_PARSER_REGEX.find(trimmedLine)
+            if (match != null) {
+                columns = listOf(
                     match.groupValues[1].trim(),
                     match.groupValues[2].trim(),
                     match.groupValues[3].trim(),
                     match.groupValues[4].trim()
                 )
+                isRegexUsed = true
             } else {
-                emptyList()
+                columns = emptyList()
             }
         }
 
-        if (columns.size < 4) return null
+        // Se o Regex foi usado, as posições assumem o formato padronizado (0, 1, 2, 3).
+        val actualCodeCol = if (isRegexUsed) 0 else codeCol
+        val actualQtyCol = if (isRegexUsed) 1 else qtyCol
+        val actualPriceCol = if (isRegexUsed) 2 else priceCol
+        val actualDescCol = if (isRegexUsed) 3 else descCol
 
-        val code = columns[0]
+        if (columns.size <= maxOf(actualCodeCol, actualQtyCol, actualPriceCol, actualDescCol)) return null
 
-        val quantityStr = columns[1]
-        val priceStr = columns[2]
-        val description = columns[3]
-        
-        // Detect scientific notation corruption (e.g., "7,90E+12"). 
-        // These are lossy conversions from Excel and should be treated as errors.
-        if (code.contains("E+", ignoreCase = true) || code.isEmpty()) {
+        val rawCode = columns[actualCodeCol]
+        val rawQty = columns[actualQtyCol]
+        val rawPrice = columns[actualPriceCol]
+        val rawDesc = columns[actualDescCol]
+
+        if (rawCode.contains("E+", ignoreCase = true) || rawCode.isEmpty()) {
             return null
         }
 
-        // Sanitize quantity by removing dots and commas to treat "2.467" as 2467 units.
-        val sanitizedQuantityStr = quantityStr.replace(Regex("[.,]"), "")
-        val quantity = sanitizedQuantityStr.toIntOrNull() ?: 0
-        
-        val priceInCents = if (priceStr.isBlank()) 0L else parseMonetaryToCents(priceStr)
+        val sanitizedQty = rawQty.replace(DECIMAL_CLEANER_REGEX, "")
+        val finalDesc = if (rawDesc.isEmpty()) "Sem descrição" else rawDesc
 
-        val finalDescription = if (description.isEmpty()) "Sem descrição" else description
+        return ParsedRawStock(code = rawCode, quantityStr = sanitizedQty, priceStr = rawPrice, description = finalDesc)
+    }
+
+    internal fun parseStockLine(line: String): Stock? {
+        val parsedRow = extractAndSanitizeRow(line) ?: return null
+
+        val quantity = parsedRow.quantityStr.toIntOrNull() ?: 0
+        val priceInCents = if (parsedRow.priceStr.isBlank()) 0L else parseMonetaryToCents(parsedRow.priceStr)
 
         val item = Item.buildFromMinimalProperties(
-            code = code,
+            code = parsedRow.code,
             priceInCents = priceInCents,
-            description = finalDescription
+            description = parsedRow.description
         )
 
         return Stock(quantity = quantity, item = item)

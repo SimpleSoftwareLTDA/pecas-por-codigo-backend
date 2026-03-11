@@ -1,4 +1,5 @@
-const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
+const API_BASE = 'http://localhost:8080/api/v1';
+// const API_BASE = 'httpz://backend.pecasporcodigo.com.br/api/v1';
 
 // --- Feature Flags ---
 const FLAGS = {
@@ -558,10 +559,21 @@ async function validateAndPreviewFile(file) {
         return false;
     }
 
+    const verifyBtn = document.getElementById('verifyBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const originalVerifyHtml = verifyBtn ? verifyBtn.innerHTML : '';
+
     try {
         if (validationMessages) {
             validationMessages.innerHTML = '<div class="validation-message"><i class="fas fa-spinner fa-spin"></i> Validando arquivo no servidor...</div>';
         }
+
+        // Disable buttons and show loading state on Verify Button
+        if (verifyBtn) {
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+        }
+        if (uploadBtn) uploadBtn.disabled = true;
 
         const formData = new FormData();
         formData.append('file', file);
@@ -634,6 +646,12 @@ async function validateAndPreviewFile(file) {
         console.error('Error validating file:', err);
         showValidationMessage('Erro ao comunicar com o servidor para validar o arquivo.', 'error');
         return false;
+    } finally {
+        if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = originalVerifyHtml;
+        }
+        if (uploadBtn) uploadBtn.disabled = false;
     }
 }
 
