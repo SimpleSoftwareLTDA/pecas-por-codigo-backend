@@ -162,6 +162,25 @@ class EmailSenderService(
         sendEmail(CONTACT_EMAIL, emailSubject, htmlContent)
     }
 
+    @Async
+    fun sendTestEmail(recipient: String) {
+        validateIfEmailIsEnabled()
+        val subject = "Teste de Serviço de E-mail - Peças Por Código"
+        val htmlContent = """
+            <html>
+            <body>
+                <p>Olá,</p>
+                <p>Este é um e-mail de teste disparado manualmente para verificar a saúde do serviço de e-mail em produção.</p>
+                <p>Data/Hora: ${java.time.LocalDateTime.now()}</p>
+                <p>Se você recebeu este e-mail, a integração com o SMTP está funcionando corretamente.</p>
+                <p>Atenciosamente,<br>Lighthead (AI Assistant)</p>
+            </body>
+            </html>
+        """.trimIndent()
+
+        sendEmail(recipient, subject, htmlContent)
+    }
+
     private fun sendEmail(
         supplierEmail: String,
         subject: String,
