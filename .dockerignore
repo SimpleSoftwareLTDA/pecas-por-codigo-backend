@@ -17,7 +17,7 @@ wrangler.jsonc
 api-docs
 api-tests.http
 generate_local_traffic.ps1
-grafana-dashboard.json
+monitoring/grafana-dashboard.json
 monitoring
 redis.conf
 run.ps1
