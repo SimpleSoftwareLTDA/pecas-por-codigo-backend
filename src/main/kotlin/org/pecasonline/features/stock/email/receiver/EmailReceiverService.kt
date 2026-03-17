@@ -16,11 +16,7 @@ import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.*
 import java.lang.System.getProperties
@@ -161,21 +157,6 @@ class EmailReceiverService(
             }
         }
         return lineCount >= 3
-    }
-}
-
-
-@RestController
-@RequestMapping("/email")
-class EmailController(
-    private val emailReceiverService: EmailReceiverService
-) {
-
-    @GetMapping("/receive")
-    fun receiveEmails(): ResponseEntity<String> {
-        emailReceiverService.receiveEmails()
-
-        return ResponseEntity.ok("E-mails processados com sucesso!")
     }
 }
 
