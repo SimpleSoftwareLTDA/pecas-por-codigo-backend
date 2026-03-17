@@ -14,7 +14,7 @@ COPY build.gradle.kts gradle.properties settings.gradle.kts ./
 RUN chmod +x ./gradlew
 
 # Pre-download dependencies (improves build speed on subsequent runs)
-RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew dependencies --no-daemon > /dev/null
 
 # Copy source code and build
 COPY src src

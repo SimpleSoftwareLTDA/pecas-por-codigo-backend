@@ -13,7 +13,7 @@ COPY gradlew ./
 COPY gradle gradle
 COPY build.gradle.kts gradle.properties settings.gradle.kts ./
 RUN chmod +x ./gradlew
-RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew dependencies --no-daemon > /dev/null
 
 COPY src src
 RUN ./gradlew nativeCompile -Dorg.gradle.daemon=false --no-daemon -x generateGitProperties
