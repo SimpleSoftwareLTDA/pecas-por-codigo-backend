@@ -47,13 +47,14 @@ class EmailReceiverService(
 
             val inbox = emailStore.getFolder(inboxFolder)
 
-            inbox.use { emailInbox ->
-                emailInbox.open(Folder.READ_WRITE)
+                inbox.use { emailInbox ->
+                    emailInbox.open(Folder.READ_WRITE)
 
-                val messages = emailInbox.messages.filter { it.flags.contains(Flag.SEEN) }
+                    // Process only unread messages to avoid reprocessing the same emails over and over.
+                    val messages = emailInbox.messages.filter { !it.flags.contains(Flag.SEEN) }
 
-                for (message in messages) {
-                    logger.info { "Processando mensagem: ${message.subject}" }
+                    for (message in messages) {
+                        logger.info { "Processando mensagem: ${message.subject}" }
 
                     val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
 
