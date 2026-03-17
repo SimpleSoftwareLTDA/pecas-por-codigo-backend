@@ -1,5 +1,5 @@
-const API_BASE = 'http://localhost:8080/api/v1';
-// const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
+// const API_BASE = 'http://localhost:8080/api/v1';
+const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
 
 // --- Feature Flags ---
 const FLAGS = {
