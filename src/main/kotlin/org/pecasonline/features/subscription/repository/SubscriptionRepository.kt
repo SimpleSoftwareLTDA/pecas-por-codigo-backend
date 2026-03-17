@@ -14,6 +14,14 @@ interface SubscriptionRepository: JpaRepository<Subscription, Long> {
     @Query("SELECT s.bigBannerUrl FROM signature s")
     fun findBigBannerUrls(): List<String?>
 
+    @Query("""
+        SELECT s.cnpj, sig.big_banner_url 
+        FROM signature sig 
+        JOIN supplier s ON sig.supplier_id = s.id 
+        WHERE sig.big_banner_url IS NOT NULL AND sig.big_banner_url != ''
+    """, nativeQuery = true)
+    fun findBigBannerDetails(): List<Array<Any>>
+
     @Transactional
     @Modifying
     @Query("""

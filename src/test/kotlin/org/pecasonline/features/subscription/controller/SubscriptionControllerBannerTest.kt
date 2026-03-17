@@ -8,10 +8,12 @@ import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.subscription.service.SubscriptionService
+import org.pecasonline.features.subscription.dto.BannerDetail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
@@ -102,5 +104,44 @@ class SubscriptionControllerBannerTest(@Autowired val mockMvc: MockMvc) {
             }
 
         verify { subscriptionService.getBigBannerUrls() }
+    }
+
+    @Test
+    fun `should return all banner details`() {
+        // Given
+        val bannerDetails = listOf(
+            BannerDetail(cnpj = "12.345.678/0001-95", url = "https://example.com/banner1.jpg"),
+            BannerDetail(cnpj = "98.765.432/0001-10", url = "https://example.com/banner2.jpg")
+        )
+        every { subscriptionService.getBannerDetails() } returns bannerDetails
+
+        // When & Then
+        mockMvc.get("/api/v1/banner/details")
+            .andExpect {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$[0].cnpj") { value(bannerDetails[0].cnpj) }
+                jsonPath("$[0].url") { value(bannerDetails[0].url) }
+                jsonPath("$[1].cnpj") { value(bannerDetails[1].cnpj) }
+                jsonPath("$[1].url") { value(bannerDetails[1].url) }
+            }
+
+        verify { subscriptionService.getBannerDetails() }
+    }
+
+    @Test
+    fun `should delete a banner URL for a supplier`() {
+        // Given
+        val cnpj = "12345678000195"
+        every { subscriptionService.removeBigBannerUrlForSupplier(any()) } returns Unit
+
+        // When & Then
+        mockMvc.delete("/api/v1/banner") {
+            param("cnpj", cnpj)
+        }.andExpect {
+            status { isNoContent() }
+        }
+
+        verify { subscriptionService.removeBigBannerUrlForSupplier(cnpj) }
     }
 }

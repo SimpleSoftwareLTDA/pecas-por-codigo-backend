@@ -1,5 +1,5 @@
-// const API_BASE = 'http://localhost:8080/api/v1';
-const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
+const API_BASE = 'http://localhost:8080/api/v1';
+// const API_BASE = 'https://backend.pecasporcodigo.com.br/api/v1';
 
 // --- Feature Flags ---
 const FLAGS = {
@@ -824,7 +824,7 @@ window.copyToClipboard = async (text) => {
 async function fetchBanners() {
     try {
         setLoader('bannersLoader', true);
-        const response = await fetch(`${API_BASE}/banner/all`);
+        const response = await fetch(`${API_BASE}/banner/details`);
 
         if (!response.ok) throw new Error('Failed to fetch banners');
 
@@ -859,17 +859,47 @@ function renderBanners(banners) {
         return;
     }
 
-    const html = banners.map((url, index) => `
+    const html = banners.map((banner, index) => `
         <div class="banner-item">
-            <img src="${url}" alt="Banner ${index + 1}" class="banner-preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22200%22%3E%3Crect fill=%22%23334155%22 width=%22800%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2224%22%3EImagem não disponível%3C/text%3E%3C/svg%3E'">
+            <img src="${banner.url}" alt="Banner ${index + 1}" class="banner-preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22200%22%3E%3Crect fill=%22%23334155%22 width=%22800%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2224%22%3EImagem não disponível%3C/text%3E%3C/svg%3E'">
             <div class="banner-info">
-                <div class="banner-url">${url}</div>
+                <div class="banner-url">${banner.url}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">CNPJ: ${banner.cnpj}</div>
+                <div class="banner-actions" style="margin-top: 1rem;">
+                    <button class="btn-copy" onclick="copyToClipboard('${banner.url}')">
+                        <i class="fas fa-copy"></i> Copiar URL
+                    </button>
+                    <button class="btn-copy" style="border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1);" onclick="removeBanner('${banner.cnpj}')">
+                        <i class="fas fa-trash"></i> Remover
+                    </button>
+                </div>
             </div>
         </div>
     `).join('');
 
     bannersList.innerHTML = html;
 }
+
+window.removeBanner = async (cnpj) => {
+    if (!confirm(`Tem certeza que deseja remover o banner do CNPJ ${cnpj}?`)) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/banner?cnpj=${encodeURIComponent(cnpj)}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showBannerMessage('✓ Banner removido com sucesso!', 'success');
+            setTimeout(() => fetchBanners(), 500);
+        } else {
+            const errorText = await response.text();
+            showBannerMessage(`Erro ao remover banner: ${errorText}`, 'error');
+        }
+    } catch (err) {
+        console.error('Error removing banner:', err);
+        showBannerMessage('Erro de conexão ao remover banner', 'error');
+    }
+};
 
 // --- General Helpers ---
 function setLoader(id, show) {

@@ -7,10 +7,12 @@ import org.pecasonline.common.httpclients.dto.CreateClientRequest
 import org.pecasonline.common.httpclients.dto.CreateClientResponse
 import org.pecasonline.features.banking.BankingService
 import org.pecasonline.features.subscription.dto.AsaasWebhook
+import org.pecasonline.features.subscription.dto.BannerDetail
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -64,8 +66,20 @@ class SubscriptionController(
         meterRegistry.counter("banner.update", "cnpj", normalizedCnpj).increment()
     }
 
+    @DeleteMapping("/api/v1/banner")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteBanner(@RequestParam("cnpj") @CNPJ cnpj: String) {
+        subscriptionService.removeBigBannerUrlForSupplier(cnpj)
+        meterRegistry.counter("banner.delete", "cnpj", cnpj).increment()
+    }
+
     @GetMapping("/api/v1/banner/all")
     fun getAllBannerUrls(): List<String> {
         return subscriptionService.getBigBannerUrls().filter { it.isNotBlank() }
+    }
+
+    @GetMapping("/api/v1/banner/details")
+    fun getAllBannerDetails(): List<BannerDetail> {
+        return subscriptionService.getBannerDetails()
     }
 }

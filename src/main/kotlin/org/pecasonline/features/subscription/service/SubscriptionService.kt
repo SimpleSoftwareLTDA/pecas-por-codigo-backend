@@ -6,6 +6,7 @@ import org.pecasonline.features.banking.BankingService
 import org.pecasonline.common.httpclients.dto.CreateSubscriptionRequest
 import org.pecasonline.features.plan.IPlanService
 import org.pecasonline.features.subscription.constants.SubscriptionPlan
+import org.pecasonline.features.subscription.dto.BannerDetail
 import org.pecasonline.features.subscription.dto.CreateSubscription
 import org.pecasonline.features.subscription.entities.InvalidSubscriptionException
 import org.pecasonline.features.subscription.entities.Subscription
@@ -139,6 +140,25 @@ class SubscriptionService(
             bigBannerUrl = newBannerUrl
         )
     }
+
+    fun removeBigBannerUrlForSupplier(cnpj: String) {
+        val normalizedCnpj = formatCnpj(cnpj)
+        val supplier = supplierRepository.findSupplierByCnpj(normalizedCnpj)
+            ?: throw IllegalArgumentException("Fornecedor com CNPJ: $cnpj não encontrado.")
+
+        subscriptionRepository.updateBigBannerUrlByCnpj(
+            cnpj = supplier.cnpj,
+            bigBannerUrl = ""
+        )
+    }
+
+    fun getBannerDetails(): List<BannerDetail> =
+        subscriptionRepository.findBigBannerDetails().map {
+            BannerDetail(
+                cnpj = it[0] as String,
+                url = it[1] as String
+            )
+        }
 }
 
 fun String.toSubscriptionStatus(): SubscriptionStatus = when (this) {
