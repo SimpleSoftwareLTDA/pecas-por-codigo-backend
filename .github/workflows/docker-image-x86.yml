@@ -1,0 +1,43 @@
+name: Docker Image x86 CI
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - 'frontend-admin/**'
+  pull_request:
+    branches: ["main"]
+    paths-ignore:
+      - 'frontend-admin/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-push-x86:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set short git commit SHA
+        id: short_sha
+        run: echo "sha=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push x86 image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            randintn/novo-pecas-online:x86-${{ steps.short_sha.outputs.sha }}
+            randintn/novo-pecas-online:latest-x86
