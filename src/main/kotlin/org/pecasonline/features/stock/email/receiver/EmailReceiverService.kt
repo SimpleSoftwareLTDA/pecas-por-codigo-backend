@@ -5,7 +5,6 @@ import jakarta.mail.Flags.Flag
 import jakarta.mail.Folder
 import jakarta.mail.Message
 import jakarta.mail.Part.ATTACHMENT
-import jakarta.mail.Session
 import jakarta.mail.internet.MimeMultipart
 import org.pecasonline.features.stock.IStockService
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.costRegex
@@ -19,7 +18,6 @@ import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.*
-import java.lang.System.getProperties
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
 
@@ -37,55 +35,42 @@ class EmailReceiverService(
     @Value("\${spring.mail.imap.processed-folder:}") private val processedFolder: String
 ) {
 
-    fun receiveEmails() {
-        val session = Session.getDefaultInstance(getProperties(), null)
+    fun handleReceivedEmail(message: Message) {
+        logger.info { "Processando mensagem: ${message.subject}" }
 
-        val store = session.getStore("imaps")
+        val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
 
-        store.use { emailStore ->
-            emailStore.connect(host, username, password)
+        supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
 
-            val inbox = emailStore.getFolder(inboxFolder)
+            supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
+                subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
+            }
 
-                inbox.use { emailInbox ->
-                    emailInbox.open(Folder.READ_WRITE)
+            processAttachments(message, senderEmail = senderEmail, supplierCnpj = cnpj)
 
-                    // Process only unread messages to avoid reprocessing the same emails over and over.
-                    val messages = emailInbox.messages.filter { !it.flags.contains(Flag.SEEN) }
+            message.setFlag(Flag.SEEN, true)
 
-                    for (message in messages) {
-                        logger.info { "Processando mensagem: ${message.subject}" }
+            if (processedFolder.isNotEmpty()) {
+                val folder = message.folder
+                if (folder != null && folder.isOpen) {
+                    val store = folder.store
+                    val processed = store.getFolder(processedFolder)
 
-                    val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
+                    if (!processed.exists()) {
+                        processed.create(Folder.HOLDS_MESSAGES)
+                    }
 
-                    supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
-
-                        supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
-                            subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
-                        }
-
-                        processAttachments(message, senderEmail = senderEmail, supplierCnpj = cnpj)
-
-                        message.setFlag(Flag.SEEN, true)
-
-                        if (processedFolder.isNotEmpty()) {
-                            val processed = emailStore.getFolder(processedFolder)
-
-                            if (!processed.exists()) {
-                                processed.create(Folder.HOLDS_MESSAGES)
-                            }
-
-                            emailInbox.copyMessages(arrayOf(message), processed)
-                        }
-                    } ?: error("CNPJ não cadastrado")
+                    folder.copyMessages(arrayOf(message), processed)
+                } else {
+                    logger.warn { "Não foi possível mover a mensagem pois a pasta está fechada ou nula." }
                 }
             }
-        }
+        } ?: error("CNPJ não cadastrado")
     }
 
     private fun processAttachments(message: Message, senderEmail: String, supplierCnpj: String?) {
 
-        supplierCnpj?.let { cnpj ->
+        supplierCnpj?.let { _ ->
             if (message.isMimeType("multipart/*")) {
                 val multipart = message.content as MimeMultipart
 
@@ -94,15 +79,15 @@ class EmailReceiverService(
 
                     when {
                         bodyPart.size > 50 * 1024 * 1024 -> { // Limite de 50 MB
-                            logger.error { "Arquivo muito grande para ser processado: \${bodyPart.size} bytes" }
+                            logger.error { $$"Arquivo muito grande para ser processado: ${bodyPart.size} bytes" }
                             return
                         }
 
                         ATTACHMENT.equals(bodyPart.disposition, ignoreCase = true) -> {
                             val fileName = bodyPart.fileName
 
-                            if (fileName.endsWith(".txt")) {
-                                logger.info { "Arquivo .txt: $fileName encontrado no e-mail, verificando se a estrutura dele é válida..." }
+                            if (fileName.endsWith(".txt") || fileName.endsWith(".csv")) {
+                                logger.info { "Arquivo anexo: $fileName encontrado no e-mail, verificando se a estrutura dele é válida..." }
 
                                 // Read attachment once and convert to UTF-8 if needed (handles ANSI/Windows-1252)
                                 val originalBytes = bodyPart.inputStream.use { it.readBytes() }
