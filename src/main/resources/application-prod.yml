@@ -28,6 +28,7 @@ spring:
     imap:
       enabled: true
       inbox-folder: INBOX
+      spam-folder: "[Gmail]/Spam"
       processed-folder: Processed
 springdoc:
   api-docs:

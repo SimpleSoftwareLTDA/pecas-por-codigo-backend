@@ -38,9 +38,15 @@ class EmailReceiverService(
     fun handleReceivedEmail(message: Message) {
         logger.info { "Processando mensagem: ${message.subject}" }
 
+        if (!hasValidAttachment(message)) {
+            logger.info { "E-mail ignorado: não contém anexo .txt ou .csv" }
+            return
+        }
+
         val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
 
         supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
+            logger.info { "Fornecedor identificado com sucesso: $senderEmail (CNPJ: $cnpj)" }
 
             supplierRepository.findSupplierByEmail(senderEmail)?.let { supplier ->
                 subscriptionService.checkIfSubscriptionIsActiveOrThrow(supplier, cnpj)
@@ -61,11 +67,30 @@ class EmailReceiverService(
                     }
 
                     folder.copyMessages(arrayOf(message), processed)
+                    logger.info { "E-mail '${message.subject}' movido para a pasta $processedFolder" }
                 } else {
                     logger.warn { "Não foi possível mover a mensagem pois a pasta está fechada ou nula." }
                 }
             }
         } ?: error("CNPJ não cadastrado")
+    }
+
+    private fun hasValidAttachment(message: Message): Boolean {
+        if (!message.isMimeType("multipart/*")) return false
+
+        return runCatching {
+            val multipart = message.content as MimeMultipart
+            for (i in 0 until multipart.count) {
+                val bodyPart = multipart.getBodyPart(i)
+                if (ATTACHMENT.equals(bodyPart.disposition, ignoreCase = true)) {
+                    val fileName = bodyPart.fileName?.lowercase() ?: ""
+                    if (fileName.endsWith(".txt") || fileName.endsWith(".csv")) {
+                        return@runCatching true
+                    }
+                }
+            }
+            false
+        }.getOrDefault(false)
     }
 
     private fun processAttachments(message: Message, senderEmail: String, supplierCnpj: String?) {
@@ -87,31 +112,25 @@ class EmailReceiverService(
                             val fileName = bodyPart.fileName
 
                             if (fileName.endsWith(".txt") || fileName.endsWith(".csv")) {
-                                logger.info { "Arquivo anexo: $fileName encontrado no e-mail, verificando se a estrutura dele é válida..." }
+                                logger.info { "Arquivo anexo: $fileName (${bodyPart.size / 1024} KB) aprovado para processamento." }
 
                                 // Read attachment once and convert to UTF-8 if needed (handles ANSI/Windows-1252)
                                 val originalBytes = bodyPart.inputStream.use { it.readBytes() }
                                 val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(originalBytes)
-                                val utf8Text = String(utf8Bytes, StandardCharsets.UTF_8)
 
-                                val bufferedReader = BufferedReader(StringReader(utf8Text))
+                                logger.info { "Enviando arquivo para o StockService processar..." }
 
-                                if (isValidFileStructure(bufferedReader)) {
-                                    logger.info { "Estrutura do arquivo válida. Processando..." }
+                                runCatching {
+                                    val tempFile = File.createTempFile("upload-", "-$fileName")
+                                    tempFile.outputStream().use { it.write(utf8Bytes) }
 
-                                    runCatching {
-                                        // Persist UTF-8 content to a temp file for processing
-                                        val tempFile = File.createTempFile("upload-", "-$fileName")
-                                        tempFile.outputStream().use { it.write(utf8Bytes) }
-
-                                        stockService.createStock(
-                                            file = tempFile,
-                                            emailAddress = senderEmail,
-                                            originalFileName = fileName
-                                        )
-                                    }.onFailure { ex ->
-                                        logger.error(ex) { "Erro ao processar arquivo" }
-                                    }
+                                    stockService.createStock(
+                                        file = tempFile,
+                                        emailAddress = senderEmail,
+                                        originalFileName = fileName
+                                    )
+                                }.onFailure { ex ->
+                                    logger.error(ex) { "Erro ao processar arquivo" }
                                 }
                             }
                         }
@@ -120,41 +139,17 @@ class EmailReceiverService(
             }
         } ?: logger.error { "CNPJ e E-MAIL não cadastrados" }
     }
-
-    private fun isValidFileStructure(reader: BufferedReader): Boolean {
-        var lineCount = 0
-
-        reader.useLines { lines ->
-            for (line in lines) {
-                val fields = line.trim().split(RegexPatterns.whitespaceRegex, 4)
-
-                when {
-                    fields.size != 4 ||
-                            !productCodeRegex.matcher(fields[0]).matches() ||
-                            !quantityRegex.matcher(fields[1]).matches() ||
-                            !costRegex.matcher(fields[2]).matches()
-                        -> return false
-
-                    else -> {
-                        lineCount++
-                        if (lineCount >= 3) break
-                    }
-                }
-            }
-        }
-        return lineCount >= 3
-    }
 }
 
 object RegexPatterns {
-    val productCodeRegex = Pattern.compile("[a-zA-Z0-9]+")
+    val productCodeRegex = Pattern.compile("[a-zA-Z0-9.\\- ]+")
     val quantityRegex = Pattern.compile("\\d+")
     // Allow prices with optional thousand separators and either ',' or '.' as decimal separator
     // Examples: 89,427.27 | 1.005,47 | 999.86 | 999,86 | 1000
     val costRegex = Pattern.compile("\\d[\\d.,]*(?:[.,]\\d{2})?")
     val emailRegex = Pattern.compile("<(.*?)>|([\\w.-]+@[\\w.-]+\\.[\\w]{2,})").matcher("")
-    // Split fields only by tab or semicolon as per specification
-    val whitespaceRegex = Pattern.compile("[\\t;]+")
+    // Split fields only by tab or semicolon as per specification, or 2 or more spaces
+    val whitespaceRegex = Pattern.compile("[\\t;]+|\\s{2,}")
 }
 
 class CustomMultipartFile(

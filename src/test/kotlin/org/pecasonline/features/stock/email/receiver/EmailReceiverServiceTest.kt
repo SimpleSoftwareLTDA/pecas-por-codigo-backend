@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.pecasonline.common.encoding.EncodingUtils
 import org.pecasonline.features.stock.IStockService
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.domain.Supplier
@@ -106,6 +107,47 @@ class EmailReceiverServiceTest {
         assertTrue(createdFile.exists())
         assertEquals(validStockContent(), createdFile.readText())
         
+        createdFile.delete()
+    }
+
+    @Test
+    @DisplayName("Should process a .txt attachment using content from src/test/resources")
+    fun `should process txt attachment from test resources`() {
+        val resourceName = "email_attachment_sample.txt"
+        val resourceBytes = readTestResourceBytes(resourceName)
+
+        // Arrange
+        val message = setupMockEmailMessage(
+            fileName = resourceName,
+            contentType = "multipart/mixed",
+            customBytes = resourceBytes,
+            overrideSize = resourceBytes.size
+        )
+        setupMockDependencies()
+
+        val fileSlot = slot<File>()
+        every {
+            stockService.createStock(
+                capture(fileSlot),
+                emailAddress = validEmailFrom,
+                originalFileName = resourceName
+            )
+        } returns Unit
+
+        // Act
+        emailReceiverService.handleReceivedEmail(message)
+
+        // Assert
+        verify(exactly = 1) { stockService.createStock(any(), emailAddress = validEmailFrom, originalFileName = resourceName) }
+        verify(exactly = 1) { message.setFlag(Flags.Flag.SEEN, true) }
+
+        val createdFile = fileSlot.captured
+        assertTrue(createdFile.exists())
+
+        // The service normalizes attachment bytes to UTF-8 before persisting to temp file.
+        val expectedUtf8Bytes = EncodingUtils.toUtf8Bytes(resourceBytes)
+        assertEquals(String(expectedUtf8Bytes, Charsets.UTF_8), createdFile.readText(Charsets.UTF_8))
+
         createdFile.delete()
     }
 
@@ -203,7 +245,13 @@ class EmailReceiverServiceTest {
         every { subscriptionService.checkIfSubscriptionIsActiveOrThrow(mockSupplier, validCnpj) } returns Unit
     }
 
-    private fun setupMockEmailMessage(fileName: String, contentType: String, customContent: String? = null, overrideSize: Int = 1024): Message {
+    private fun setupMockEmailMessage(
+        fileName: String,
+        contentType: String,
+        customContent: String? = null,
+        customBytes: ByteArray? = null,
+        overrideSize: Int = 1024
+    ): Message {
         val message = mockk<MimeMessage>(relaxed = true)
         
         // Mock From Address
@@ -238,10 +286,16 @@ class EmailReceiverServiceTest {
         every { bodyPart.disposition } returns Part.ATTACHMENT
         every { bodyPart.fileName } returns fileName
         
-        val contentBytes = (customContent ?: validStockContent()).toByteArray()
+        val contentBytes = customBytes ?: (customContent ?: validStockContent()).toByteArray()
         every { bodyPart.inputStream } returns ByteArrayInputStream(contentBytes)
 
         return message
+    }
+
+    private fun readTestResourceBytes(resourceName: String): ByteArray {
+        val stream = this.javaClass.classLoader.getResourceAsStream(resourceName)
+            ?: throw IllegalStateException("Test resource '$resourceName' not found in src/test/resources")
+        return stream.use { it.readBytes() }
     }
 
     private fun validStockContent(): String {

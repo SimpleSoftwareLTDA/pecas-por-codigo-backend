@@ -37,8 +37,7 @@ class StockService(
     private val supplierRepository: SupplierRepository,
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
-    private val subscriptionService: SubscriptionService,
-    private val oldPecasService: OldPecasService
+    private val subscriptionService: SubscriptionService
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -109,7 +108,7 @@ class StockService(
             throw IllegalArgumentException(errorMessage)
         }
 
-        logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $resolvedCnpj (Arquivo: $displayFileName)" }
+        logger.info { "Iniciando atualização de estoque para o fornecedor CNPJ: $resolvedCnpj. Lendo arquivo: $displayFileName, tamanho: ${file.length() / 1024} KB" }
 
         emailSenderService.sendStockProcessingStartNotification(
             supplierEmail = supplier.contact.itemsEmail,
@@ -347,6 +346,8 @@ class StockService(
             val saved = stockRepository.saveAll(newStocks)
             saved.mapNotNull { it.id }.let { updatedIds.addAll(it) }
         }
+        
+        logger.info { "Lote inserido no banco: ${newStocks.size} itens novos, ${updatedStocks.size} estoques atualizados." }
     }
 
     private fun processAllItems(allItems: List<Item>): Map<String, Item> {
@@ -462,6 +463,7 @@ class StockService(
         } else {
             val match = STOCK_PARSER_REGEX.find(trimmedLine)
             if (match != null) {
+                logger.debug { "Delimitador falhou na linha, aplicando Regex de fallback." }
                 columns = listOf(
                     match.groupValues[1].trim(),
                     match.groupValues[2].trim(),

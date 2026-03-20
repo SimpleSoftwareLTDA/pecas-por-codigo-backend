@@ -39,6 +39,7 @@ spring:
     imap:
       enabled: true
       inbox-folder: INBOX
+      spam-folder: "[Gmail]/Spam"
       processed-folder: Processed
 
 springdoc:
@@ -53,6 +54,9 @@ app:
   url: ${CURRENT_URL:http://localhost:8080}
   mail:
     redirect-to: robson.cassiano777@gmail.com
+  local-test:
+    email-receiver:
+      enabled: true
 
 asaas:
   api:
