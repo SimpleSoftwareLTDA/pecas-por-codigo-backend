@@ -22,6 +22,8 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -37,7 +39,8 @@ class StockService(
     private val supplierRepository: SupplierRepository,
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
-    private val subscriptionService: SubscriptionService
+    private val subscriptionService: SubscriptionService,
+    private val meterRegistry: MeterRegistry
 ) : IStockService {
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
@@ -73,6 +76,9 @@ class StockService(
 
     @Async
     override fun createStock(file: File, emailAddress: String, token: String?, cnpj: String?, originalFileName: String?) {
+        val timerSample = Timer.start(meterRegistry)
+        meterRegistry.counter("stock.upload.total").increment()
+
         val resolvedCnpj = token?.let {
             getSupplierByToken(token)
         } ?: cnpj ?: supplierRepository.findSupplierCnpjByEmail(emailAddress)
@@ -98,6 +104,7 @@ class StockService(
         val displayFileName = "${baseFileName}_$dateSuffix$extension"
 
         if (file.length() == 0L) {
+            meterRegistry.counter("stock.upload.error.empty_file").increment()
             val errorMessage = "Arquivo vazio. Selecione um arquivo de estoque com dados para upload."
 
             emailSenderService.sendStockProcessingErrorNotification(
@@ -175,6 +182,8 @@ class StockService(
             )
 
             logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $resolvedCnpj. Total Processado: $totalProcessed. Erros: ${invalidLines.size}" }
+            meterRegistry.counter("stock.upload.lines.valid").increment(totalProcessed.toDouble())
+            meterRegistry.counter("stock.upload.lines.invalid").increment(invalidLines.size.toDouble())
             
             errorFile?.let { 
                 logger.debug { "Error file generated. Deletion will be handled by EmailSenderService after sending." }
@@ -182,6 +191,7 @@ class StockService(
         } finally {
             file.delete()
             logger.info { "Arquivo temporário removido: ${file.path}" }
+            timerSample.stop(meterRegistry.timer("stock.upload.duration"))
         }
     }
 

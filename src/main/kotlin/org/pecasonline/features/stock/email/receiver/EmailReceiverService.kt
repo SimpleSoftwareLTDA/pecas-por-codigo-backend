@@ -1,23 +1,23 @@
 package org.pecasonline.features.stock.email.receiver
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.micrometer.core.instrument.MeterRegistry
 import jakarta.mail.Flags.Flag
 import jakarta.mail.Folder
 import jakarta.mail.Message
 import jakarta.mail.Part.ATTACHMENT
 import jakarta.mail.internet.MimeMultipart
 import org.pecasonline.features.stock.IStockService
-import org.pecasonline.features.stock.email.receiver.RegexPatterns.costRegex
 import org.pecasonline.features.stock.email.receiver.RegexPatterns.emailRegex
-import org.pecasonline.features.stock.email.receiver.RegexPatterns.productCodeRegex
-import org.pecasonline.features.stock.email.receiver.RegexPatterns.quantityRegex
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.repository.SupplierRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
 
@@ -28,6 +28,7 @@ class EmailReceiverService(
     private val stockService: IStockService,
     private val supplierRepository: SupplierRepository,
     private val subscriptionService: SubscriptionService,
+    private val meterRegistry: MeterRegistry,
     @Value("\${spring.mail.properties.mail.imap.host}") private val host: String,
     @Value("\${spring.mail.username}") private val username: String,
     @Value("\${spring.mail.password}") private val password: String,
@@ -37,13 +38,18 @@ class EmailReceiverService(
 
     fun handleReceivedEmail(message: Message) {
         logger.info { "Processando mensagem: ${message.subject}" }
+        meterRegistry.counter("email.receiver.processed.total").increment()
 
         if (!hasValidAttachment(message)) {
             logger.info { "E-mail ignorado: não contém anexo .txt ou .csv" }
+
+            meterRegistry.counter("email.receiver.ignored.no_attachment").increment()
             return
         }
 
         val senderEmail = message.from.firstOrNull()?.toString()?.let { extractEmailAddress(it) } ?: "E-Mail Desconhecido"
+
+        logger.info { "Email identificado com sucesso: $senderEmail" }
 
         supplierRepository.findSupplierCnpjByEmail(senderEmail)?.let { cnpj ->
             logger.info { "Fornecedor identificado com sucesso: $senderEmail (CNPJ: $cnpj)" }
@@ -72,7 +78,10 @@ class EmailReceiverService(
                     logger.warn { "Não foi possível mover a mensagem pois a pasta está fechada ou nula." }
                 }
             }
-        } ?: error("CNPJ não cadastrado")
+        } ?: run {
+            meterRegistry.counter("email.receiver.error.unknown_sender").increment()
+            error("CNPJ não cadastrado")
+        }
     }
 
     private fun hasValidAttachment(message: Message): Boolean {
@@ -104,6 +113,7 @@ class EmailReceiverService(
 
                     when {
                         bodyPart.size > 50 * 1024 * 1024 -> { // Limite de 50 MB
+                            meterRegistry.counter("email.receiver.error.large_attachment").increment()
                             logger.error { $$"Arquivo muito grande para ser processado: ${bodyPart.size} bytes" }
                             return
                         }
@@ -119,6 +129,7 @@ class EmailReceiverService(
                                 val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(originalBytes)
 
                                 logger.info { "Enviando arquivo para o StockService processar..." }
+                                meterRegistry.counter("email.receiver.success").increment()
 
                                 runCatching {
                                     val tempFile = File.createTempFile("upload-", "-$fileName")
