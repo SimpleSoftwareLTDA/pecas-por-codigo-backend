@@ -1,5 +1,6 @@
 package org.pecasonline.features.stock.email.receiver.localtest
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.activation.DataHandler
 import jakarta.mail.Session
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.Properties
+
+private val logger = KotlinLogging.logger {}
 
 //@Profile("local")
 //@ConditionalOnProperty(prefix = "app.local-test.email-receiver", name = ["enabled"], havingValue = "true")
@@ -51,8 +54,11 @@ class LocalEmailReceiverTestController(
         @RequestParam("subject", required = false) subject: String?
     ): ResponseEntity<LocalEmailReceiverResponse> {
         val originalFileName = (file.originalFilename ?: "upload.txt").trim()
+        
+        logger.info { "[LocalTest] Recebida requisição para processar arquivo '$originalFileName' vindo de '$fromEmail'" }
 
         if (!originalFileName.endsWith(".txt", ignoreCase = true) && !originalFileName.endsWith(".csv", ignoreCase = true)) {
+            logger.warn { "[LocalTest] Arquivo rejeitado: '$originalFileName'. O formato deve ser .txt ou .csv." }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 LocalEmailReceiverResponse(
                     ok = false,
@@ -64,6 +70,7 @@ class LocalEmailReceiverTestController(
             )
         }
 
+        logger.debug { "[LocalTest] Construindo MimeMessage simulada com o arquivo em anexo..." }
         val message = buildMimeMessageWithAttachment(
             fromEmail = fromEmail,
             subject = subject ?: "Local test upload - $originalFileName",
@@ -73,7 +80,10 @@ class LocalEmailReceiverTestController(
         )
 
         return runCatching {
+            logger.info { "[LocalTest] MimeMessage construída com sucesso. Invocando EmailReceiverService.handleReceivedEmail()..." }
             emailReceiverService.handleReceivedEmail(message)
+            
+            logger.info { "[LocalTest] Processamento via EmailReceiverService finalizado com sucesso para o arquivo '$originalFileName'." }
             ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 LocalEmailReceiverResponse(
                     ok = true,
@@ -83,6 +93,7 @@ class LocalEmailReceiverTestController(
                 )
             )
         }.getOrElse { ex ->
+            logger.error(ex) { "[LocalTest] Falha ao processar arquivo '$originalFileName' via EmailReceiverService. Motivo: ${ex.message}" }
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 LocalEmailReceiverResponse(
                     ok = false,
