@@ -80,7 +80,7 @@ class EmailReceiverService(
             }
         } ?: run {
             meterRegistry.counter("email.receiver.error.unknown_sender").increment()
-            error("CNPJ não cadastrado")
+            error("CNPJ não cadastrado para o e-mail: $senderEmail")
         }
     }
 
