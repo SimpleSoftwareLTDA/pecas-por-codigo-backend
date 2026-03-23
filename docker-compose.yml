@@ -1,5 +1,8 @@
 services:
   grafana:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile.grafana
     image: randintn/pecas-grafana:v1.0.0
     container_name: grafana
     restart: unless-stopped
@@ -21,6 +24,9 @@ services:
       - tempo
 
   tempo:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile.tempo
     image: randintn/pecas-tempo:v1.0.0
     container_name: tempo
     command: [ "-config.file=/etc/tempo.yml" ]
@@ -75,15 +81,35 @@ services:
       redis:
         condition: service_started
 
+  loki:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile.loki
+    container_name: loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
   otel-collector:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile.otel-collector
     image: randintn/pecas-otel-collector:v1.0.0
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-contrib/config.yml" ]
     ports:
       - "4318:4318"
+    depends_on:
+      - loki
 
   prometheus:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile.prometheus
     image: randintn/pecas-prometheus:v1.0.0
     container_name: prometheus
     restart: unless-stopped
@@ -112,3 +138,4 @@ volumes:
   prometheus_data:
   tempo_data:
   redis_data:
+  loki_data:

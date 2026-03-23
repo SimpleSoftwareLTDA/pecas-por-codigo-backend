@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
+import java.io.InputStream
+import org.apache.poi.ss.usermodel.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -124,36 +126,41 @@ class StockService(
         )
 
         try {
-            val normalizedFile = autoNormalizeFile(file)
+            val isExcel = originalFileName?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
             var totalProcessed = 0
             val updatedIds = mutableSetOf<Long>()
             val invalidLines = mutableListOf<String>()
             val validStockLines = mutableListOf<Stock>()
-
-            try {
-                Files.lines(normalizedFile.toPath()).use { lines ->
-                    lines.asSequence()
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty() }
-                        .forEach { line ->
-                            val stockLine = parseStockLine(line)
-                            if (stockLine == null) {
-                                invalidLines.add(line)
-                            } else {
-                                validStockLines.add(stockLine)
-                                if (validStockLines.size >= 1000) {
-                                    processBatch(validStockLines, supplier, updatedIds)
-                                    totalProcessed += validStockLines.size
-                                    validStockLines.clear()
-                                    logger.info { "Lote processado. Itens acumulados: $totalProcessed" }
+            
+            if (isExcel) {
+                processExcelFile(file, supplier, updatedIds, invalidLines)
+            } else {
+                val normalizedFile = autoNormalizeFile(file)
+                try {
+                    Files.lines(normalizedFile.toPath()).use { lines ->
+                        lines.asSequence()
+                            .map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                            .forEach { line ->
+                                val stockLine = parseStockLine(line)
+                                if (stockLine == null) {
+                                    invalidLines.add(line)
+                                } else {
+                                    validStockLines.add(stockLine)
+                                    if (validStockLines.size >= 1000) {
+                                        processBatch(validStockLines, supplier, updatedIds)
+                                        totalProcessed += validStockLines.size
+                                        validStockLines.clear()
+                                        logger.info { "Lote processado. Itens acumulados: $totalProcessed" }
+                                    }
                                 }
                             }
-                        }
-                }
-            } finally {
-                if (normalizedFile.absolutePath != file.absolutePath) {
-                    normalizedFile.delete()
-                    logger.debug { "Arquivo normalizado temporário removido: ${normalizedFile.path}" }
+                    }
+                } finally {
+                    if (normalizedFile.absolutePath != file.absolutePath) {
+                        normalizedFile.delete()
+                        logger.debug { "Arquivo normalizado temporário removido: ${normalizedFile.path}" }
+                    }
                 }
             }
 
@@ -162,6 +169,10 @@ class StockService(
                 processBatch(validStockLines, supplier, updatedIds)
                 totalProcessed += validStockLines.size
                 validStockLines.clear()
+            }
+            
+            if (isExcel) {
+                totalProcessed = updatedIds.size // Since processExcelFile adds directly to updatedIds
             }
 
             logger.info { "Processamento finalizado. Válidos: $totalProcessed, Inválidos: ${invalidLines.size}" }
@@ -195,38 +206,64 @@ class StockService(
         }
     }
 
-    override fun validateStockFile(file: File): StockValidationResult {
-        val normalizedFile = autoNormalizeFile(file)
+    override fun validateStockFile(file: File, originalFileName: String?): StockValidationResult {
+        val isExcel = originalFileName?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
         val invalidLines = mutableListOf<String>()
         val validLines = mutableListOf<ValidStockLineDto>()
         var totalLines = 0
 
-        try {
-            Files.lines(normalizedFile.toPath()).use { lines ->
-                lines.asSequence()
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .forEach { line ->
-                        totalLines++
-                        val stockLine = parseStockLine(line)
-                        if (stockLine == null) {
-                            invalidLines.add(line)
-                        } else {
-                            validLines.add(
-                                ValidStockLineDto(
-                                    line = line,
-                                    code = stockLine.item.code,
-                                    quantity = stockLine.quantity,
-                                    priceInCents = stockLine.item.priceInCents ?: 0L,
-                                    description = stockLine.item.description ?: ""
-                                )
+        if (isExcel) {
+            WorkbookFactory.create(file).use { workbook ->
+                val sheet = workbook.getSheetAt(0)
+                for (row in sheet) {
+                    if (row.rowNum == 0 && isHeaderRow(row)) continue
+                    val lineStr = rowToCsvLine(row)
+                    totalLines++
+                    val stockLine = parseExcelRow(row)
+                    if (stockLine == null) {
+                        invalidLines.add(lineStr)
+                    } else {
+                        validLines.add(
+                            ValidStockLineDto(
+                                line = lineStr,
+                                code = stockLine.item.code,
+                                quantity = stockLine.quantity,
+                                priceInCents = stockLine.item.priceInCents ?: 0L,
+                                description = stockLine.item.description ?: ""
                             )
-                        }
+                        )
                     }
+                }
             }
-        } finally {
-            if (normalizedFile.absolutePath != file.absolutePath) {
-                normalizedFile.delete()
+        } else {
+            val normalizedFile = autoNormalizeFile(file)
+            try {
+                Files.lines(normalizedFile.toPath()).use { lines ->
+                    lines.asSequence()
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .forEach { line ->
+                            totalLines++
+                            val stockLine = parseStockLine(line)
+                            if (stockLine == null) {
+                                invalidLines.add(line)
+                            } else {
+                                validLines.add(
+                                    ValidStockLineDto(
+                                        line = line,
+                                        code = stockLine.item.code,
+                                        quantity = stockLine.quantity,
+                                        priceInCents = stockLine.item.priceInCents ?: 0L,
+                                        description = stockLine.item.description ?: ""
+                                    )
+                                )
+                            }
+                        }
+                }
+            } finally {
+                if (normalizedFile.absolutePath != file.absolutePath) {
+                    normalizedFile.delete()
+                }
             }
         }
 
@@ -266,6 +303,107 @@ class StockService(
             }
         }
         return formattedFile
+    }
+
+    private fun processExcelFile(file: File, supplier: Supplier, updatedIds: MutableSet<Long>, invalidLines: MutableList<String>) {
+        logger.info { "Iniciando processamento de arquivo Excel: ${file.name}" }
+        val validStockLines = mutableListOf<Stock>()
+        var totalProcessed = 0
+
+        WorkbookFactory.create(file).use { workbook ->
+            val sheet = workbook.getSheetAt(0)
+            for (row in sheet) {
+                // Skip header row if it looks like one
+                if (row.rowNum == 0 && isHeaderRow(row)) {
+                    logger.info { "Linha de cabeçalho detectada e ignorada: ${rowToCsvLine(row)}" }
+                    continue
+                }
+
+                val stockLine = parseExcelRow(row)
+                if (stockLine == null) {
+                    val lineStr = rowToCsvLine(row)
+                    if (lineStr.isNotBlank()) {
+                        invalidLines.add(lineStr)
+                    }
+                } else {
+                    validStockLines.add(stockLine)
+                    if (validStockLines.size >= 1000) {
+                        processBatch(validStockLines, supplier, updatedIds)
+                        totalProcessed += validStockLines.size
+                        validStockLines.clear()
+                        logger.info { "Lote Excel processado. Itens acumulados: $totalProcessed" }
+                    }
+                }
+            }
+        }
+
+        if (validStockLines.isNotEmpty()) {
+            processBatch(validStockLines, supplier, updatedIds)
+            totalProcessed += validStockLines.size
+            validStockLines.clear()
+        }
+        logger.info { "Processamento Excel finalizado. Válidos: $totalProcessed, Inválidos: ${invalidLines.size}" }
+    }
+
+    private fun parseExcelRow(row: Row): Stock? {
+        val codeCell = row.getCell(0) ?: return null
+        val qtyCell = row.getCell(1) ?: return null
+        val priceCell = row.getCell(2)
+        val descCell = row.getCell(3)
+
+        val code = getCellValueAsString(codeCell).trim()
+        if (code.isBlank() || code.contains("E+", ignoreCase = true)) return null
+
+        val qtyStr = getCellValueAsString(qtyCell).replace(DECIMAL_CLEANER_REGEX, "")
+        val qty = qtyStr.toIntOrNull() ?: 0
+
+        val priceStr = priceCell?.let { getCellValueAsString(it) } ?: ""
+        val priceInCents = if (priceStr.isBlank()) 0L else parseMonetaryToCents(priceStr)
+
+        val desc = descCell?.let { getCellValueAsString(it) }?.trim()?.takeUnless { it.isEmpty() } ?: "Sem descrição"
+
+        val item = Item.buildFromMinimalProperties(
+            code = code,
+            priceInCents = priceInCents,
+            description = desc
+        )
+
+        return Stock(quantity = qty, item = item)
+    }
+
+    private fun getCellValueAsString(cell: Cell): String {
+        return when (cell.cellType) {
+            CellType.STRING -> cell.stringCellValue
+            CellType.NUMERIC -> {
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    cell.dateCellValue.toString()
+                } else {
+                    // Use DataFormatter to get the displayed value (avoids scientific notation for codes)
+                    DataFormatter().formatCellValue(cell)
+                }
+            }
+            CellType.BOOLEAN -> cell.booleanCellValue.toString()
+            CellType.FORMULA -> {
+                runCatching { cell.stringCellValue }.getOrElse { 
+                    runCatching { cell.numericCellValue.toString() }.getOrDefault("")
+                }
+            }
+            else -> ""
+        }
+    }
+
+    private fun isHeaderRow(row: Row): Boolean {
+        val firstCell = getCellValueAsString(row.getCell(0)).lowercase()
+        return firstCell.contains("código") || firstCell.contains("codigo") || firstCell.contains("code") || firstCell.contains("part")
+    }
+
+    private fun rowToCsvLine(row: Row): String {
+        val cells = mutableListOf<String>()
+        for (i in 0 until maxOf(row.lastCellNum.toInt(), 4)) {
+            val cell = row.getCell(i)
+            cells.add(cell?.let { getCellValueAsString(it) } ?: "")
+        }
+        return cells.joinToString(";")
     }
 
     private fun autoNormalizeFile(originalFile: File): File {

@@ -83,7 +83,7 @@ management:
       enabled: false
   metrics:
     tags:
-      application: ${spring.application.name:pecasonline}
+      application: ${spring.application.name:pecasporcodigo-local}
   tracing:
     sampling:
       probability: 1.0
@@ -94,3 +94,5 @@ management:
         step: 15s
     tracing:
       endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/traces
+    logging:
+      endpoint: ${OTEL_EXPORTER_ENDPOINT:http://localhost:4318}/v1/logs

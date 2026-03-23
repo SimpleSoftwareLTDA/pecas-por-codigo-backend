@@ -93,7 +93,7 @@ class EmailReceiverService(
                 val bodyPart = multipart.getBodyPart(i)
                 if (ATTACHMENT.equals(bodyPart.disposition, ignoreCase = true)) {
                     val fileName = bodyPart.fileName?.lowercase() ?: ""
-                    if (fileName.endsWith(".txt") || fileName.endsWith(".csv")) {
+                    if (fileName.endsWith(".txt") || fileName.endsWith(".csv") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
                         return@runCatching true
                     }
                 }
@@ -121,19 +121,25 @@ class EmailReceiverService(
                         ATTACHMENT.equals(bodyPart.disposition, ignoreCase = true) -> {
                             val fileName = bodyPart.fileName
 
-                            if (fileName.endsWith(".txt") || fileName.endsWith(".csv")) {
+                            if (fileName.endsWith(".txt") || fileName.endsWith(".csv") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
                                 logger.info { "Arquivo anexo: $fileName (${bodyPart.size / 1024} KB) aprovado para processamento." }
 
                                 // Read attachment once and convert to UTF-8 if needed (handles ANSI/Windows-1252)
-                                val originalBytes = bodyPart.inputStream.use { it.readBytes() }
-                                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(originalBytes)
+                                // Only for text files; Excel is binary and handles its own encoding
+                                val isExcel = fileName.endsWith(".xls") || fileName.endsWith(".xlsx")
+                                val fileBytes = if (isExcel) {
+                                    bodyPart.inputStream.use { it.readBytes() }
+                                } else {
+                                    val originalBytes = bodyPart.inputStream.use { it.readBytes() }
+                                    org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(originalBytes)
+                                }
 
                                 logger.info { "Enviando arquivo para o StockService processar..." }
                                 meterRegistry.counter("email.receiver.success").increment()
 
                                 runCatching {
                                     val tempFile = File.createTempFile("upload-", "-$fileName")
-                                    tempFile.outputStream().use { it.write(utf8Bytes) }
+                                    tempFile.outputStream().use { it.write(fileBytes) }
 
                                     stockService.createStock(
                                         file = tempFile,

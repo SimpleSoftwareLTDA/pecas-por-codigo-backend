@@ -23,10 +23,13 @@ exporters:
     tls:
       insecure: true
 
+  otlphttp/loki:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+
   logging:
-    loglevel: debug
-    sampling_initial: 5
-    sampling_thereafter: 200
+    verbosity: detailed
 
 service:
   pipelines:
@@ -39,6 +42,11 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp, logging]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki, logging]
 
   telemetry:
     logs:

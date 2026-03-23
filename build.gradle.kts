@@ -63,6 +63,10 @@ dependencies {
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
     implementation("commons-fileupload:commons-fileupload:1.4")
 
+    // Excel processing
+    implementation("org.apache.poi:poi:5.5.1")
+    implementation("org.apache.poi:poi-ooxml:5.5.1")
+
 
     // Logback (Spring Boot's default logger with SLF4J)
     implementation("org.slf4j:slf4j-api:2.0.16")
@@ -83,6 +87,7 @@ dependencies {
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.6.0-alpha")
 
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

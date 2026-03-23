@@ -92,8 +92,13 @@ class StockController(
                 val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
 
                 // Convert uploaded content to UTF-8 to avoid issues with ANSI encodings
-                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
-                tempFile.outputStream().use { it.write(utf8Bytes) }
+                // Only for text files; Excel is binary and handles its own encoding
+                val isExcel = file.originalFilename?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
+                val fileBytes = when {
+                    isExcel -> file.bytes
+                    else -> org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+                }
+                tempFile.outputStream().use { it.write(fileBytes) }
 
                 stockService.createStock(file = tempFile, token = token, originalFileName = file.originalFilename)
             }
@@ -115,8 +120,14 @@ class StockController(
                 val tempFile = File(uploadDir, "upload_${UUID.randomUUID()}.tmp")
 
                 // Convert uploaded content to UTF-8 to avoid issues with ANSI encodings
-                val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
-                tempFile.outputStream().use { it.write(utf8Bytes) }
+                // Only for text files; Excel is binary and handles its own encoding
+                val isExcel = file.originalFilename?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
+                val fileBytes = if (isExcel) {
+                    file.bytes
+                } else {
+                    org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(file.bytes)
+                }
+                tempFile.outputStream().use { it.write(fileBytes) }
 
                 stockService.createStock(file = tempFile, cnpj = normalizedCnpj, originalFileName = file.originalFilename)
             }
@@ -144,14 +155,18 @@ class StockController(
 
         org.slf4j.LoggerFactory.getLogger(StockController::class.java).info("Validating stock file natively (Cache MISS).")
         val tempDir = System.getProperty("java.io.tmpdir")
-        val uploadDir = java.io.File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
-        val tempFile = java.io.File(uploadDir, "upload_validate_${java.util.UUID.randomUUID()}.tmp")
+        val uploadDir = File(tempDir, "meus-arquivos-temporarios").apply { mkdirs() }
+        val tempFile = File(uploadDir, "upload_validate_${java.util.UUID.randomUUID()}.tmp")
 
         try {
-            val utf8Bytes = org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(fileBytes)
-            tempFile.outputStream().use { it.write(utf8Bytes) }
+            val isExcel = file.originalFilename?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
+            val fileBytesForProcessing = when {
+                isExcel -> fileBytes
+                else -> org.pecasonline.common.encoding.EncodingUtils.toUtf8Bytes(fileBytes)
+            }
+            tempFile.outputStream().use { it.write(fileBytesForProcessing) }
 
-            val result = stockService.validateStockFile(tempFile)
+            val result = stockService.validateStockFile(tempFile, file.originalFilename)
 
             // Save to cache for 1 hour
             stringRedisTemplate.opsForValue().set(
