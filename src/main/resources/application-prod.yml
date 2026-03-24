@@ -42,6 +42,7 @@ logging:
   level:
     org:
       pecasonline: INFO
+      springframework.integration.mail.ImapIdleChannelAdapter: FATAL
 
 server:
   forward-headers-strategy: native

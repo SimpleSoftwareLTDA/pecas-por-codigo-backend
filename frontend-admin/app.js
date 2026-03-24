@@ -554,8 +554,8 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
 
 async function validateAndPreviewFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
-    if (ext !== 'tsv' && ext !== 'csv' && ext !== 'txt') {
-        showValidationMessage('Apenas arquivos .tsv, .csv ou .txt são permitidos.', 'error');
+    if (ext !== 'tsv' && ext !== 'csv' && ext !== 'txt' && ext !== 'xls' && ext !== 'xlsx') {
+        showValidationMessage('Apenas arquivos .xls, .xlsx, .csv, .txt ou .tsv são permitidos.', 'error');
         return false;
     }
 

@@ -57,3 +57,7 @@ decodo:
     port: 10007
     username: ${DECODO_USER:}
     password: ${DECODO_PASS:}
+
+logging:
+  level:
+    org.springframework.integration.mail.ImapIdleChannelAdapter: FATAL
