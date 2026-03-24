@@ -1,6 +1,7 @@
 package org.pecasonline.features.stock.swagger
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -175,4 +176,14 @@ interface StockSwaggerSpec {
         delimiter: String
     ): org.springframework.http.ResponseEntity<org.springframework.core.io.Resource>
 
+    @Operation(summary = "Retorna o histórico de envio de arquivos de estoque")
+    @ApiResponse(responseCode = "200",
+        description = "Histórico de envios de arquivos de estoque paginado",
+        content = [Content(mediaType = "application/json")]
+    )
+    fun getUploadHistory(
+        @Parameter(description = "CNPJ do Fornecedor") cnpj: String?,
+        @Parameter(description = "Número da página") page: Int,
+        @Parameter(description = "Tamanho da página") size: Int
+    ): Page<org.pecasonline.features.stock.history.StockUploadHistoryDto>
 }

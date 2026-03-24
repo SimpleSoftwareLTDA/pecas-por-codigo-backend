@@ -13,6 +13,9 @@ import java.io.File
 import java.util.*
 
 import org.hibernate.validator.constraints.br.CNPJ
+import org.pecasonline.features.stock.history.StockUploadHistoryDto
+import org.springframework.data.domain.Page
+
 @Validated
 @RestController
 @RequestMapping("$BASE_ENDPOINT/estoque")
@@ -214,4 +217,11 @@ class StockController(
             tempFile.delete()
         }
     }
+
+    @GetMapping("/historico")
+    override fun getUploadHistory(
+        @RequestParam(required = false) cnpj: String?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int
+    ): Page<StockUploadHistoryDto> = stockService.getUploadHistory(cnpj, page, size)
 }

@@ -26,9 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- State Variables (Module Scope) ---
 let currentToken = localStorage.getItem('ppc_admin_token');
 let allSuppliers = [];
-let uploadHistory = JSON.parse(localStorage.getItem('ppc_upload_history') || '[]');
+let uploadHistory = []; // Only kept for compatibility elsewhere if needed, but we'll fetch direct.
 let currentFileData = null;
 let editingSupplierId = null;
+let currentHistoryPage = 0;
 
 // --- Auth Module ---
 let loginScreen, mainApp, loginTokenInput, loginBtn, loginError, logoutBtn;
@@ -135,6 +136,10 @@ function initNav() {
 
             if (tabId === 'suppliers') fetchSuppliers();
             if (tabId === 'banners') fetchBanners();
+            if (tabId === 'stock') {
+                currentHistoryPage = 0;
+                fetchUploadHistory();
+            }
         });
     });
 }
@@ -383,6 +388,7 @@ function initContactForm() {
 
 // --- Stock Upload ---
 let stockFile, stockCnpjInput, uploadBtn, fileNameLabel, filePreview, previewTableHead, previewTableBody, previewStats, validationMessages, uploadHistoryList, downloadTemplateBtn, dropZone;
+let prevHistoryPageBtn, nextHistoryPageBtn, historyPageInfo;
 
 function initStockUpload() {
     stockFile = document.getElementById('stockFile');
@@ -397,8 +403,27 @@ function initStockUpload() {
     uploadHistoryList = document.getElementById('uploadHistoryList');
     downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
     dropZone = document.getElementById('dropZone');
+    prevHistoryPageBtn = document.getElementById('prevHistoryPageBtn');
+    nextHistoryPageBtn = document.getElementById('nextHistoryPageBtn');
+    historyPageInfo = document.getElementById('historyPageInfo');
 
-    renderUploadHistory();
+    fetchUploadHistory();
+
+    if (prevHistoryPageBtn) {
+        prevHistoryPageBtn.onclick = () => {
+            if (currentHistoryPage > 0) {
+                currentHistoryPage--;
+                fetchUploadHistory();
+            }
+        };
+    }
+
+    if (nextHistoryPageBtn) {
+        nextHistoryPageBtn.onclick = () => {
+            currentHistoryPage++;
+            fetchUploadHistory();
+        };
+    }
 
     if (downloadTemplateBtn) {
         downloadTemplateBtn.onclick = () => {
@@ -497,15 +522,8 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
             const formData = new FormData();
             formData.append('file', file);
 
-            const historyEntry = {
-                timestamp: new Date().toISOString(),
-                fileName: file.name,
-                cnpj: cnpj,
-                status: 'processing',
-                rows: currentFileData?.totalRows || 0
-            };
-
-            addToHistory(historyEntry);
+            // We'll fetch history shortly after upload request starts.
+            setTimeout(fetchUploadHistory, 1000);
 
             try {
                 uploadBtn.disabled = true;
@@ -517,10 +535,8 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
                 });
 
                 if (response.ok) {
-                    // Update history status
-                    uploadHistory[0].status = 'completed';
-                    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-                    renderUploadHistory();
+                    // Update history status via fresh fetch
+                    fetchUploadHistory();
 
                     showValidationMessage('✓ Arquivo enviado com sucesso! O fornecedor receberá um aviso quando o processamento terminar.', 'success');
 
@@ -530,18 +546,13 @@ DEF456\t20\t45.00\tPeça de exemplo 3`;
                     if (filePreview) filePreview.classList.add('hidden');
                     currentFileData = null;
                 } else {
-                    uploadHistory[0].status = 'error';
-                    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-                    renderUploadHistory();
-
+                    fetchUploadHistory();
                     showValidationMessage('Erro no upload. Verifique se o CNPJ está correto.', 'error');
                 }
             } catch (err) {
                 console.error(err);
 
-                uploadHistory[0].status = 'error';
-                localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-                renderUploadHistory();
+                fetchUploadHistory();
 
                 showValidationMessage('Erro de conexão ao tentar subir o estoque.', 'error');
             } finally {
@@ -666,33 +677,58 @@ function showValidationMessage(message, type) {
     }
 }
 
-function addToHistory(entry) {
-    uploadHistory.unshift(entry);
-    if (uploadHistory.length > 20) uploadHistory = uploadHistory.slice(0, 20);
-    localStorage.setItem('ppc_upload_history', JSON.stringify(uploadHistory));
-    renderUploadHistory();
-}
-
-function renderUploadHistory() {
+async function fetchUploadHistory() {
     if (!uploadHistoryList) return;
+    try {
+        const response = await fetch(`${API_BASE}/estoque/historico?page=${currentHistoryPage}&size=10`);
+        if (response.ok) {
+            const data = await response.json();
+            const history = data.content || [];
+            const pageData = data.page || data;
 
-    if (uploadHistory.length === 0) {
-        uploadHistoryList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Nenhum upload realizado ainda</td></tr>';
-        return;
+            const currentNum = pageData.number !== undefined ? pageData.number : 0;
+            const totalPages = pageData.totalPages !== undefined ? pageData.totalPages : 1;
+
+            if (historyPageInfo) historyPageInfo.innerText = `Página ${currentNum + 1} de ${totalPages}`;
+            
+            if (prevHistoryPageBtn) prevHistoryPageBtn.disabled = (totalPages <= 1 || currentNum === 0);
+            if (nextHistoryPageBtn) nextHistoryPageBtn.disabled = (totalPages <= 1 || currentNum + 1 >= totalPages);
+            
+            if (history.length === 0) {
+                uploadHistoryList.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Nenhum upload registrado ainda</td></tr>';
+                return;
+            }
+
+            uploadHistoryList.innerHTML = history.map(entry => {
+                const statusMap = {
+                    'PROCESSING': { class: 'processing', label: 'Processando' },
+                    'SUCCESS': { class: 'completed', label: 'Sucesso' },
+                    'PARTIAL_SUCCESS': { class: 'completed', label: 'Sucesso Parcial' },
+                    'FAILED': { class: 'error', label: 'Falha' }
+                };
+                
+                const statusInfo = statusMap[entry.status] || { class: 'processing', label: entry.status };
+                
+                return `
+                    <tr>
+                        <td>${new Date(entry.createdAt).toLocaleString('pt-BR')}</td>
+                        <td>${entry.fileName} <br><small style="color:var(--text-muted)">via ${entry.uploadSource}</small></td>
+                        <td>${entry.supplierCnpj || '-'} <br><small>${entry.supplierName || ''}</small></td>
+                        <td><span class="status-badge ${statusInfo.class}" title="${entry.errorMessage || ''}">${statusInfo.label}</span></td>
+                        <td>
+                            <div style="font-size: 0.9em; line-height: 1.4;">
+                                Total: <b>${entry.totalLinesProcessed}</b><br>
+                                <span style="color:var(--success)">✓ ${entry.validLines}</span> | 
+                                <span style="color:var(--danger)">✗ ${entry.invalidLines}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (err) {
+        console.error('Failed to fetch upload history', err);
     }
-
-    uploadHistoryList.innerHTML = uploadHistory.map(entry => {
-        const statusClass = entry.status === 'completed' ? 'completed' : entry.status === 'error' ? 'error' : 'processing';
-        return `
-            <tr>
-                <td>${new Date(entry.timestamp).toLocaleString('pt-BR')}</td>
-                <td>${entry.fileName}</td>
-                <td>${entry.cnpj}</td>
-                <td><span class="status-badge ${statusClass}">${entry.status === 'completed' ? 'Concluído' : entry.status === 'error' ? 'Erro' : 'Processando'}</span></td>
-                <td>${entry.rows || '-'}</td>
-            </tr>
-        `;
-    }).join('');
 }
 
 

@@ -1,18 +1,24 @@
 package org.pecasonline.features.stock
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.DataFormatter
+import org.apache.poi.ss.usermodel.DateUtil
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.pecasonline.common.exceptions.NotFoundException
 import org.pecasonline.common.httpclients.dto.PecaDTO
-import org.pecasonline.common.isInvalidColumnSize
-import org.pecasonline.common.service.OldPecasService
 import org.pecasonline.features.category.Category
 import org.pecasonline.features.category.ICategoryService
 import org.pecasonline.features.items.Item
 import org.pecasonline.features.items.ItemRepository
 import org.pecasonline.features.stock.dto.StockValidationResult
 import org.pecasonline.features.stock.dto.ValidStockLineDto
-import org.pecasonline.features.stock.email.receiver.RegexPatterns.whitespaceRegex
 import org.pecasonline.features.stock.email.sender.EmailSenderService
+import org.pecasonline.features.stock.history.toDto
 import org.pecasonline.features.subscription.service.SubscriptionService
 import org.pecasonline.features.supplier.domain.Supplier
 import org.pecasonline.features.supplier.repository.SupplierRepository
@@ -22,10 +28,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Timer
-import java.io.InputStream
-import org.apache.poi.ss.usermodel.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -42,8 +44,23 @@ class StockService(
     private val categoryService: ICategoryService,
     private val emailSenderService: EmailSenderService,
     private val subscriptionService: SubscriptionService,
-    private val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry,
+    private val stockUploadHistoryRepository: org.pecasonline.features.stock.history.StockUploadHistoryRepository
 ) : IStockService {
+
+    override fun getUploadHistory(supplierCnpj: String?, page: Int?, size: Int?): Page<org.pecasonline.features.stock.history.StockUploadHistoryDto> {
+        val pageable = PageRequest.of(page ?: 0, size ?: 10, org.springframework.data.domain.Sort.Direction.DESC, "createdAt")
+        val entityPage = if (supplierCnpj.isNullOrBlank()) {
+            stockUploadHistoryRepository.findAll(pageable)
+        } else {
+            val formattedCnpj = org.pecasonline.common.formatCnpj(supplierCnpj)
+            val supplier = supplierRepository.findSupplierByCnpj(formattedCnpj) 
+                ?: return org.springframework.data.domain.PageImpl(emptyList(), pageable, 0)
+            supplier.id?.let { stockUploadHistoryRepository.findBySupplierId(it, pageable) }
+                ?: org.springframework.data.domain.PageImpl(emptyList(), pageable, 0)
+        }
+        return entityPage.map { it.toDto() }
+    }
 
     override fun getAllStocks(page: Int?, size: Int?): Page<Stock> =
         stockRepository.findAll(PageRequest.of(page ?: 0, size ?: 10))
@@ -125,15 +142,30 @@ class StockService(
             fileName = displayFileName
         )
 
+        val uploadSource = when {
+            emailAddress.isNotBlank() -> org.pecasonline.features.stock.history.UploadSource.EMAIL
+            token != null -> org.pecasonline.features.stock.history.UploadSource.API
+            else -> org.pecasonline.features.stock.history.UploadSource.ADMIN_PANEL
+        }
+
+        var historyRecord = org.pecasonline.features.stock.history.StockUploadHistory(
+            supplier = supplier,
+            fileName = displayFileName,
+            uploadSource = uploadSource,
+            status = org.pecasonline.features.stock.history.UploadStatus.PROCESSING
+        )
+        historyRecord = stockUploadHistoryRepository.save(historyRecord)
+
         try {
             val isExcel = originalFileName?.lowercase()?.let { it.endsWith(".xls") || it.endsWith(".xlsx") } ?: false
             var totalProcessed = 0
+            var totalLinesParsed = 0
             val updatedIds = mutableSetOf<Long>()
             val invalidLines = mutableListOf<String>()
             val validStockLines = mutableListOf<Stock>()
             
             if (isExcel) {
-                processExcelFile(file, supplier, updatedIds, invalidLines)
+                totalLinesParsed = processExcelFile(file, supplier, updatedIds, invalidLines)
             } else {
                 val normalizedFile = autoNormalizeFile(file)
                 try {
@@ -142,6 +174,7 @@ class StockService(
                             .map { it.trim() }
                             .filter { it.isNotEmpty() }
                             .forEach { line ->
+                                totalLinesParsed++
                                 val stockLine = parseStockLine(line)
                                 if (stockLine == null) {
                                     invalidLines.add(line)
@@ -195,10 +228,20 @@ class StockService(
             logger.info { "Atualização de estoque concluída para o fornecedor CNPJ: $resolvedCnpj. Total Processado: $totalProcessed. Erros: ${invalidLines.size}" }
             meterRegistry.counter("stock.upload.lines.valid").increment(totalProcessed.toDouble())
             meterRegistry.counter("stock.upload.lines.invalid").increment(invalidLines.size.toDouble())
-            
-            errorFile?.let { 
-                logger.debug { "Error file generated. Deletion will be handled by EmailSenderService after sending." }
-            }
+            historyRecord.status = if (invalidLines.isEmpty()) org.pecasonline.features.stock.history.UploadStatus.SUCCESS else org.pecasonline.features.stock.history.UploadStatus.PARTIAL_SUCCESS
+            historyRecord.totalLinesProcessed = totalLinesParsed
+            historyRecord.validLines = updatedIds.size
+            historyRecord.invalidLines = invalidLines.size
+            historyRecord.finishedAt = java.time.LocalDateTime.now()
+            stockUploadHistoryRepository.save(historyRecord)
+
+        } catch (ex: Exception) {
+            historyRecord.status = org.pecasonline.features.stock.history.UploadStatus.FAILED
+            historyRecord.errorMessage = ex.message?.take(255) ?: "Erro desconhecido"
+            historyRecord.finishedAt = java.time.LocalDateTime.now()
+            stockUploadHistoryRepository.save(historyRecord)
+            logger.error(ex) { "Erro no processamento do estoque" }
+            throw ex
         } finally {
             file.delete()
             logger.info { "Arquivo temporário removido: ${file.path}" }
@@ -305,14 +348,16 @@ class StockService(
         return formattedFile
     }
 
-    private fun processExcelFile(file: File, supplier: Supplier, updatedIds: MutableSet<Long>, invalidLines: MutableList<String>) {
+    private fun processExcelFile(file: File, supplier: Supplier, updatedIds: MutableSet<Long>, invalidLines: MutableList<String>): Int {
         logger.info { "Iniciando processamento de arquivo Excel: ${file.name}" }
         val validStockLines = mutableListOf<Stock>()
         var totalProcessed = 0
+        var totalLinesParsed = 0
 
         WorkbookFactory.create(file).use { workbook ->
             val sheet = workbook.getSheetAt(0)
             for (row in sheet) {
+                totalLinesParsed++
                 // Skip header row if it looks like one
                 if (row.rowNum == 0 && isHeaderRow(row)) {
                     logger.info { "Linha de cabeçalho detectada e ignorada: ${rowToCsvLine(row)}" }
@@ -343,6 +388,7 @@ class StockService(
             validStockLines.clear()
         }
         logger.info { "Processamento Excel finalizado. Válidos: $totalProcessed, Inválidos: ${invalidLines.size}" }
+        return totalLinesParsed
     }
 
     private fun parseExcelRow(row: Row): Stock? {
