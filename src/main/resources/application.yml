@@ -11,6 +11,11 @@ management:
 spring:
   application:
     name: novo-pecas-online
+  ai:
+    mcp:
+      server:
+        transport: sse
+        path: /mcp/sse
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   servlet:

@@ -26,11 +26,14 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
 dependencies {
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.ai:spring-ai-mcp-server-spring-boot-starter:1.0.0-M6")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
@@ -102,6 +105,7 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.1")
+        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0-M6")
     }
 }
 
