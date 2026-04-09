@@ -12,7 +12,10 @@ import org.pecasonline.features.stock.StockService
 
 class ExcelStockParsingTest {
 
-    private val stockService = StockService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+    private val stockService = StockService(
+        mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
+        stockUploadHistoryRepository = mockk()
+    )
 
     @Test
     fun `should parse valid Excel row correctly`() {

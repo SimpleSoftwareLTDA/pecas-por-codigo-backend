@@ -1,6 +1,6 @@
 package org.pecasonline.features.items
 
-import org.springframework.ai.mcp.annotation.McpTool
+import org.springaicommunity.mcp.annotation.McpTool
 import org.springframework.stereotype.Component
 
 /**
@@ -17,7 +17,5 @@ class InventoryMcpServer(
         code: String,
         page: Int? = 0,
         size: Int? = 10
-    ): List<Item> {
-        return itemService.findItemByCode(code, page, size).content
-    }
+    ): List<Item> = itemService.findItemByCode(code, page, size).content
 }

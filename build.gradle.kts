@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -26,14 +27,16 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://repo.spring.io/milestone") }
-    maven { url = uri("https://repo.spring.io/snapshot") }
 }
+
+extra["springAiVersion"] = "1.1.4"
+extra["springCloudVersion"] = "2025.0.2"
+
 
 dependencies {
     // Web dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.ai:spring-ai-mcp-server-spring-boot-starter:1.0.0-M6")
+    implementation("org.springframework.ai:spring-ai-starter-mcp-server-webmvc")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
@@ -64,7 +67,7 @@ dependencies {
     implementation("org.springframework.integration:spring-integration-mail")
 
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
-    implementation("commons-fileupload:commons-fileupload:1.4")
+    implementation("commons-fileupload:commons-fileupload:1.6.0")
 
     // Excel processing
     implementation("org.apache.poi:poi:5.5.1")
@@ -104,8 +107,8 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.1")
-        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0-M6")
+        mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
     }
 }
 

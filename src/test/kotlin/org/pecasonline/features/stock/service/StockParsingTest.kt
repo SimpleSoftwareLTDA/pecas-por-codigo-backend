@@ -7,7 +7,7 @@ import io.mockk.mockk
 
 class StockParsingTest {
 
-    private val stockService = StockService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+    private val stockService = StockService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
 
     @Test
     fun `should detect scientific notation as invalid`() {
