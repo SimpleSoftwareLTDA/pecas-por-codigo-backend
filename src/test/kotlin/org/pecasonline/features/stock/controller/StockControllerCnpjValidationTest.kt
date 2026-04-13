@@ -20,6 +20,12 @@ class StockControllerCnpjValidationTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
+    @MockkBean(relaxed = true)
+    private lateinit var stringRedisTemplate: org.springframework.data.redis.core.StringRedisTemplate
+
+    @MockkBean(relaxed = true)
+    private lateinit var objectMapper: com.fasterxml.jackson.databind.ObjectMapper
+
     @MockkBean
     private lateinit var stockService: IStockService
 

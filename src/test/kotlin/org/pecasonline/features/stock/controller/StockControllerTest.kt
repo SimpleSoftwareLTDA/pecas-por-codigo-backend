@@ -1,8 +1,8 @@
 package org.pecasonline.features.stock.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -15,11 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.data.domain.PageImpl
 import org.springframework.http.MediaType
-import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @ExtendWith(SpringExtension::class)
@@ -30,6 +28,12 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean(relaxed = true)
     private lateinit var meterRegistry: io.micrometer.core.instrument.MeterRegistry
 
+    @MockkBean(relaxed = true)
+    private lateinit var stringRedisTemplate: org.springframework.data.redis.core.StringRedisTemplate
+
+    // Use a real ObjectMapper instead of a mock to avoid serialization issues
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @MockkBean
     private lateinit var stockService: IStockService
@@ -50,12 +54,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should return stock by id`() {
         val stockId = 1
-        val stock = Stock(id = 1, quantity = 10, supplier = null, item = Item(
-            id = 1,
-            code = "ITEM123",
-            description = "Sample",
-            hash = "hash",
-        ))
+        val stock = createSampleStock(stockId.toLong())
         every { stockService.findStockById(stockId) } returns stock
 
         mockMvc.perform(get("/api/v1/estoque/$stockId"))
@@ -96,14 +95,8 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `should search stock by item ID`() {
         val itemId = 1
-        every { stockService.findStockByItemId(itemId, 0, 10) } returns PageImpl(listOf(
-            Stock(id = 1, quantity = 10, supplier = null, item = Item(
-                id = 1,
-                code = "ITEM123",
-                description = "Sample",
-                hash = "hash",
-            ))
-        ))
+        val stock = createSampleStock(1L)
+        every { stockService.findStockByItemId(itemId, 0, 10) } returns PageImpl(listOf(stock))
 
         mockMvc.perform(get("/api/v1/estoque/item/$itemId")
                 .param("page", "0")
@@ -155,5 +148,19 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         verify { stockService.findStockBySupplierName(supplierName, 0, 10) }
+    }
+
+    private fun createSampleStock(stockId: Long): Stock {
+        return Stock(
+            id = stockId,
+            quantity = 10,
+            supplier = null,
+            item = Item(
+                id = 1,
+                code = "ITEM123",
+                description = "Sample",
+                hash = "hash",
+            )
+        )
     }
 }
