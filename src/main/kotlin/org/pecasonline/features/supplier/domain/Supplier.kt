@@ -1,6 +1,7 @@
 package org.pecasonline.features.supplier.domain
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import org.pecasonline.features.login.entities.Tokens
@@ -52,12 +53,12 @@ data class Supplier(
     val contact: Contact,
 
     @Column(name = "asaas_id", unique = true)
-    @JsonProperty("asaasId")
+    @JsonIgnore
     val asaasId: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "token_id", nullable = true)
-    @JsonProperty("token")
+    @JsonIgnore
     val token: Tokens? = null,
 
     @OneToOne(mappedBy = "supplier", fetch = FetchType.LAZY)

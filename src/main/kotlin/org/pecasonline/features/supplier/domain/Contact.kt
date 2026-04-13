@@ -1,5 +1,6 @@
 package org.pecasonline.features.supplier.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -27,13 +28,13 @@ data class Contact(
     @JsonProperty("whatsappPecas")
     val itemsWhatsapp: String? = null,
 
-    @JsonProperty("emailEstoque")
+    @JsonIgnore
     val stockEmail: String? = null,
 
-    @JsonProperty("emailContasPagar")
+    @JsonIgnore
     val billingEmail: String? = null,
 
-    @JsonProperty("emailNotaFiscal")
+    @JsonIgnore
     val nfEmail: String? = null,
 
     @JsonProperty("webSite")
