@@ -12,7 +12,7 @@ plugins {
 
     id("io.spring.dependency-management") version "1.1.6"
 
-    id("org.springframework.boot") version "3.5.9"
+    id("org.springframework.boot") version "3.5.12"
 
 }
 
@@ -50,7 +50,7 @@ dependencies {
     // Database dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("com.h2database:h2:2.3.232")
+    implementation("com.h2database:h2:2.4.240")
     runtimeOnly("org.postgresql:postgresql")
 //    implementation("org.flywaydb:flyway-core:11.1.1")
 //    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.1.1")
@@ -67,7 +67,7 @@ dependencies {
     implementation("org.springframework.integration:spring-integration-mail")
 
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
-    implementation("commons-fileupload:commons-fileupload:1.6.0")
+    implementation("org.apache.commons:commons-fileupload2-jakarta-servlet6:2.0.0-M5")
 
     // Excel processing
     implementation("org.apache.poi:poi:5.5.1")
@@ -86,7 +86,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // Documentation dependencies
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16")
 
     // Micrometer dependencies
     implementation("io.micrometer:micrometer-registry-prometheus")
