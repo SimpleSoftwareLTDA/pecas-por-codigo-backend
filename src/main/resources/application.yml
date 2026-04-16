@@ -14,9 +14,11 @@ spring:
   ai:
     mcp:
       server:
-        sse-endpoint: /mcp/sse
-        sse-message-endpoint: /mcp/message
-        keep-alive-interval: 30s
+        enabled: true
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+          keep-alive-interval: 30s
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   servlet:
